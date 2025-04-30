@@ -46,7 +46,7 @@ const GraphSonification = () => {
 
   const calculateFrequency = (y) => {
     if (y === null || y === undefined) return null;
-    const normalizedY = Math.max(0, Math.min(1, (y - -10) / (10 - -10)));
+    const normalizedY = Math.max(0, Math.min(1, (y - -10) / (10 - -10)));  //may be: (y - bbox[3]) / (bbox[1] - bbox[3])
     return minFrequency + normalizedY * (maxFrequency - minFrequency);
   };
 

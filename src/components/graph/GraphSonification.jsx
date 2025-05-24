@@ -4,39 +4,76 @@ import { useGraphContext } from "../../context/GraphContext";
 
 const GraphSonification = () => {
   const { cursorCoords, isAudioEnabled, graphBounds } = useGraphContext();
-  const oscillatorRef = useRef(null);
-  const pannerRef = useRef(null);
+  let instrumentRef = useRef(null);
+  let pannerRef = useRef(null);
   const lastTimeRef = useRef(null);
 
   const minFrequency = 100;
   const maxFrequency = 1000;
 
   useEffect(() => {
-    const oscillator = new Tone.Oscillator({ type: "sine" }).toDestination();
     const panner = new Tone.Panner(0).toDestination();
-    oscillator.connect(panner);
-    oscillator.volume.value = -32;
-
-    oscillatorRef.current = oscillator;
     pannerRef.current = panner;
 
+    const clarinet = new Tone.FMSynth({
+      volume: 0,
+      detune: 3,
+      portamento: 0,
+      harmonicity: 2,
+      oscillator: {
+        partialCount: 0,
+        partials: [],
+        phase: 0,
+        type: "sine",
+      },
+      envelope: {
+        attack: 0.21000000000000005,
+        attackCurve: "linear",
+        decay: 0.1,
+        decayCurve: "exponential",
+        release: 0.05,
+        releaseCurve: "exponential",
+        sustain: 1,
+      },
+      modulation: {
+        partialCount: 0,
+        partials: [],
+        phase: 0,
+        type: "triangle",
+      },
+      modulationEnvelope: {
+        attack: 0.20000000000000004,
+        attackCurve: "linear",
+        decay: 0.01,
+        decayCurve: "exponential",
+        release: 0.5,
+        releaseCurve: "exponential",
+        sustain: 1,
+      },
+      modulationIndex: 1,
+    }).connect(pannerRef.current).toDestination();
+
+    instrumentRef.current = clarinet;
+
+    Tone.start();
+
     return () => {
-      oscillator.stop();
-      oscillator.disconnect();
+      instrumentRef.current.dispose();
       panner.disconnect();
     };
   }, []);
 
   // update the frequency based on cursor position
   useEffect(() => {
-    if (!oscillatorRef.current || !pannerRef.current || !isAudioEnabled) {
+    if (!instrumentRef.current || !pannerRef.current || !isAudioEnabled) {
       stopTone();
       return;
     }
 
-    const { y } = cursorCoords;
+    const { x, y } = cursorCoords;
     const frequency = calculateFrequency(y);
-    const pan = 0;
+    const pan = calculatePan(x);
+    console.log("Cursor Coords:", cursorCoords, "Frequency:", frequency, "Pan:", pan);
 
     if (frequency) {
       startTone(frequency, pan);
@@ -51,24 +88,21 @@ const GraphSonification = () => {
     return minFrequency + normalizedY * (maxFrequency - minFrequency);
   };
 
+  const calculatePan = (x) => {
+    if (x === null || x === undefined) return 0;
+    return -1+2*(x- graphBounds.xMin)/(graphBounds.xMax-graphBounds.xMin); 
+  };
+
+
   const startTone = (frequency, pan) => {
-    const now = Tone.now();
-    if (lastTimeRef.current && now - lastTimeRef.current < 0.01) return;
 
-    oscillatorRef.current.frequency.setValueAtTime(frequency, now);
-    pannerRef.current.pan.setValueAtTime(pan, now);
+    instrumentRef.current.triggerAttack(frequency);
+    pannerRef.current.pan.value=pan;
 
-    if (oscillatorRef.current.state !== "started") {
-      oscillatorRef.current.start(now);
-    }
-
-    lastTimeRef.current = now;
   };
 
   const stopTone = () => {
-    if (oscillatorRef.current && oscillatorRef.current.state === "started") {
-      oscillatorRef.current.stop(Tone.now());
-    }
+    instrumentRef.current.triggerRelease();
   };
 
   return null;

@@ -15,6 +15,7 @@ const GraphSonification = () => {
     const oscillator = new Tone.Oscillator({ type: "sine" }).toDestination();
     const panner = new Tone.Panner(0).toDestination();
     oscillator.connect(panner);
+    oscillator.volume.value = -32;
 
     oscillatorRef.current = oscillator;
     pannerRef.current = panner;

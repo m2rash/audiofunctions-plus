@@ -90,7 +90,10 @@ const GraphSonification = () => {
 
   const calculatePan = (x) => {
     if (x === null || x === undefined) return 0;
-    return -1+2*(x- graphBounds.xMin)/(graphBounds.xMax-graphBounds.xMin); 
+    const pan =-1+2*(x- graphBounds.xMin)/(graphBounds.xMax-graphBounds.xMin);  // Normalize x to range [-1, 1]
+    if (pan > 1) return 1;
+    if (pan < -1) return -1;
+    return pan;
   };
 
 

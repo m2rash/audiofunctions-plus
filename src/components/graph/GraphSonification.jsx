@@ -51,7 +51,7 @@ const GraphSonification = () => {
         sustain: 1,
       },
       modulationIndex: 1,
-    }).connect(pannerRef.current).toDestination();
+    }).connect(pannerRef.current);
 
     instrumentRef.current = clarinet;
 

@@ -11,7 +11,10 @@ const math = create(all, config)
 // for instance [[x+5,x < -4],[x^2,-4<=x < 1],[x-2,1<=x < 3],[5,x==3],[x-2,3 < x < 5],[3,5<= x]]
 // it should be previusly checked that it is a valid piecewise function or a math expression
 function createEndPoints(txtraw,board){
-    const parsed = transformMathConstants(math.parse(txtraw));
+    // we are allowing the use of the power operator **, so we replace it by ^ to be able to parse it
+    // we are also transforming the math constants to be able to parse them
+    // WARNING nthroot is not implemented in mathjs, we need nthRoot, so when using mathjs, we need to change nthroot to nthRoot
+    const parsed = transformMathConstants(math.parse(txtraw.replace("**","^").replace("nthroot","nthRoot"))); 
     if (!("items" in parsed)){ // not a piecewise function
         return [[],[]];
     }
@@ -20,19 +23,20 @@ function createEndPoints(txtraw,board){
     const endpoints = []; // the endpoints of the intervals
     const xisolated = []; // the x coordinates of points associated to equalities (avoidable discontinuities)
     for (i=0;i< l.length;i++){
+        let currentFn = board.jc.snippet(checkMathSpell(l[i].items[0].toString()), true, "x", true); // the definition of the function of the ith item
         ineq = transformAssingnments(l[i].items[1]); // the inequality or equality of ith item, we change assignments to equalities
         if ("op" in ineq){ //that is a single inequality or an equality
             if (ineq.op == "<=" || ineq.op ==">=" || ineq.op =="=="){ //one of the arguments is the variable "x" 
                 if ("name" in ineq.args[1]){ // we have a op x, with op in {<=, >=, ==}
                     v=ineq.args[0].evaluate(); // v is the value of a in a op x
-                    p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});
+                    p=board.create("point", [v,currentFn(v)], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});
                     endpoints.push(p);
                     if (ineq.op == "=="){ // if we have an equality, we add the x coordinate to the list of x-coordinates of isolated points
                         xisolated.push(p.X());
                     }
                 }else{ // we have x op a, with op in {<=, >=, ==}
                     v=ineq.args[1].evaluate(); // v is the value of a in x op a
-                    p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'isolated-point', fixed:true, highlight:false, withLabel:false, size: 4});   
+                    p=board.create("point", [v,currentFn(v)], {cssClass: 'isolated-point', fixed:true, highlight:false, withLabel:false, size: 4});   
                     endpoints.push(p);
                     if (ineq.op == "=="){ // if we have an equality, we add the x coordinate to the list of x-coordinates of isolated points
                         xisolated.push(p.X());
@@ -42,11 +46,11 @@ function createEndPoints(txtraw,board){
             if (ineq.op == "<" || ineq.op ==">" || ineq.op=="!="){ // this we fill in white, since it is an strict inequality
                 if ("name" in ineq.args[1]){ // we have a op x, with op in {<,>}
                     v=ineq.args[0].evaluate(); // v is the value of a in a op x
-                    p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                    p=board.create("point", [v,currentFn(v)], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
                     endpoints.push(p);
                 }else{ // we have x op a, with op in {<, >}
                     v=ineq.args[1].evaluate(); // v is the value of a in x op a
-                    p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                    p=board.create("point", [v,currentFn(v)], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
                     endpoints.push(p);
                 }
             }
@@ -56,17 +60,17 @@ function createEndPoints(txtraw,board){
             b=ineq.params[2].evaluate(); // the value of b in a op x op b
             // we should check here that conditionals are in the form smaller, smallerEq 
             if (ineq.conditionals[0]=="smaller"){ // this is a smaller so we fill in white, since it is an strict inequality
-                p=board.create("point", [a,l[i].items[0].evaluate({x:a})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [a,currentFn(a)], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
                 endpoints.push(p);
             }else{  // this is a smallerEq so we fill in blue
-                p=board.create("point", [a,l[i].items[0].evaluate({x:a})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [a,currentFn(a)], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});   
                 endpoints.push(p);
             }
             if (ineq.conditionals[1]=="smaller"){ // this is a smaller so we fill in white, since it is an strict inequality
-                p=board.create("point", [b,l[i].items[0].evaluate({x:b})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [b,currentFn(b)], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
                 endpoints.push(p);
             }else{ // this is a smallerEq so we fill in blue
-                p=board.create("point", [b,l[i].items[0].evaluate({x:b})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [b,currentFn(b)], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});   
                 endpoints.push(p);
             }
         }

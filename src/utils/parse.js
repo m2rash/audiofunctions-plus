@@ -16,7 +16,9 @@ function isMathConstant(expr){
 
 // detects if expr is an expression of a function in one variable or a constant, for instance, "sin(x)+x^2" or "2"
 function isOneVariableFunction(expr){
-    const allowed_fn = ["sin", "ceil", "floor", "cos", "tan", "exp", "log", "sqrt", "abs", "exp", "ln", "log10", "log2", "asin", "acos", "atan", "sinh", "cosh", "tanh"];
+    const allowed_fn = ["sin", "ceil", "floor", "cos", "tan", "exp", "log", "sqrt", "abs", "exp", "ln", "log10", "log2", "asin", "acos", "atan", "sinh", "cosh", "tanh","cot","acot","nthroot"];
+    const fn_with_more_args = ["log", "nthroot"]; // functions that can have one or two arguments 
+    // WARNING nthroot is not implemented in mathjs, we need nthRoot, so when using mathjs, we need to change nthroot to nthRoot
     const allowed_constants = ["PI","pi","e","E"];
     const allowed_op = ["+", "-", "*", "/", "^"];  
     function removeItemAll(arr, value) {
@@ -41,21 +43,40 @@ function isOneVariableFunction(expr){
         console.log(snodes.map((n) => n.name));
         console.log("fn ",fnNodes.map((n) => n.name));
         console.log("op ",opNodes.map((n) => n.op));
-        if (!(fnNodes.every((n) => n.args.length==1 && allowed_fn.includes(n.name)))){
-            console.log("Invalid function or wrong number of arguments");
-            return false;
-        }
+        // if (!(fnNodes.every((n) => n.args.length==1 && allowed_fn.includes(n.name)))){
+        //     console.log("Invalid function or wrong number of arguments");
+        //     return false;
+        // }
+        for (let i=0;i<fnNodes.length;i++){
+            if (!(allowed_fn.includes(fnNodes[i].name))){
+                console.log("Invalid function name: ", fnNodes[i].name);
+                return false;
+            }
+            if (fnNodes[i].args.length!=1 && !(fn_with_more_args.includes(fnNodes[i].name))){
+                console.log("Invalid function, wrong number of arguments: ", fnNodes[i].name);
+                return false;
+            }
+            if (fnNodes[i].name=="log" && fnNodes[i].args.length>2){
+                console.log("This function should have at most two arguments: ", fnNodes[i].name);
+                return false;
+            }               
+            if (fnNodes[i].name=="nthroot" && fnNodes[i].args.length!=2){
+                console.log("This function should have two arguments: ", fnNodes[i].name);
+                return false;
+            }               
+        }    
         if (!(opNodes.every((n) => allowed_op.includes(n.op)))){
             console.log("Invalid operator");
             return false;
         }
-        parsed.traverse(function (node, path, parent) {
+        parsed.traverse(function (node, path, parent) { // we have checked all functions, we remove them from the list of symbol nodes
             if (node.isSymbolNode && parent?.name == node.name && allowed_fn.includes(node.name)){ 
                 removeItemAll(snodes,node);
                 console.log(node.name);
             }
         });
         console.log(snodes.map((n) => n.name));
+        // the remaining should be a single variable "x" or a constant
         return snodes.every((n) => allowed_constants.includes(n.name) || n.name=="x"); 
     }
     catch(ex){
@@ -263,7 +284,10 @@ function parsePiecewise(txt){
 // this function checks that the input is a valid function expression
 // either single or piecewise
 // if the txt is not a valid expression, it returns "0", otherwise it returns the input string parsed (if piecewise)
-export function checkMathSpell(txt){
+export function checkMathSpell(txt_input){
+    // we are allowing ** to be used as a power operator, so we replace it with ^
+    const txt = txt_input.replace(/\*\*/g, '^'); // replace ** with ^
+    console.log("Checking math spell: ", txt);
     // check if its a function of one variable
     if(isOneVariableFunction(txt)){
         // jessiecode does does not understand E, e, pi, we translate them to mathjs constants

@@ -1,9 +1,9 @@
 import { useRegisterActions, Priority } from "kbar";
 import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, CircleGauge, List, ZoomIn, ZoomOut, 
-  SwatchBook, Sun, Moon, SunMoon, Contrast,
+  SwatchBook, Sun, Moon, SunMoon, Contrast, Plus, Edit,
   ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info } from "lucide-react"
 import { useGraphContext } from "../../context/GraphContext";
-import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN } from "../../utils/graphObjectOperations";
+import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN, getActiveFunctions, getLandmarksN, addLandmarkWithValidation, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
 import { useDialog } from "../../context/DialogContext";
 import { setTheme } from "../../utils/theme"; // Import the theme utility
 import { useZoomBoard } from "./KeyboardHandler"; // Import the zoom utility
@@ -141,6 +141,92 @@ export const useDynamicKBarActions = () => {
 
   const currentSonificationType = getCurrentSonificationType();
 
+  // Get active function and its landmarks
+  const activeFunctions = getActiveFunctions(functionDefinitions);
+  const activeFunction = activeFunctions.length > 0 ? activeFunctions[0] : null;
+  const activeFunctionIndex = activeFunction ? functionDefinitions.findIndex(f => f.id === activeFunction.id) : -1;
+  const landmarks = activeFunction ? getLandmarksN(functionDefinitions, activeFunctionIndex) : [];
+
+  // Function to jump to landmark
+  const jumpToLandmark = (landmark) => {
+    updateCursor(landmark.x);
+    announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
+    showInfoToast(`${landmark.label || 'Landmark'}: x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`, 2000);
+  };
+
+  // Function to add landmark at current cursor position
+  const addLandmarkAtCursor = () => {
+    if (!activeFunction || !cursorCoords || cursorCoords.length === 0) {
+      announce("No active function or cursor position available");
+      return;
+    }
+
+    const cursorCoord = cursorCoords.find(coord => coord.functionId === activeFunction.id);
+    if (!cursorCoord) {
+      announce("No cursor position for active function");
+      return;
+    }
+
+    const x = parseFloat(cursorCoord.x);
+    const y = parseFloat(cursorCoord.y);
+
+    // Check if landmark already exists at this position (with small tolerance)
+    const currentLandmarks = getLandmarksN(functionDefinitions, activeFunctionIndex);
+    const tolerance = 0.01;
+    const existingLandmarkIndex = currentLandmarks.findIndex(landmark => 
+      Math.abs(landmark.x - x) < tolerance && Math.abs(landmark.y - y) < tolerance
+    );
+
+    if (existingLandmarkIndex !== -1) {
+      // Open existing landmark in dialog instead of showing error
+      const existingLandmark = currentLandmarks[existingLandmarkIndex];
+      announce(`Opening existing landmark at x = ${x.toFixed(2)}, y = ${y.toFixed(2)}`);
+      
+      openDialog("edit-landmark", {
+        landmarkData: {
+          functionIndex: activeFunctionIndex,
+          landmarkIndex: existingLandmarkIndex,
+          landmark: existingLandmark
+        }
+      });
+      return;
+    }
+
+    // Use the validation function from graphObjectOperations
+    const result = addLandmarkWithValidation(functionDefinitions, activeFunctionIndex, x, y);
+    
+    if (!result.success) {
+      announce(result.message);
+      if (result.message.includes("Maximum")) {
+        showInfoToast(`Error: ${result.message}`, 3000);
+      }
+      return;
+    }
+
+    // Update function definitions with the new landmark
+    setFunctionDefinitions(result.definitions);
+
+    const shortcutText = result.shortcut ? `, shortcut: Ctrl+${result.shortcut}` : '';
+    announce(`${result.message}${shortcutText}`);
+    showInfoToast(`Landmark added${result.shortcut ? ` (Ctrl+${result.shortcut})` : ''}`, 2000);
+
+    // Find the newly created landmark and open it in the dialog
+    const updatedLandmarks = getLandmarksN(result.definitions, activeFunctionIndex);
+    const newLandmarkIndex = updatedLandmarks.length - 1; // New landmark is the last one
+    const newLandmark = updatedLandmarks[newLandmarkIndex];
+
+    // Open the new landmark in edit dialog
+    setTimeout(() => {
+      openDialog("edit-landmark", {
+        landmarkData: {
+          functionIndex: activeFunctionIndex,
+          landmarkIndex: newLandmarkIndex,
+          landmark: newLandmark
+        }
+      });
+    }, 100); // Small delay to ensure state is updated
+  };
+
   useRegisterActions([
 
     // quick options
@@ -239,6 +325,58 @@ export const useDynamicKBarActions = () => {
     },
     icon: <RotateCcw className="size-5 shrink-0 opacity-70" />,
   },
+
+  //landmarks
+  {
+    id: "landmarks",
+    name: "Landmarks",
+    keywords: "landmark, bookmarks, markers, points, navigation, jump, goto, position, coordinates",
+    icon: <MapPin className="size-5 shrink-0 opacity-70" />,
+  },
+
+  {
+    id: "add-landmark",
+    name: "Add Landmark at Cursor",
+    keywords: "add, create, new, landmark, bookmark, marker, current, position, cursor",
+    parent: "landmarks",
+    perform: () => {
+      addLandmarkAtCursor();
+      setTimeout(() => focusChart(), 100);
+    },
+    icon: <Plus className="size-5 shrink-0 opacity-70" />,
+  },
+
+  // Individual landmark actions
+  ...landmarks.map((landmark, index) => ({
+    id: `jump-to-landmark-${index}`,
+    name: `${landmark.label || `Landmark ${index + 1}`} (${landmark.x.toFixed(2)}, ${landmark.y.toFixed(2)})`,
+    shortcut: landmark.shortcut ? [`ctrl+${landmark.shortcut}`] : undefined,
+    keywords: `landmark, jump, goto, navigate, ${landmark.label || ''}`,
+    parent: "landmarks",
+    perform: () => {
+      jumpToLandmark(landmark);
+      setTimeout(() => focusChart(), 100);
+    },
+    icon: <MapPin className="size-5 shrink-0 opacity-70" />,
+  })),
+
+  // Edit landmark actions
+  ...landmarks.map((landmark, index) => ({
+    id: `edit-landmark-${index}`,
+    name: `Edit ${landmark.label || `Landmark ${index + 1}`}`,
+    keywords: `edit, modify, change, landmark, ${landmark.label || ''}`,
+    parent: "landmarks",
+    perform: () => {
+      openDialog("edit-landmark", {
+        landmarkData: {
+          functionIndex: activeFunctionIndex,
+          landmarkIndex: index,
+          landmark: landmark
+        }
+      });
+    },
+    icon: <Edit className="size-5 shrink-0 opacity-70" />,
+  })),
 
   // Function selection section
   {
@@ -425,7 +563,7 @@ export const useDynamicKBarActions = () => {
     priority: Priority.LOW,
   },
 
-], [isAudioEnabled, cursorCoords, functionDefinitions, isReadOnly, focusChart]);
+], [isAudioEnabled, cursorCoords, functionDefinitions, isReadOnly, focusChart, landmarks, activeFunction, activeFunctionIndex]);
 
   return null;
 };

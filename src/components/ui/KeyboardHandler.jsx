@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useGraphContext } from "../../context/GraphContext";
-import { getActiveFunctions, getFunctionNameN } from "../../utils/graphObjectOperations";
+import { getActiveFunctions, getFunctionNameN, getLandmarksN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
 import audioSampleManager from "../../utils/audioSamples";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
@@ -107,6 +107,22 @@ export default function KeyboardHandler() {
         console.log(`Switched to function ${targetIndex + 1}`);
     };
   
+    // Function to jump to landmark by shortcut
+    const jumpToLandmarkByShortcut = (shortcut) => {
+        const activeFunctions = getActiveFunctions(functionDefinitions);
+        if (activeFunctions.length === 0) return;
+        
+        const activeFunction = activeFunctions[0];
+        const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
+        
+        const landmark = findLandmarkByShortcut(functionDefinitions, activeFunctionIndex, shortcut);
+        if (landmark) {
+            updateCursor(landmark.x);
+            announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
+            showInfoToast(`${landmark.label || 'Landmark'}: x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`, 2000);
+        }
+    };
+
     useEffect(() => {
       const handleKeyDown = async (event) => {
         const active = document.activeElement;
@@ -125,6 +141,17 @@ export default function KeyboardHandler() {
         
         const activeFunctions = getActiveFunctions(functionDefinitions);
         const step = event.shiftKey ? 5 : 1; // if shift is pressed, change step size
+
+        // Handle landmark shortcuts (Ctrl + 1-9, 0)
+        if (event.ctrlKey && !event.altKey && !event.shiftKey) {
+            const landmarkShortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+            if (landmarkShortcuts.includes(event.key)) {
+                event.preventDefault();
+                event.stopPropagation();
+                jumpToLandmarkByShortcut(event.key);
+                return;
+            }
+        }
 
         // Handle Czech keyboard shortcuts for function switching (1-9 alternatives)
         const czechFunctionKeyMap = {

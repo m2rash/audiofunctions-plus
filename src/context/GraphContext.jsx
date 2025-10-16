@@ -155,15 +155,14 @@ const initGraphObject = {
       ],
 
       "landmarks": [
-        // {
-        //   "x": 0,
-        //   "y": 0,
-        //   "label": "landmark",      // optional
-        //   "color": "#FF0000",       // optional
-        //   "earcon": "earcon2",
-        //   "message": "user defined message",  // optional
-        //   "shortcut": "a"           // set by app or user
-        // },
+        {
+          "x": 0,
+          "y": 0,
+          "label": "landmark 1",
+          "shape": "triangle",
+          "earcon": "earcon1",      
+          "shortcut": "1"           // set by app or user
+        },
       ]
     },
 

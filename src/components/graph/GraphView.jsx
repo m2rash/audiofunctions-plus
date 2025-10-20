@@ -21,6 +21,7 @@ function createEndPoints(func,board){
     // we are allowing the use of the power operator **, so we replace it by ^ to be able to parse it
     // we are also transforming the math constants to be able to parse them
     // WARNING nthroot is not implemented in mathjs, we need nthRoot, so when using mathjs, we need to change nthroot to nthRoot
+    // WARNING ln is not implemented in mathjs, we need log, so when using mathjs, we need to change ln to log
     console.log("Creating endpoints for function: ", func);
     if (func.type === "function"){
       return [[],[]];
@@ -31,7 +32,7 @@ function createEndPoints(func,board){
     }
     const  txtraw = functionDefPiecewiseToString(func.functionDef);
     console.log("Raw piecewise function string:", txtraw);
-    const parsed = transformMathConstants(math.parse(txtraw.replace("**","^").replace("nthroot","nthRoot"))); 
+    const parsed = transformMathConstants(math.parse(txtraw.replace("**","^").replace("nthroot","nthRoot").replace("ln","log"))); 
     const types_to_be_deleted= ["isolated", "unequal"]; // we remove these types of points of interest, since they will be redefined
     const filteredPoints = func.pointOfInterests.filter(
       point => !types_to_be_deleted.includes(point.type)

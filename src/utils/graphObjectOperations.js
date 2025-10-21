@@ -963,11 +963,15 @@ export function addLandmarkWithValidation(functionDefinitions, n, x, y, options 
   // Assign next available shortcut
   const shortcut = getNextAvailableShortcut(currentLandmarks);
   
-  // Create landmark
+  // Create landmark with automatic earcon based on shape
+  const shape = options.shape || options.appearance || 'circle';
+  const earcon = options.earcon || `landmark_${shape}`;
+  
   const newLandmark = createLandmark(x, y, {
     label: options.label || `Landmark ${currentLandmarks.length + 1}`,
     shortcut: shortcut,
-    earcon: options.earcon || '',
+    earcon: earcon,
+    shape: shape,
     ...options
   });
 

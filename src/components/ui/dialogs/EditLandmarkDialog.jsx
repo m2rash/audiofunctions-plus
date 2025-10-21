@@ -231,6 +231,10 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       ...prev,
       appearance: value
     }));
+    
+    // Automatically set earcon based on shape
+    const earcon = `landmark_${value}`;
+    console.log(`Landmark shape changed to ${value}, earcon set to ${earcon}`);
   };
 
   // Dialog actions
@@ -243,7 +247,8 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       label: localLandmark.label,
       x: localLandmark.x,
       y: localLandmark.y,
-      shape: localLandmark.appearance
+      shape: localLandmark.appearance,
+      earcon: `landmark_${localLandmark.appearance}`
     };
     
     const result = updateLandmarkWithValidation(functionDefinitions, functionIndex, landmarkIndex, updates);

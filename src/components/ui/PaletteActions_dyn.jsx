@@ -4,6 +4,7 @@ import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, Circl
   ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info } from "lucide-react"
 import { useGraphContext } from "../../context/GraphContext";
 import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN, getActiveFunctions, getLandmarksN, addLandmarkWithValidation, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import landmarkEarconManager from "../../utils/landmarkEarcons";
 import { useDialog } from "../../context/DialogContext";
 import { setTheme } from "../../utils/theme"; // Import the theme utility
 import { useZoomBoard } from "./KeyboardHandler"; // Import the zoom utility
@@ -560,6 +561,19 @@ export const useDynamicKBarActions = () => {
     keywords: "about, info, information, copyright, license, developers, version, team, credits, acknowledgments, universities, funding, eu, project",
     perform: () => openDialog("about"),
     icon: <Info className="size-5 shrink-0 opacity-70" />,
+    priority: Priority.LOW,
+  },
+
+  // Test landmark earcons (development only)
+  {
+    id: "test-landmark-earcons",
+    name: "Test Landmark Earcons",
+    keywords: "test, landmark, earcon, sound, audio, development, debug, circle, triangle, square",
+    perform: () => {
+      landmarkEarconManager.testAllEarcons();
+      announce("Testing landmark earcons: circle, triangle, square");
+    },
+    icon: <Music className="size-5 shrink-0 opacity-70" />,
     priority: Priority.LOW,
   },
 

@@ -9,9 +9,11 @@ import {
   getFunctionById,
   isFunctionActiveN,
   getFunctionInstrumentN,
-  getFunctionIndexById
+  getFunctionIndexById,
+  getLandmarksN
 } from "../../utils/graphObjectOperations";
 import audioSampleManager from "../../utils/audioSamples";
+import landmarkEarconManager from "../../utils/landmarkEarcons";
 
 const GraphSonification = () => {
   const { 
@@ -31,6 +33,7 @@ const GraphSonification = () => {
   const boundaryTriggeredRef = useRef(new Map()); // Track if boundary event was recently triggered to avoid spam
   const yAxisTriggeredRef = useRef(new Map()); // Track if y-axis intersection was recently triggered
   const prevBoundaryStateRef = useRef(new Map()); // Track previous boundary state for each function
+  const prevLandmarkPositionsRef = useRef(new Map()); // Track previous cursor positions for landmark crossing detection
   const lastTickIndexRef = useRef(null); // Track last ticked index
   const tickSynthRef = useRef(null); // Reference to tick synth
   const tickChannelRef = useRef(null); // Reference to tick channel for panning
@@ -98,25 +101,27 @@ const GraphSonification = () => {
     };
   }, []);
 
-  // Initialize audio sample manager only
+  // Initialize audio sample manager and landmark earcons
   useEffect(() => {
-    const initializeAudioSampleManager = async () => {
+    const initializeAudioSystems = async () => {
       try {
         // Wait for Tone.js to be fully initialized
         await new Promise(resolve => setTimeout(resolve, 500));
         
         await audioSampleManager.initialize();
-        console.log("Audio sample manager initialized (samples will load on-demand)");
+        await landmarkEarconManager.initialize();
+        console.log("Audio systems initialized (samples and landmark earcons)");
       } catch (error) {
-        console.error("Failed to initialize audio sample manager:", error);
+        console.error("Failed to initialize audio systems:", error);
       }
     };
 
-    initializeAudioSampleManager();
+    initializeAudioSystems();
 
     return () => {
-      // Cleanup audio sample manager
+      // Cleanup audio systems
       audioSampleManager.dispose();
+      landmarkEarconManager.dispose();
     };
   }, []);
 
@@ -304,6 +309,13 @@ const GraphSonification = () => {
     Array.from(yAxisTriggeredRef.current.keys()).forEach(functionId => {
       if (!currentFunctionIds.has(functionId)) {
         yAxisTriggeredRef.current.delete(functionId);
+      }
+    });
+    
+    // Clean up prevLandmarkPositionsRef
+    Array.from(prevLandmarkPositionsRef.current.keys()).forEach(functionId => {
+      if (!currentFunctionIds.has(functionId)) {
+        prevLandmarkPositionsRef.current.delete(functionId);
       }
     });
   }, [functionDefinitions]);
@@ -517,6 +529,9 @@ const GraphSonification = () => {
         break;
       }
     }
+
+    // Check for landmark intersections
+    checkLandmarkIntersections(cursorCoords);
 
     // Only start pink noise if there's a negative y value AND not at a boundary
     if (hasNegativeY && !isAnyAtBoundary) {
@@ -781,6 +796,97 @@ const GraphSonification = () => {
       // Clear the discontinuity trigger when function becomes valid again
       boundaryTriggeredRef.current.delete(`${functionId}_discontinuity`);
     }
+  };
+
+  // Check for landmark intersections and play appropriate earcons
+  const checkLandmarkIntersections = (cursorCoords) => {
+    if (!cursorCoords || cursorCoords.length === 0) return;
+
+    // Get active functions
+    const activeFunctions = getActiveFunctions(functionDefinitions);
+    
+    activeFunctions.forEach(func => {
+      const functionId = func.id;
+      const functionIndex = functionDefinitions.findIndex(f => f.id === functionId);
+      
+      if (functionIndex === -1) return;
+      
+      // Get landmarks for this function
+      const landmarks = getLandmarksN(functionDefinitions, functionIndex);
+      if (!landmarks || landmarks.length === 0) return;
+      
+      // Find cursor position for this function
+      const cursorCoord = cursorCoords.find(coord => coord.functionId === functionId);
+      if (!cursorCoord) return;
+      
+      const cursorX = parseFloat(cursorCoord.x);
+      const cursorY = parseFloat(cursorCoord.y);
+      
+      // Get previous cursor position for this function
+      const prevPosition = prevLandmarkPositionsRef.current.get(functionId);
+      
+      // Check each landmark for crossing detection
+      landmarks.forEach((landmark, landmarkIndex) => {
+        const landmarkX = parseFloat(landmark.x);
+        const landmarkY = parseFloat(landmark.y);
+        
+        // Create landmark key for tracking
+        const landmarkKey = `${functionId}_landmark_${landmarkIndex}`;
+        
+        let shouldTriggerEarcon = false;
+        
+        if (prevPosition) {
+          const prevX = prevPosition.x;
+          const prevY = prevPosition.y;
+          
+          // Check if cursor crossed the landmark position
+          // We consider it crossed if the cursor moved from one side of the landmark to the other
+          const prevDistance = Math.sqrt(
+            Math.pow(prevX - landmarkX, 2) + Math.pow(prevY - landmarkY, 2)
+          );
+          const currentDistance = Math.sqrt(
+            Math.pow(cursorX - landmarkX, 2) + Math.pow(cursorY - landmarkY, 2)
+          );
+          
+          // Define a small threshold for "reaching" the landmark (much smaller than before)
+          const reachThreshold = 0.05; // Very small threshold
+          
+          // Trigger if we're very close to the landmark and weren't close before
+          if (currentDistance <= reachThreshold && prevDistance > reachThreshold) {
+            shouldTriggerEarcon = true;
+          }
+        } else {
+          // First time tracking this function - check if we're already at a landmark
+          const distance = Math.sqrt(
+            Math.pow(cursorX - landmarkX, 2) + Math.pow(cursorY - landmarkY, 2)
+          );
+          
+          if (distance <= 0.05) { // Very small threshold for initial detection
+            shouldTriggerEarcon = true;
+          }
+        }
+        
+        if (shouldTriggerEarcon) {
+          // Check if we haven't recently triggered this landmark to avoid spam
+          const lastTriggered = boundaryTriggeredRef.current.get(landmarkKey);
+          const now = Date.now();
+          
+          if (!lastTriggered || (now - lastTriggered) > 300) { // 300ms cooldown for landmarks
+            // Play landmark earcon
+            const shape = landmark.shape || landmark.appearance || "circle";
+            landmarkEarconManager.playLandmarkEarcon(landmark, {
+              pan: (cursorX - graphBounds.xMin) / (graphBounds.xMax - graphBounds.xMin) * 2 - 1 // -1 to 1
+            });
+            
+            boundaryTriggeredRef.current.set(landmarkKey, now);
+            console.log(`Landmark intersection: ${landmark.label || `Landmark ${landmarkIndex + 1}`} (${shape}) at x=${cursorX.toFixed(2)}, y=${cursorY.toFixed(2)}`);
+          }
+        }
+      });
+      
+      // Update previous position for this function
+      prevLandmarkPositionsRef.current.set(functionId, { x: cursorX, y: cursorY });
+    });
   };
 
   // Helper function to play audio samples

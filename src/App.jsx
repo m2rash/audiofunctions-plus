@@ -19,8 +19,8 @@ function App() {
       <GraphContextProvider>
         <AnnouncementProvider>
           <InfoToastProvider>
-            <KeyboardHandler />
             <DialogProvider>
+              <KeyboardHandler />
               <AppContent />
             </DialogProvider>
           </InfoToastProvider>

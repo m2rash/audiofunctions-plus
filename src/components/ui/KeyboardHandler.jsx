@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useGraphContext } from "../../context/GraphContext";
-import { getActiveFunctions, getFunctionNameN, getLandmarksN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import { getActiveFunctions, getFunctionNameN, getLandmarksN, findLandmarkByShortcut, addLandmarkWithValidation } from "../../utils/graphObjectOperations";
 import audioSampleManager from "../../utils/audioSamples";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
+import { useDialog } from "../../context/DialogContext";
 
 // Export the ZoomBoard function so it can be used in other components
 export const useZoomBoard = () => {
@@ -49,11 +50,12 @@ export default function KeyboardHandler() {
         mouseTimeoutRef,
         isAudioEnabled,
         setIsShiftPressed,
-        graphBounds // Add this line - import graphBounds from context
+        graphBounds
     } = useGraphContext();
 
     const { announce } = useAnnouncement();
     const { showLandmarkToast, showInfoToast } = useInfoToast();
+    const { openDialog } = useDialog();
 
     const pressedKeys = useRef(new Set());
     const lastKeyDownTime = useRef(null);
@@ -133,6 +135,88 @@ export default function KeyboardHandler() {
         }
     };
 
+    // Function to add landmark at current cursor position
+    const addLandmarkAtCursor = () => {
+        const activeFunctions = getActiveFunctions(functionDefinitions);
+        if (activeFunctions.length === 0) {
+            announce("No active function available");
+            return;
+        }
+
+        const activeFunction = activeFunctions[0];
+        const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
+
+        if (!cursorCoords || cursorCoords.length === 0) {
+            announce("No cursor position available");
+            return;
+        }
+
+        const cursorCoord = cursorCoords.find(coord => coord.functionId === activeFunction.id);
+        if (!cursorCoord) {
+            announce("No cursor position for active function");
+            return;
+        }
+
+        const x = parseFloat(cursorCoord.x);
+        const y = parseFloat(cursorCoord.y);
+
+        // Check if landmark already exists at this position
+        const currentLandmarks = getLandmarksN(functionDefinitions, activeFunctionIndex);
+        const tolerance = 0.01;
+        const existingLandmarkIndex = currentLandmarks.findIndex(landmark => 
+            Math.abs(landmark.x - x) < tolerance && Math.abs(landmark.y - y) < tolerance
+        );
+
+        if (existingLandmarkIndex !== -1) {
+            // Open existing landmark in dialog
+            const existingLandmark = currentLandmarks[existingLandmarkIndex];
+            announce(`Opening existing landmark at x = ${x.toFixed(2)}, y = ${y.toFixed(2)}`);
+            
+            openDialog("edit-landmark", {
+                landmarkData: {
+                    functionIndex: activeFunctionIndex,
+                    landmarkIndex: existingLandmarkIndex,
+                    landmark: existingLandmark
+                }
+            });
+            return;
+        }
+
+        // Create new landmark
+        const result = addLandmarkWithValidation(functionDefinitions, activeFunctionIndex, x, y);
+        
+        if (!result.success) {
+            announce(result.message);
+            if (result.message.includes("Maximum")) {
+                showInfoToast(`Error: ${result.message}`, 3000);
+            }
+            return;
+        }
+
+        // Update function definitions with the new landmark
+        setFunctionDefinitions(result.definitions);
+
+        const shortcutText = result.shortcut ? `, shortcut: Ctrl+${result.shortcut}` : '';
+        announce(`${result.message}${shortcutText}`);
+        showInfoToast(`Landmark added${result.shortcut ? ` (Ctrl+${result.shortcut})` : ''}`, 2000);
+
+        // Find the newly created landmark and open it in the dialog
+        const updatedLandmarks = getLandmarksN(result.definitions, activeFunctionIndex);
+        const newLandmarkIndex = updatedLandmarks.length - 1;
+        const newLandmark = updatedLandmarks[newLandmarkIndex];
+
+        // Open the new landmark in edit dialog
+        setTimeout(() => {
+            openDialog("edit-landmark", {
+                landmarkData: {
+                    functionIndex: activeFunctionIndex,
+                    landmarkIndex: newLandmarkIndex,
+                    landmark: newLandmark
+                }
+            });
+        }, 100);
+    };
+
     useEffect(() => {
         // Function to handle key down events
         const handleKeyDown = async (event) => {
@@ -143,7 +227,6 @@ export default function KeyboardHandler() {
                 return;
             }
         
-
             pressedKeys.current.add(event.key.toLowerCase());   // Store the pressed key in the set
             
             // Track Shift key state
@@ -154,13 +237,46 @@ export default function KeyboardHandler() {
             const activeFunctions = getActiveFunctions(functionDefinitions);
             const step = event.shiftKey ? 5 : 1; // if shift is pressed, change step size
 
-            // Handle landmark shortcuts (Ctrl + 1-9, 0)
+            // Handle Ctrl+N for new landmark
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey && !event.altKey) {
+                event.preventDefault();
+                event.stopPropagation();
+                addLandmarkAtCursor();
+                return;
+            }
+
+            // Handle landmark shortcuts - support both regular numbers and Czech keyboard
             if (event.ctrlKey && !event.altKey && !event.shiftKey) {
                 const landmarkShortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+                
+                // Czech keyboard alternatives for Ctrl shortcuts
+                const czechLandmarkKeyMap = {
+                    '+': '1',  // Czech 1
+                    'ě': '2',  // Czech 2  
+                    'š': '3',  // Czech 3
+                    'č': '4',  // Czech 4
+                    'ř': '5',  // Czech 5
+                    'ž': '6',  // Czech 6
+                    'ý': '7',  // Czech 7
+                    'á': '8',  // Czech 8
+                    'í': '9',  // Czech 9
+                    'é': '0'   // Czech 0
+                };
+
+                // Check for regular number keys first
                 if (landmarkShortcuts.includes(event.key)) {
                     event.preventDefault();
                     event.stopPropagation();
                     jumpToLandmarkByShortcut(event.key);
+                    return;
+                }
+
+                // Check for Czech keyboard alternatives
+                const mappedShortcut = czechLandmarkKeyMap[event.key];
+                if (mappedShortcut) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    jumpToLandmarkByShortcut(mappedShortcut);
                     return;
                 }
             }
@@ -381,7 +497,7 @@ export default function KeyboardHandler() {
         document.removeEventListener("keydown", handleKeyDown);
         document.removeEventListener("keyup", handleKeyUp);
       };
-    }, [setPlayFunction, setIsAudioEnabled, setGraphBounds, setGraphSettings, inputRefs, cursorCoords, updateCursor, stepSize, functionDefinitions, setFunctionDefinitions, setExplorationMode, PlayFunction, mouseTimeoutRef, isAudioEnabled, setIsShiftPressed, ZoomBoard]);
+    }, [setPlayFunction, setIsAudioEnabled, setGraphBounds, setGraphSettings, inputRefs, cursorCoords, updateCursor, stepSize, functionDefinitions, setFunctionDefinitions, setExplorationMode, PlayFunction, mouseTimeoutRef, isAudioEnabled, setIsShiftPressed, ZoomBoard, openDialog]);
   
     return null;
 }

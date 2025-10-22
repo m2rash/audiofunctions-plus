@@ -384,6 +384,7 @@ export const useDynamicKBarActions = () => {
   {
     id: "add-landmark",
     name: "Add Landmark at Cursor",
+    shortcut: ["ctrl+b"],
     keywords: "add, create, new, landmark, bookmark, marker, current, position, cursor",
     parent: "landmarks",
     perform: () => {

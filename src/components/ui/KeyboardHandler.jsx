@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useGraphContext } from "../../context/GraphContext";
-import { getActiveFunctions, getFunctionNameN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import { getActiveFunctions, getFunctionNameN, findLandmarkByShortcut, getLandmarksN } from "../../utils/graphObjectOperations";
 import { addLandmarkAtCursorPosition, jumpToLandmarkWithToast, getScreenPosition } from "../../utils/landmarkUtils";
 import audioSampleManager from "../../utils/audioSamples";
 import { useAnnouncement } from '../../context/AnnouncementContext';
@@ -62,9 +62,132 @@ export default function KeyboardHandler() {
     const lastKeyDownTime = useRef(null);
     const HOLD_THRESHOLD = 1000;
     const KEYPRESS_THRESHOLD = 15;
+    
+    // Track if normal navigation has happened to reset boundary wrapping
+    const normalNavigationHappenedRef = useRef(false);
 
     // Use the exported zoom function
     const ZoomBoard = useZoomBoard();
+
+    // Function to get sorted navigation points (current bounds + landmarks within view)
+    const getSortedNavigationPoints = () => {
+        const activeFunctions = getActiveFunctions(functionDefinitions);
+        if (activeFunctions.length === 0) return [];
+
+        const activeFunction = activeFunctions[0];
+        const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
+        const allLandmarks = getLandmarksN(functionDefinitions, activeFunctionIndex);
+
+        // Use current graph bounds
+        const { xMin, xMax } = graphBounds;
+
+        // Filter landmarks to only include those within the current view
+        const visibleLandmarks = allLandmarks.filter(landmark => 
+            landmark.x >= xMin && landmark.x <= xMax
+        );
+
+        // Create navigation points array
+        const navigationPoints = [
+            { type: 'boundary', x: xMin, label: 'Left boundary' }
+        ];
+
+        // Add sorted visible landmarks
+        const sortedLandmarks = [...visibleLandmarks]
+            .sort((a, b) => a.x - b.x)
+            .map(landmark => ({
+                type: 'landmark',
+                x: landmark.x,
+                label: landmark.label || 'Landmark',
+                landmark: landmark
+            }));
+
+        navigationPoints.push(...sortedLandmarks);
+        navigationPoints.push({ type: 'boundary', x: xMax, label: 'Right boundary' });
+
+        return navigationPoints;
+    };
+
+    // Function to jump to next/previous navigation point
+    const jumpToNavigationPoint = (direction) => {
+        if (!cursorCoords || cursorCoords.length === 0) return;
+
+        const currentX = parseFloat(cursorCoords[0].x);
+        const navigationPoints = getSortedNavigationPoints();
+
+        if (navigationPoints.length === 0) return;
+
+        let targetPoint = null;
+
+        if (direction === 1) { // Next (right)
+            // Find first point to the right of current position
+            targetPoint = navigationPoints.find(point => point.x > currentX);
+            // If none found, wrap to first point (but only if normal navigation hasn't happened)
+            if (!targetPoint) {
+                if (normalNavigationHappenedRef.current) {
+                    // Reset flag and go to left boundary (xMin)
+                    normalNavigationHappenedRef.current = false;
+                    targetPoint = navigationPoints[0]; // Left boundary
+                } else {
+                    targetPoint = navigationPoints[0];
+                }
+            }
+        } else { // Previous (left)
+            // Find last point to the left of current position
+            const leftPoints = navigationPoints.filter(point => point.x < currentX);
+            targetPoint = leftPoints[leftPoints.length - 1];
+            // If none found, wrap to last point (but only if normal navigation hasn't happened)
+            if (!targetPoint) {
+                if (normalNavigationHappenedRef.current) {
+                    // Reset flag and go to right boundary (xMax)
+                    normalNavigationHappenedRef.current = false;
+                    targetPoint = navigationPoints[navigationPoints.length - 1]; // Right boundary
+                } else {
+                    targetPoint = navigationPoints[navigationPoints.length - 1];
+                }
+            }
+        }
+
+        if (targetPoint) {
+            updateCursor(targetPoint.x);
+            
+            // Announce and show toast based on type
+            if (targetPoint.type === 'landmark') {
+                const screenPosition = getScreenPosition(targetPoint.x, targetPoint.landmark.y, graphBounds);
+                showLandmarkToast(
+                    `${targetPoint.label}: x = ${targetPoint.x.toFixed(2)}, y = ${targetPoint.landmark.y.toFixed(2)}`,
+                    screenPosition,
+                    2000
+                );
+                announce(`Jumped to ${targetPoint.label} at x = ${targetPoint.x.toFixed(2)}`);
+            } else {
+                // For boundary points, calculate screen position and show cursor-positioned toast
+                // Get Y coordinate from active function at boundary position
+                const activeFunctions = getActiveFunctions(functionDefinitions);
+                let boundaryY = 0; // Default Y value
+                
+                if (activeFunctions.length > 0 && cursorCoords.length > 0) {
+                    // Try to get Y value from current cursor position of active function
+                    const activeFunctionCoord = cursorCoords.find(coord => 
+                        coord.functionId === activeFunctions[0].id
+                    );
+                    if (activeFunctionCoord) {
+                        const y = parseFloat(activeFunctionCoord.y);
+                        if (!isNaN(y) && isFinite(y)) {
+                            boundaryY = y;
+                        }
+                    }
+                }
+                
+                const screenPosition = getScreenPosition(targetPoint.x, boundaryY, graphBounds);
+                showLandmarkToast(
+                    `${targetPoint.label}: x = ${targetPoint.x.toFixed(2)}`,
+                    screenPosition,
+                    2000
+                );
+                announce(`Jumped to ${targetPoint.label} at x = ${targetPoint.x.toFixed(2)}`);
+            }
+        }
+    };
 
     // Function to switch to specific function by index
     const switchToFunction = (targetIndex) => {
@@ -239,23 +362,23 @@ export default function KeyboardHandler() {
                         break;
                     }
 
-                    // Handle Cmd/Ctrl + Left/Right for cursor positioning
+                    // Handle Cmd/Ctrl + Left/Right for navigation through landmarks
                     if (event.ctrlKey || event.metaKey) {
                         event.preventDefault();
                         event.stopPropagation();
                         
-                        const bounds = graphSettings?.defaultView || [-10, 10, 10, -10];
                         if (event.key === "ArrowLeft" || event.key === "j" || event.key === "J") {
-                            // Go to beginning with Cmd/Ctrl + Left or J
-                            const [xMin] = bounds;
-                            updateCursor(xMin);
+                            // Navigate to previous landmark/boundary
+                            jumpToNavigationPoint(-1);
                         } else {
-                            // Go to end with Cmd/Ctrl + Right or L
-                            const [, xMax] = bounds;
-                            updateCursor(xMax);
+                            // Navigate to next landmark/boundary
+                            jumpToNavigationPoint(1);
                         }
                         break;
                     }
+
+                    // Mark that normal navigation has happened
+                    normalNavigationHappenedRef.current = true;
 
                     let direction = 1;                               //right by default
                     if (event.key === "ArrowLeft" || event.key === "j" || event.key === "J") direction = -1;   //left if left arrow or J pressed
@@ -373,7 +496,7 @@ export default function KeyboardHandler() {
         document.removeEventListener("keydown", handleKeyDown);
         document.removeEventListener("keyup", handleKeyUp);
       };
-    }, [setPlayFunction, setIsAudioEnabled, setGraphBounds, setGraphSettings, inputRefs, cursorCoords, updateCursor, stepSize, functionDefinitions, setFunctionDefinitions, setExplorationMode, PlayFunction, mouseTimeoutRef, isAudioEnabled, setIsShiftPressed, ZoomBoard, openDialog]);
+    }, [setPlayFunction, setIsAudioEnabled, setGraphBounds, setGraphSettings, inputRefs, cursorCoords, updateCursor, stepSize, functionDefinitions, setFunctionDefinitions, setExplorationMode, PlayFunction, mouseTimeoutRef, isAudioEnabled, setIsShiftPressed, ZoomBoard, openDialog, graphBounds, graphSettings]);
   
     return null;
 }

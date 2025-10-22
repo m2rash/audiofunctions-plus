@@ -15,8 +15,61 @@ export const useDynamicKBarActions = () => {
   const { isAudioEnabled, setIsAudioEnabled, cursorCoords, functionDefinitions, setFunctionDefinitions, setPlayFunction, graphSettings, graphBounds, setGraphBounds, updateCursor, focusChart } = useGraphContext();
   const { openDialog } = useDialog();
   const { announce } = useAnnouncement();
-  const { showInfoToast } = useInfoToast();
-  
+  const { showInfoToast, showLandmarkToast } = useInfoToast();
+
+  // Function to calculate screen position directly here
+  const getScreenPosition = (graphX, graphY, graphBounds) => {
+    const chartElement = document.getElementById('jxgbox'); // Direct DOM access to chart
+    
+    if (!chartElement) {
+      console.warn('Chart element not found, using fallback position');
+      return { x: 150, y: 150 }; // Fallback position
+    }
+
+    const chartRect = chartElement.getBoundingClientRect();
+    
+    // Debug logging
+    console.log('Chart rect:', chartRect);
+    console.log('Graph coordinates:', { graphX, graphY });
+    console.log('Graph bounds:', graphBounds);
+    
+    // Calculate relative position within the chart
+    const xRange = graphBounds.xMax - graphBounds.xMin;
+    const yRange = graphBounds.yMax - graphBounds.yMin;
+    
+    if (xRange === 0 || yRange === 0) {
+      console.warn('Invalid graph bounds range');
+      return { x: 150, y: 150 };
+    }
+    
+    const relativeX = (graphX - graphBounds.xMin) / xRange;
+    const relativeY = (graphBounds.yMax - graphY) / yRange; // Invert Y axis
+    
+    // Convert to screen coordinates
+    const screenX = chartRect.left + (relativeX * chartRect.width);
+    const screenY = chartRect.top + (relativeY * chartRect.height);
+    
+    console.log('Screen position calculated:', { x: screenX, y: screenY });
+    
+    return { x: screenX, y: screenY };
+  };
+
+  // Function to jump to landmark
+  const jumpToLandmark = (landmark) => {
+    updateCursor(landmark.x);
+    
+    const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
+                
+    showLandmarkToast(
+        `${landmark.label || 'Landmark'}: x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`,
+        screenPosition,
+        2000
+    );
+
+    // Still announce for screen readers
+    announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
+  };
+
   // Check if in read-only or full-restriction mode
   const isReadOnly = graphSettings?.restrictionMode === "read-only";
   const isFullyRestricted = graphSettings?.restrictionMode === "full-restriction";
@@ -147,13 +200,6 @@ export const useDynamicKBarActions = () => {
   const activeFunction = activeFunctions.length > 0 ? activeFunctions[0] : null;
   const activeFunctionIndex = activeFunction ? functionDefinitions.findIndex(f => f.id === activeFunction.id) : -1;
   const landmarks = activeFunction ? getLandmarksN(functionDefinitions, activeFunctionIndex) : [];
-
-  // Function to jump to landmark
-  const jumpToLandmark = (landmark) => {
-    updateCursor(landmark.x);
-    announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
-    showInfoToast(`${landmark.label || 'Landmark'}: x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`, 2000);
-  };
 
   // Function to add landmark at current cursor position
   const addLandmarkAtCursor = () => {

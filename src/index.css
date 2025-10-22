@@ -78,6 +78,11 @@
   --color-cursor-primary-border: var(--color-contrast-border);
 
 
+  --color-landmark-fill: var(--color-background);
+  --color-landmark-border: var(--color-dark-blue);
+
+
+
   /* special cases */
   --color-text-input-background: var(--color-white);
 }
@@ -590,6 +595,37 @@ text.JXGtext {
   stroke-width: 4px;
 
 }
+
+
+/* -------------------------- */
+/* ------- Landmark Symbols ------- */
+/* -------------------------- */
+
+/* Landmark circle styles */
+.landmark-circle {
+  fill: var(--color-landmark-fill);
+  stroke: var(--color-landmark-border);
+  stroke-width: 4px;
+}
+
+/* Landmark triangle styles */
+.landmark-triangle {
+  fill: var(--color-landmark-fill);
+  stroke: var(--color-landmark-border);
+  stroke-width: 4px;
+}
+
+/* Landmark square styles */  
+.landmark-square {
+  fill: var(--color-landmark-fill);
+  stroke: var(--color-landmark-border);
+  stroke-width: 4px;
+}
+
+
+
+
+
 
 /* -------------------------- */
 /* ------- Welcome Dialog ---- */

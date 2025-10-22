@@ -105,7 +105,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <button
-                      onClick={() => handleExternalLink('https://sonairgraph.tactilelibrary.eu/', 'project information site')}
+                      onClick={() => handleExternalLink('https://www.sonairgraph.unito.it/', 'project information site')}
                       className="inline-flex items-center gap-2 text-sm text-primary hover:opacity-80 underline transition-opacity"
                       aria-label="Visit project information website"
                     >

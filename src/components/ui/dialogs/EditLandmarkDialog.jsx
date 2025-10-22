@@ -10,7 +10,7 @@ const config = {};
 const math = create(all, config);
 
 const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
-  const { functionDefinitions, setFunctionDefinitions, graphSettings } = useGraphContext();
+  const { functionDefinitions, setFunctionDefinitions } = useGraphContext();
   const { announce } = useAnnouncement();
   
   const [statusMessage, setStatusMessage] = useState('');
@@ -25,9 +25,6 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     y: 0,
     appearance: 'circle'
   });
-
-  // Check if in read-only mode
-  const isReadOnly = graphSettings?.restrictionMode === "read-only" || graphSettings?.restrictionMode === "full-restriction";
   
   // Check if there are any errors that prevent saving
   const hasErrors = Object.keys(inputErrors).some(key => inputErrors[key] && inputErrors[key].length > 0);
@@ -106,12 +103,9 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       });
       
       setInputErrors({});
-      announceStatus(isReadOnly ? 
-        `Landmark dialog opened in read-only mode. Viewing landmark at x=${landmark.x.toFixed(2)}.` :
-        `Edit landmark dialog opened. Current position: x=${landmark.x.toFixed(2)}, y=${landmark.y.toFixed(2)}.`
-      );
+      announceStatus(`Edit landmark dialog opened. Current position: x=${landmark.x.toFixed(2)}, y=${landmark.y.toFixed(2)}.`);
     }
-  }, [isOpen, landmarkData, isReadOnly, functionDefinitions]);
+  }, [isOpen, landmarkData, functionDefinitions]);
 
   // Announce status changes to screen readers
   const announceStatus = (message) => {
@@ -154,8 +148,6 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
 
   // Handle input changes
   const handleXChange = (value) => {
-    if (isReadOnly) return;
-    
     // Always update the display value
     setLocalLandmark(prev => {
       let newX = value;
@@ -183,8 +175,6 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   };
 
   const handleXBlur = (value) => {
-    if (isReadOnly) return;
-    
     let finalValue = value;
     
     // Convert empty or invalid values to 0
@@ -210,8 +200,6 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   };
 
   const handleLabelChange = (value) => {
-    if (isReadOnly) return;
-    
     setLocalLandmark(prev => ({
       ...prev,
       label: value
@@ -225,8 +213,6 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   };
 
   const handleAppearanceChange = (value) => {
-    if (isReadOnly) return;
-    
     setLocalLandmark(prev => ({
       ...prev,
       appearance: value
@@ -239,7 +225,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
 
   // Dialog actions
   const handleAccept = () => {
-    if (isReadOnly || hasErrors || !landmarkData) return;
+    if (hasErrors || !landmarkData) return;
     
     const { functionIndex, landmarkIndex } = landmarkData;
     
@@ -271,7 +257,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   };
 
   const handleDelete = () => {
-    if (isReadOnly || !landmarkData) return;
+    if (!landmarkData) return;
     
     const { functionIndex, landmarkIndex, landmark } = landmarkData;
     
@@ -323,7 +309,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   const handleClose = () => {
     // Only prevent closing if we have validation errors AND we're not explicitly cancelling
     // This method is called by the dialog's onClose prop (clicking overlay, etc.)
-    if (!isReadOnly && hasErrors) {
+    if (hasErrors) {
       announceStatus("Cannot close: Please fix all errors or cancel to discard changes.");
       return;
     }
@@ -339,12 +325,12 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
         e.preventDefault();
         e.stopPropagation();
         handleCancel(); // Use handleCancel for Escape key
-      } else if (e.key === 'Delete' && !isReadOnly) {
+      } else if (e.key === 'Delete') {
         // Delete key shortcut for deleting landmark
         e.preventDefault();
         e.stopPropagation();
         handleDelete();
-      } else if (e.key === 'Enter' && !hasErrors && !isReadOnly) {
+      } else if (e.key === 'Enter' && !hasErrors) {
         // Check if Delete button is focused
         const activeElement = document.activeElement;
         if (activeElement && activeElement.textContent === 'Delete') {
@@ -381,7 +367,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, hasErrors, isReadOnly, localLandmark, landmarkData]);
+  }, [isOpen, hasErrors, localLandmark, landmarkData]);
 
   if (!landmarkData) {
     return null;
@@ -402,13 +388,10 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
         <DialogPanel className="w-full max-w-lg bg-background rounded-lg shadow-lg flex flex-col max-h-[90vh]">
           <div className="p-6 pb-4 flex-shrink-0">
             <DialogTitle id="dialog-title" className="text-lg font-bold text-titles">
-              {isReadOnly ? "View Landmark" : "Edit Landmark"}
+              Edit Landmark
             </DialogTitle>
             <Description id="dialog-description" className="text-descriptions">
-              {isReadOnly ? 
-                "View landmark details in read-only mode." :
-                "Edit landmark properties. The Y coordinate is automatically calculated based on the X coordinate and function."
-              }
+              Edit landmark properties. The Y coordinate is automatically calculated based on the X coordinate and function.
             </Description>
           </div>
           
@@ -456,8 +439,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                   aria-label="Landmark label"
                   aria-invalid={inputErrors.label ? 'true' : 'false'}
                   aria-errormessage={inputErrors.label ? "label-error" : undefined}
-                  readOnly={isReadOnly}
-                  aria-description={isReadOnly ? "Landmark label. Read-only mode active." : "Optional label for the landmark"}
+                  aria-description="Optional label for the landmark"
                 />
               </div>
               {inputErrors.label && (
@@ -496,8 +478,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                     aria-label="X coordinate"
                     aria-invalid={inputErrors.x ? 'true' : 'false'}
                     aria-errormessage={inputErrors.x ? "x-coordinate-error" : undefined}
-                    readOnly={isReadOnly}
-                    aria-description={isReadOnly ? "X coordinate. Read-only mode active." : "X coordinate on the function"}
+                    aria-description="X coordinate on the function"
                   />
                 </div>
                 {inputErrors.x && (
@@ -553,8 +534,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                     onChange={(e) => handleAppearanceChange(e.target.value)}
                     className="grow text-input-inner"
                     aria-label="Landmark appearance"
-                    disabled={isReadOnly}
-                    aria-description={isReadOnly ? "Landmark appearance. Read-only mode active." : "Visual appearance of the landmark"}
+                    aria-description="Visual and auditive appearance of the landmark"
                   >
                     <option value="circle" className="bg-background text-txt">Circle</option>
                     <option value="triangle" className="bg-background text-txt">Triangle</option>
@@ -570,16 +550,14 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
             <div className="flex justify-between items-center" role="group" aria-label="Dialog controls">
               {/* Delete button on the left */}
               <div>
-                {!isReadOnly && (
-                  <button
-                    onClick={handleDelete}
-                    className="btn-danger"
-                    title="Delete this landmark permanently"
-                    aria-description="Delete this landmark. This action cannot be undone."
-                  >
-                    Delete
-                  </button>
-                )}
+                <button
+                  onClick={handleDelete}
+                  className="btn-danger"
+                  title="Delete this landmark permanently"
+                  aria-description="Delete this landmark. This action cannot be undone."
+                >
+                  Delete
+                </button>
               </div>
               
               {/* Cancel and Accept buttons on the right */}
@@ -588,20 +566,17 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                   onClick={handleCancel}
                   className="btn-secondary"
                 >
-                  {isReadOnly ? "Close" : "Cancel"}
+                  Cancel
                 </button>
-
-                {!isReadOnly && (
-                  <button
-                    onClick={handleAccept}
-                    className="btn-primary"
-                    disabled={hasErrors}
-                    aria-disabled={hasErrors}
-                    title={hasErrors ? "Please fix all errors before saving" : "Save changes and close"}
-                  >
-                    Accept
-                  </button>
-                )}
+                <button
+                  onClick={handleAccept}
+                  className="btn-primary"
+                  disabled={hasErrors}
+                  aria-disabled={hasErrors}
+                  title={hasErrors ? "Please fix all errors before saving" : "Save changes and close"}
+                >
+                  Accept
+                </button>
               </div>
             </div>
           </div>

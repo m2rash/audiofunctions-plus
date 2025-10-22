@@ -524,7 +524,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                     id="landmark-y"
                     type="text"
                     value={typeof localLandmark.y === 'number' ? localLandmark.y.toFixed(6) : localLandmark.y}
-                    className="text-input-inner"
+                    className="grow text-input-inner"
                     aria-label="Y coordinate (automatically calculated)"
                     readOnly
                     tabIndex={-1}

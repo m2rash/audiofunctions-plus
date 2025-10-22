@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useGraphContext } from "../../context/GraphContext";
-import { getActiveFunctions, getFunctionNameN, getLandmarksN, findLandmarkByShortcut, addLandmarkWithValidation } from "../../utils/graphObjectOperations";
+import { getActiveFunctions, getFunctionNameN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import { addLandmarkAtCursorPosition, jumpToLandmarkWithToast, getScreenPosition } from "../../utils/landmarkUtils";
 import audioSampleManager from "../../utils/audioSamples";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
@@ -54,13 +55,13 @@ export default function KeyboardHandler() {
     } = useGraphContext();
 
     const { announce } = useAnnouncement();
-    const { showLandmarkToast, showInfoToast } = useInfoToast();
+    const { showInfoToast, showLandmarkToast } = useInfoToast();
     const { openDialog } = useDialog();
 
     const pressedKeys = useRef(new Set());
     const lastKeyDownTime = useRef(null);
-    const HOLD_THRESHOLD = 1000; // Time in ms before allowing continuous movement
-    const KEYPRESS_THRESHOLD = 15; // Time in ms to filter out false positive keyup events (typical key repeat delay is ~30ms)
+    const HOLD_THRESHOLD = 1000;
+    const KEYPRESS_THRESHOLD = 15;
 
     // Use the exported zoom function
     const ZoomBoard = useZoomBoard();
@@ -83,34 +84,6 @@ export default function KeyboardHandler() {
         
         console.log(`Switched to function ${targetIndex + 1}`);
     };
-  
-    // Function to calculate screen position directly here (same logic as in PaletteActions)
-    const getScreenPosition = (graphX, graphY, graphBounds) => {
-      const chartElement = document.getElementById('jxgbox');
-      
-      if (!chartElement) {
-        console.warn('Chart element not found, using fallback position');
-        return { x: 150, y: 150 };
-      }
-
-      const chartRect = chartElement.getBoundingClientRect();
-      
-      const xRange = graphBounds.xMax - graphBounds.xMin;
-      const yRange = graphBounds.yMax - graphBounds.yMin;
-      
-      if (xRange === 0 || yRange === 0) {
-        console.warn('Invalid graph bounds range');
-        return { x: 150, y: 150 };
-      }
-      
-      const relativeX = (graphX - graphBounds.xMin) / xRange;
-      const relativeY = (graphBounds.yMax - graphY) / yRange;
-      
-      const screenX = chartRect.left + (relativeX * chartRect.width);
-      const screenY = chartRect.top + (relativeY * chartRect.height);
-      
-      return { x: screenX, y: screenY };
-    };
 
     // Function to jump to landmark by shortcut
     const jumpToLandmarkByShortcut = (shortcut) => {
@@ -122,99 +95,8 @@ export default function KeyboardHandler() {
         
         const landmark = findLandmarkByShortcut(functionDefinitions, activeFunctionIndex, shortcut);
         if (landmark) {
-            updateCursor(landmark.x);
-            
-            const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
-            
-            showLandmarkToast(
-                `${landmark.label || 'Landmark'}: x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`,
-                screenPosition,
-                2000
-            );
-            announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
+            jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, announce, showLandmarkToast);
         }
-    };
-
-    // Function to add landmark at current cursor position
-    const addLandmarkAtCursor = () => {
-        const activeFunctions = getActiveFunctions(functionDefinitions);
-        if (activeFunctions.length === 0) {
-            announce("No active function available");
-            return;
-        }
-
-        const activeFunction = activeFunctions[0];
-        const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
-
-        if (!cursorCoords || cursorCoords.length === 0) {
-            announce("No cursor position available");
-            return;
-        }
-
-        const cursorCoord = cursorCoords.find(coord => coord.functionId === activeFunction.id);
-        if (!cursorCoord) {
-            announce("No cursor position for active function");
-            return;
-        }
-
-        const x = parseFloat(cursorCoord.x);
-        const y = parseFloat(cursorCoord.y);
-
-        // Check if landmark already exists at this position
-        const currentLandmarks = getLandmarksN(functionDefinitions, activeFunctionIndex);
-        const tolerance = 0.01;
-        const existingLandmarkIndex = currentLandmarks.findIndex(landmark => 
-            Math.abs(landmark.x - x) < tolerance && Math.abs(landmark.y - y) < tolerance
-        );
-
-        if (existingLandmarkIndex !== -1) {
-            // Open existing landmark in dialog
-            const existingLandmark = currentLandmarks[existingLandmarkIndex];
-            announce(`Opening existing landmark at x = ${x.toFixed(2)}, y = ${y.toFixed(2)}`);
-            
-            openDialog("edit-landmark", {
-                landmarkData: {
-                    functionIndex: activeFunctionIndex,
-                    landmarkIndex: existingLandmarkIndex,
-                    landmark: existingLandmark
-                }
-            });
-            return;
-        }
-
-        // Create new landmark
-        const result = addLandmarkWithValidation(functionDefinitions, activeFunctionIndex, x, y);
-        
-        if (!result.success) {
-            announce(result.message);
-            if (result.message.includes("Maximum")) {
-                showInfoToast(`Error: ${result.message}`, 3000);
-            }
-            return;
-        }
-
-        // Update function definitions with the new landmark
-        setFunctionDefinitions(result.definitions);
-
-        const shortcutText = result.shortcut ? `, shortcut: Ctrl+${result.shortcut}` : '';
-        announce(`${result.message}${shortcutText}`);
-        showInfoToast(`Landmark added${result.shortcut ? ` (Ctrl+${result.shortcut})` : ''}`, 2000);
-
-        // Find the newly created landmark and open it in the dialog
-        const updatedLandmarks = getLandmarksN(result.definitions, activeFunctionIndex);
-        const newLandmarkIndex = updatedLandmarks.length - 1;
-        const newLandmark = updatedLandmarks[newLandmarkIndex];
-
-        // Open the new landmark in edit dialog
-        setTimeout(() => {
-            openDialog("edit-landmark", {
-                landmarkData: {
-                    functionIndex: activeFunctionIndex,
-                    landmarkIndex: newLandmarkIndex,
-                    landmark: newLandmark
-                }
-            });
-        }, 100);
     };
 
     useEffect(() => {
@@ -227,7 +109,7 @@ export default function KeyboardHandler() {
                 return;
             }
         
-            pressedKeys.current.add(event.key.toLowerCase());   // Store the pressed key in the set
+            pressedKeys.current.add(event.key.toLowerCase());
             
             // Track Shift key state
             if (event.key === "Shift") {
@@ -235,13 +117,21 @@ export default function KeyboardHandler() {
             }
             
             const activeFunctions = getActiveFunctions(functionDefinitions);
-            const step = event.shiftKey ? 5 : 1; // if shift is pressed, change step size
+            const step = event.shiftKey ? 5 : 1;
 
-            // Handle Ctrl+N for new landmark
+            // Handle shortcut for new landmark using utility function
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey && !event.altKey) {
                 event.preventDefault();
                 event.stopPropagation();
-                addLandmarkAtCursor();
+                
+                addLandmarkAtCursorPosition(
+                    functionDefinitions,
+                    cursorCoords,
+                    setFunctionDefinitions,
+                    announce,
+                    showInfoToast,
+                    openDialog
+                );
                 return;
             }
 
@@ -281,7 +171,7 @@ export default function KeyboardHandler() {
                 }
             }
 
-            // Handle Czech keyboard shortcuts for function switching (1-9 alternatives)
+            // Handle Czech keyboard shortcuts for function switching
             const czechFunctionKeyMap = {
                 '+': 0,  // Czech 1
                 'ě': 1,  // Czech 2
@@ -294,26 +184,23 @@ export default function KeyboardHandler() {
                 'í': 8   // Czech 9
             };
 
-            // Handle Czech keyboard shortcuts with Shift (uppercase variants)
             const czechFunctionKeyMapShift = {
-                '1': 0,  // Czech Shift + 1 (might produce different character)
-                '2': 1,  // Czech Shift + 2
-                '3': 2,  // Czech Shift + 3
-                '4': 3,  // Czech Shift + 4
-                '5': 4,  // Czech Shift + 5
-                '6': 5,  // Czech Shift + 6
-                '7': 6,  // Czech Shift + 7
-                '8': 7,  // Czech Shift + 8
-                '9': 8   // Czech Shift + 9
+                '1': 0,
+                '2': 1,
+                '3': 2,
+                '4': 3,
+                '5': 4,
+                '6': 5,
+                '7': 6,
+                '8': 7,
+                '9': 8
             };
             
             let targetIndex;
             
-            // Check for Shift + Czech keys first
             if (event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
                 targetIndex = czechFunctionKeyMapShift[event.key];
             }
-            // Then check for regular Czech keys (without any modifier keys)
             else if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
                 targetIndex = czechFunctionKeyMap[event.key];
             }
@@ -436,17 +323,6 @@ export default function KeyboardHandler() {
                     setPlayFunction(prev => ({ ...prev, source: "play", active: !prev.active }));
                     event.preventDefault();
                     event.stopPropagation();
-                case "ArrowUp":
-                    // if (event.shiftKey) {
-                    //     setPlayFunction(prev => ({ ...prev, speed: prev.speed + (Math.abs(prev.speed+0.5) >= 10 ? 10 : 1) })); // Increase speed with Ctrl + Up
-                    //     break;
-                    // }
-                    break;
-                case "ArrowDown":
-                    // if (event.shiftKey) {
-                    //     setPlayFunction(prev => ({ ...prev, speed: prev.speed - (Math.abs(prev.speed-0.5) >= 10 ? 10 : 1) })); // Decrease speed with Ctrl + Down
-                    //     break;
-                    // }
                     break;
 
                 default:

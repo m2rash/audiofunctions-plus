@@ -3,11 +3,12 @@ import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, Circl
   SwatchBook, Sun, Moon, SunMoon, Contrast, Plus, Edit,
   ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info } from "lucide-react"
 import { useGraphContext } from "../../context/GraphContext";
-import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN, getActiveFunctions, getLandmarksN, addLandmarkWithValidation, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN, getActiveFunctions, getLandmarksN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import { getScreenPosition, jumpToLandmarkWithToast, addLandmarkAtCursorPosition } from "../../utils/landmarkUtils";
 import landmarkEarconManager from "../../utils/landmarkEarcons";
 import { useDialog } from "../../context/DialogContext";
-import { setTheme } from "../../utils/theme"; // Import the theme utility
-import { useZoomBoard } from "./KeyboardHandler"; // Import the zoom utility
+import { setTheme } from "../../utils/theme";
+import { useZoomBoard } from "./KeyboardHandler";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
 
@@ -17,57 +18,23 @@ export const useDynamicKBarActions = () => {
   const { announce } = useAnnouncement();
   const { showInfoToast, showLandmarkToast } = useInfoToast();
 
-  // Function to calculate screen position directly here
-  const getScreenPosition = (graphX, graphY, graphBounds) => {
-    const chartElement = document.getElementById('jxgbox'); // Direct DOM access to chart
-    
-    if (!chartElement) {
-      console.warn('Chart element not found, using fallback position');
-      return { x: 150, y: 150 }; // Fallback position
-    }
-
-    const chartRect = chartElement.getBoundingClientRect();
-    
-    // Debug logging
-    console.log('Chart rect:', chartRect);
-    console.log('Graph coordinates:', { graphX, graphY });
-    console.log('Graph bounds:', graphBounds);
-    
-    // Calculate relative position within the chart
-    const xRange = graphBounds.xMax - graphBounds.xMin;
-    const yRange = graphBounds.yMax - graphBounds.yMin;
-    
-    if (xRange === 0 || yRange === 0) {
-      console.warn('Invalid graph bounds range');
-      return { x: 150, y: 150 };
-    }
-    
-    const relativeX = (graphX - graphBounds.xMin) / xRange;
-    const relativeY = (graphBounds.yMax - graphY) / yRange; // Invert Y axis
-    
-    // Convert to screen coordinates
-    const screenX = chartRect.left + (relativeX * chartRect.width);
-    const screenY = chartRect.top + (relativeY * chartRect.height);
-    
-    console.log('Screen position calculated:', { x: screenX, y: screenY });
-    
-    return { x: screenX, y: screenY };
+  // Function to jump to landmark using utility
+  const jumpToLandmark = (landmark) => {
+    jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, announce, showLandmarkToast);
   };
 
-  // Function to jump to landmark
-  const jumpToLandmark = (landmark) => {
-    updateCursor(landmark.x);
+  // Function to jump to landmark by shortcut using utility
+  const jumpToLandmarkByShortcut = (shortcut) => {
+    const activeFunctions = getActiveFunctions(functionDefinitions);
+    if (activeFunctions.length === 0) return;
     
-    const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
-                
-    showLandmarkToast(
-        `${landmark.label || 'Landmark'}: x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`,
-        screenPosition,
-        2000
-    );
-
-    // Still announce for screen readers
-    announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
+    const activeFunction = activeFunctions[0];
+    const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
+    
+    const landmark = findLandmarkByShortcut(functionDefinitions, activeFunctionIndex, shortcut);
+    if (landmark) {
+      jumpToLandmark(landmark);
+    }
   };
 
   // Check if in read-only or full-restriction mode
@@ -201,77 +168,16 @@ export const useDynamicKBarActions = () => {
   const activeFunctionIndex = activeFunction ? functionDefinitions.findIndex(f => f.id === activeFunction.id) : -1;
   const landmarks = activeFunction ? getLandmarksN(functionDefinitions, activeFunctionIndex) : [];
 
-  // Function to add landmark at current cursor position
+  // Function to add landmark at current cursor position using utility
   const addLandmarkAtCursor = () => {
-    if (!activeFunction || !cursorCoords || cursorCoords.length === 0) {
-      announce("No active function or cursor position available");
-      return;
-    }
-
-    const cursorCoord = cursorCoords.find(coord => coord.functionId === activeFunction.id);
-    if (!cursorCoord) {
-      announce("No cursor position for active function");
-      return;
-    }
-
-    const x = parseFloat(cursorCoord.x);
-    const y = parseFloat(cursorCoord.y);
-
-    // Check if landmark already exists at this position (with small tolerance)
-    const currentLandmarks = getLandmarksN(functionDefinitions, activeFunctionIndex);
-    const tolerance = 0.01;
-    const existingLandmarkIndex = currentLandmarks.findIndex(landmark => 
-      Math.abs(landmark.x - x) < tolerance && Math.abs(landmark.y - y) < tolerance
+    addLandmarkAtCursorPosition(
+      functionDefinitions,
+      cursorCoords,
+      setFunctionDefinitions,
+      announce,
+      showInfoToast,
+      openDialog
     );
-
-    if (existingLandmarkIndex !== -1) {
-      // Open existing landmark in dialog instead of showing error
-      const existingLandmark = currentLandmarks[existingLandmarkIndex];
-      announce(`Opening existing landmark at x = ${x.toFixed(2)}, y = ${y.toFixed(2)}`);
-      
-      openDialog("edit-landmark", {
-        landmarkData: {
-          functionIndex: activeFunctionIndex,
-          landmarkIndex: existingLandmarkIndex,
-          landmark: existingLandmark
-        }
-      });
-      return;
-    }
-
-    // Use the validation function from graphObjectOperations
-    const result = addLandmarkWithValidation(functionDefinitions, activeFunctionIndex, x, y);
-    
-    if (!result.success) {
-      announce(result.message);
-      if (result.message.includes("Maximum")) {
-        showInfoToast(`Error: ${result.message}`, 3000);
-      }
-      return;
-    }
-
-    // Update function definitions with the new landmark
-    setFunctionDefinitions(result.definitions);
-
-    const shortcutText = result.shortcut ? `, shortcut: Ctrl+${result.shortcut}` : '';
-    announce(`${result.message}${shortcutText}`);
-    showInfoToast(`Landmark added${result.shortcut ? ` (Ctrl+${result.shortcut})` : ''}`, 2000);
-
-    // Find the newly created landmark and open it in the dialog
-    const updatedLandmarks = getLandmarksN(result.definitions, activeFunctionIndex);
-    const newLandmarkIndex = updatedLandmarks.length - 1; // New landmark is the last one
-    const newLandmark = updatedLandmarks[newLandmarkIndex];
-
-    // Open the new landmark in edit dialog
-    setTimeout(() => {
-      openDialog("edit-landmark", {
-        landmarkData: {
-          functionIndex: activeFunctionIndex,
-          landmarkIndex: newLandmarkIndex,
-          landmark: newLandmark
-        }
-      });
-    }, 100); // Small delay to ensure state is updated
   };
 
   useRegisterActions([
@@ -282,7 +188,6 @@ export const useDynamicKBarActions = () => {
       name: "Quick Options",
       shortcut: ["q"],
       keywords: "quick, quickoptions",
-      // perform: () => {},
       icon: <List className="size-5 shrink-0 opacity-70" />,
     },
 

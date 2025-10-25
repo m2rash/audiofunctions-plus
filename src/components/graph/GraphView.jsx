@@ -30,9 +30,12 @@ function createEndPoints(func,board){
       console.error("createEndPoints: function type not recognized");
       return [];
     }
-    const  txtraw = functionDefPiecewiseToString(func.functionDef);
+    const txtraw = functionDefPiecewiseToString(func.functionDef);
     console.log("Raw piecewise function string:", txtraw);
-    const parsed = transformMathConstants(math.parse(txtraw.replace("**","^").replace("nthroot","nthRoot").replace("ln","log"))); 
+    const txt2mathjs = txtraw.replaceAll("**","^").replaceAll("nthroot","nthRoot").replaceAll("ln","log");
+    console.log("Transformed piecewise function string for mathjs:", txt2mathjs);
+    const parsed = transformMathConstants(math.parse(txt2mathjs)); 
+    console.log("Parsed piecewise function:", parsed.toString());
     const types_to_be_deleted= ["isolated", "unequal"]; // we remove these types of points of interest, since they will be redefined
     const filteredPoints = func.pointOfInterests.filter(
       point => !types_to_be_deleted.includes(point.type)

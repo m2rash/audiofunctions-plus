@@ -13,7 +13,7 @@ import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
 
 export const useDynamicKBarActions = () => {
-  const { isAudioEnabled, setIsAudioEnabled, cursorCoords, functionDefinitions, setFunctionDefinitions, setPlayFunction, graphSettings, graphBounds, setGraphBounds, updateCursor, focusChart } = useGraphContext();
+  const { isAudioEnabled, setIsAudioEnabled, cursorCoords, functionDefinitions, setFunctionDefinitions, setPlayFunction, graphSettings, graphBounds, updateCursor, focusChart } = useGraphContext();
   const { openDialog } = useDialog();
   const { announce } = useAnnouncement();
   const { showInfoToast, showLandmarkToast } = useInfoToast();
@@ -298,8 +298,8 @@ export const useDynamicKBarActions = () => {
     },
     icon: <Plus className="size-5 shrink-0 opacity-70" />,
   },
-
-  // Individual landmark actions
+  
+  // Individual landmark actions (jump/navigate)
   ...landmarks.map((landmark, index) => ({
     id: `jump-to-landmark-${index}`,
     name: `${landmark.label || `Landmark ${index + 1}`} (${landmark.x.toFixed(2)}, ${landmark.y.toFixed(2)})`,
@@ -312,13 +312,22 @@ export const useDynamicKBarActions = () => {
     },
     icon: <MapPin className="size-5 shrink-0 opacity-70" />,
   })),
+  
+  // Edit landmarks parent
+  {
+    id: "edit-landmarks",
+    name: "Edit Landmarks",
+    keywords: "edit, modify, change, landmarks, manage, update, configure",
+    parent: "landmarks",
+    icon: <Edit className="size-5 shrink-0 opacity-70" />,
+  },
 
-  // Edit landmark actions
+  // Edit landmark actions (now under edit-landmarks parent)
   ...landmarks.map((landmark, index) => ({
     id: `edit-landmark-${index}`,
     name: `Edit ${landmark.label || `Landmark ${index + 1}`}`,
     keywords: `edit, modify, change, landmark, ${landmark.label || ''}`,
-    parent: "landmarks",
+    parent: "edit-landmarks",
     perform: () => {
       openDialog("edit-landmark", {
         landmarkData: {
@@ -331,12 +340,20 @@ export const useDynamicKBarActions = () => {
     icon: <Edit className="size-5 shrink-0 opacity-70" />,
   })),
 
-  // Function selection section
+  // // Function selection section
+  // {
+  //   id: "select-function",
+  //   name: "Switch active Function",
+  //   shortcut: [""],
+  //   keywords: "function, select, show, display, choose, pick, activate, change, switch, browse",
+  //   icon: <SquareActivity className="size-5 shrink-0 opacity-70" />,
+  // },
+
+  // Function Options
   {
-    id: "select-function",
-    name: "Switch active Function",
-    shortcut: [""],
-    keywords: "function, select, show, display, choose, pick, activate, change, switch, browse",
+    id: "function-options",
+    name: "Functions",
+    keywords: "function, options, settings, configure, manage, edit, change",
     icon: <SquareActivity className="size-5 shrink-0 opacity-70" />,
   },
 
@@ -349,7 +366,7 @@ export const useDynamicKBarActions = () => {
       name: `Show ${functionName}`,
       shortcut: index < 9 ? [(index + 1).toString()] : undefined,
       keywords: `function, show, display, activate, select, switch, ${functionName}, graph, plot`,
-      parent: "select-function",
+      parent: "function-options",
       perform: () => {showOnlyFunction(index); setTimeout(() => focusChart(), 100);},
       icon: <Eye className="size-5 shrink-0 opacity-70" />,
     };
@@ -361,6 +378,7 @@ export const useDynamicKBarActions = () => {
       id: "change-function",
       name: isReadOnly ? "View Functions" : "Edit Functions",
       shortcut: ["f"],
+      parent: "function-options",
       keywords: isReadOnly 
         ? "function, view, read, inspect, examine, look, display, show, formula, equation, math"
         : "function, change, edit, modify, create, add, insert, remove, delete, formula, equation, math, input, type, write",
@@ -520,6 +538,7 @@ export const useDynamicKBarActions = () => {
   {
     id: "test-landmark-earcons",
     name: "Test Landmark Earcons",
+    parent: "landmarks",
     keywords: "test, landmark, earcon, sound, audio, development, debug, circle, triangle, square",
     perform: () => {
       landmarkEarconManager.testAllEarcons();

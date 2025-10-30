@@ -4,6 +4,7 @@ import CommandBar from './components/ui/CommandPalette';
 import GraphView from './components/graph/GraphView';
 import React, { useEffect, useRef } from "react";
 import { GraphContextProvider } from "./context/GraphContext";
+import { useGraphContext } from './context/GraphContext';
 import GraphSonification from './components/graph/GraphSonification';
 import { DialogProvider, useDialog } from './context/DialogContext';
 import Header from './components/ui/Header';
@@ -54,6 +55,21 @@ const AppContent = () => {
 
 const KBarWrapper = () => {
   // needed to wrap actions into GraphContextProvider
+  const { setIsAudioEnabled, focusChart } = useGraphContext();
+
+  const handleSkipActivate = (e) => {
+    // Enable audio and focus the chart just like pressing "P"
+    if (e) e.preventDefault();
+    setIsAudioEnabled((prev) => (prev ? prev : true));
+    // Ensure focus after enabling audio
+    setTimeout(() => {
+      // Update hash to keep expected behavior of the skip link
+      if (window.location.hash !== '#chart') {
+        window.location.hash = 'chart';
+      }
+      focusChart();
+    }, 0);
+  };
 
   return (
     <KBarProvider>
@@ -79,8 +95,14 @@ const KBarWrapper = () => {
         onBlur={(e) => {
           e.target.style.top = '-40px';
         }}
+        onClick={handleSkipActivate}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleSkipActivate(e);
+          }
+        }}
       >
-        Skip to chart. Enable chart keyboard interaction.
+        Skip to chart. Enable audio chart keyboard interaction.
       </a>
       
       <PaletteActions />

@@ -1,4 +1,5 @@
 import { getActiveFunctions, getLandmarksN, addLandmarkWithValidation } from './graphObjectOperations';
+import landmarkEarconManager from './landmarkEarcons';
 
 /**
  * Calculate screen position from graph coordinates
@@ -59,6 +60,13 @@ export function jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, ann
   
   const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
   showLandmarkToastAtPosition(landmark, screenPosition, 2000, showLandmarkToast);
+  
+  // Play landmark earcon immediately when jumping via shortcut
+  // This ensures the earcon plays even if cursor was already at the landmark
+  const shape = landmark.shape || landmark.appearance || "circle";
+  landmarkEarconManager.playLandmarkEarcon(landmark, {
+    pan: (landmark.x - graphBounds.xMin) / (graphBounds.xMax - graphBounds.xMin) * 2 - 1 // -1 to 1
+  });
   
   // Announce for screen readers
   announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);

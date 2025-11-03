@@ -140,7 +140,11 @@ class AudioSampleManager {
       'no_y': 'no_y.mp3',
       'y_axis_intersection': 'y-axis-intersection.wav',
       'deny': 'deny.wav',
-      'notification': 'notification.mp3'
+      'notification': 'notification.mp3',
+      // Landmark earcons
+      'landmark_square': 'landmark_square.mp3',
+      'landmark_triangle': 'landmark_triangle.mp3',
+      'landmark_diamond': 'landmark_diamond.mp3'
     };
     return filenameMap[sampleName];
   }

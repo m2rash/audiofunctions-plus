@@ -873,7 +873,7 @@ const GraphSonification = () => {
           
           if (!lastTriggered || (now - lastTriggered) > 300) { // 300ms cooldown for landmarks
             // Play landmark earcon
-            const shape = landmark.shape || landmark.appearance || "circle";
+            const shape = landmark.shape || landmark.appearance || "diamond";
             landmarkEarconManager.playLandmarkEarcon(landmark, {
               pan: (cursorX - graphBounds.xMin) / (graphBounds.xMax - graphBounds.xMin) * 2 - 1 // -1 to 1
             });

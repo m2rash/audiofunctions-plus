@@ -601,8 +601,8 @@ text.JXGtext {
 /* ------- Landmark Symbols ------- */
 /* -------------------------- */
 
-/* Landmark circle styles */
-.landmark-circle {
+/* Landmark diamond styles */
+.landmark-diamond {
   fill: var(--color-landmark-fill);
   stroke: var(--color-landmark-border);
   stroke-width: 4px;

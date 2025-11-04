@@ -964,7 +964,7 @@ export function addLandmarkWithValidation(functionDefinitions, n, x, y, options 
   const shortcut = getNextAvailableShortcut(currentLandmarks);
   
   // Create landmark with automatic earcon based on shape
-  const shape = options.shape || options.appearance || 'circle';
+  const shape = options.shape || options.appearance || 'diamond';
   const earcon = options.earcon || `landmark_${shape}`;
   
   const newLandmark = createLandmark(x, y, {

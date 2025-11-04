@@ -180,7 +180,7 @@ const GraphView = () => {
 
       landmarks.forEach((landmark, landmarkIndex) => {
         const { x, y, shape, label } = landmark;
-        const landmarkShape = shape || 'circle';
+        const landmarkShape = shape || 'diamond';
         
         try {
           let landmarkObject;
@@ -194,7 +194,7 @@ const GraphView = () => {
           };
 
           switch (landmarkShape) {
-            case 'circle':
+            case 'diamond':
               landmarkObject = board.create('point', [x, y], {
                 ...baseOptions,
                 face: '<>',
@@ -220,7 +220,7 @@ const GraphView = () => {
               break;
               
             default:
-              // Fallback to circle
+              // Fallback to cross
               landmarkObject = board.create('point', [x, y], {
                 ...baseOptions,
                 face: 'x'
@@ -238,7 +238,7 @@ const GraphView = () => {
           // Fallback to simple point
           const fallbackObject = board.create('point', [x, y], {
             ...baseOptions,
-            face: 'circle'
+            face: 'x'
           });
           landmarkObjects.push(fallbackObject);
         }

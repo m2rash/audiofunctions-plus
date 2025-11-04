@@ -539,10 +539,10 @@ export const useDynamicKBarActions = () => {
     id: "test-landmark-earcons",
     name: "Test Landmark Earcons",
     parent: "landmarks",
-    keywords: "test, landmark, earcon, sound, audio, development, debug, circle, triangle, square",
+    keywords: "test, landmark, earcon, sound, audio, development, debug, diamond, triangle, square",
     perform: () => {
       landmarkEarconManager.testAllEarcons();
-      announce("Testing landmark earcons: circle, triangle, square");
+      announce("Testing landmark earcons: diamond, triangle, square");
     },
     icon: <Music className="size-5 shrink-0 opacity-70" />,
     priority: Priority.LOW,

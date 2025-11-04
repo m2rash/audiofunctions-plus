@@ -63,7 +63,7 @@ export function jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, ann
   
   // Play landmark earcon immediately when jumping via shortcut
   // This ensures the earcon plays even if cursor was already at the landmark
-  const shape = landmark.shape || landmark.appearance || "circle";
+  const shape = landmark.shape || landmark.appearance || "diamond";
   landmarkEarconManager.playLandmarkEarcon(landmark, {
     pan: (landmark.x - graphBounds.xMin) / (graphBounds.xMax - graphBounds.xMin) * 2 - 1 // -1 to 1
   });

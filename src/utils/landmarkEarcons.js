@@ -32,7 +32,7 @@ class LandmarkEarconManager {
 
   /**
    * Play earcon for a specific landmark shape
-   * @param {string} shape - The landmark shape ("circle", "triangle", "square")
+   * @param {string} shape - The landmark shape ("diamond", "triangle", "square")
    * @param {Object} options - Optional parameters for customization
    */
   playEarcon(shape, options = {}) {
@@ -50,7 +50,7 @@ class LandmarkEarconManager {
       case "triangle":
         sampleName = "landmark_triangle";
         break;
-      case "circle":
+      case "diamond":
       default:
         // Per request: use diamond sample for circle
         sampleName = "landmark_diamond";
@@ -76,7 +76,7 @@ class LandmarkEarconManager {
   playLandmarkEarcon(landmark, options = {}) {
     if (!landmark) return;
 
-    const shape = landmark.shape || landmark.appearance || "circle";
+    const shape = landmark.shape || landmark.appearance || "diamond";
     this.playEarcon(shape, options);
   }
 
@@ -115,7 +115,7 @@ class LandmarkEarconManager {
     console.log("Testing all landmark earcons...");
     
     // Test each shape with a slight delay
-    setTimeout(() => this.playEarcon("circle"), 0);
+    setTimeout(() => this.playEarcon("diamond"), 0);
     setTimeout(() => this.playEarcon("triangle"), 1000);
     setTimeout(() => this.playEarcon("square"), 2000);
   }

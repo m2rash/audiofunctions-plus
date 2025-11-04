@@ -442,6 +442,22 @@ export default function KeyboardHandler() {
                         setPlayFunction(prev => ({ ...prev, source: "keyboard", active: true, direction: direction }));   // smooth move
                     }
                     break;
+                case "Home":
+                    // Jump cursor to xMin (left edge)
+                    event.preventDefault();
+                    event.stopPropagation();
+                    updateCursor(graphBounds.xMin);
+                    announce(`Jumped to left edge at x = ${graphBounds.xMin.toFixed(2)}`);
+                    break;
+
+                case "End":
+                    // Jump cursor to xMax (right edge)
+                    event.preventDefault();
+                    event.stopPropagation();
+                    updateCursor(graphBounds.xMax);
+                    announce(`Jumped to right edge at x = ${graphBounds.xMax.toFixed(2)}`);
+                    break;
+
                 case " ": // Spacebar plays batch sonification
                     setPlayFunction(prev => ({ ...prev, source: "play", active: !prev.active }));
                     event.preventDefault();

@@ -754,13 +754,18 @@ const GraphView = () => {
   //   return () => wrapper.removeEventListener('keydown', handleKeyDown);
   // }, []);
 
+  // Get the currently active function name for aria-label
+  const activeFunctions = getActiveFunctions(functionDefinitions);
+  const activeFunction = activeFunctions.length > 0 ? activeFunctions[0] : null;
+  const activeFunctionName = activeFunction ? activeFunction.functionName : 'No function';
+  
   return (
     <div 
       ref={wrapperRef}
       id="chart"
       role="application"
       tabIndex={0}
-      aria-label="Interactive graph."
+      aria-label={`Interactive graph. Currently active: ${activeFunctionName}`}
       style={{ 
         outline: 'none', 
         width: "100%", 

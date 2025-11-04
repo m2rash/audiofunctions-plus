@@ -480,7 +480,7 @@ const GraphView = () => {
                 mouseY: mouseY !== null ? mouseY.toFixed(2) : null
               });
             } else {
-              console.warn(`Invalid y value for function ${func.id} at x=${snappedX}: ${y}`);
+              console.warn(`Invalid y value for function ${func.id} at x=${snappedX}: ${y}`); // TODO That happens for "non-functions" -> maybe we should delete the warning?
               // Hide cursor visually but still pass the invalid y value for sonification
               cursor.hide();
               // Position cursor at a point outside the visible area when function is invalid

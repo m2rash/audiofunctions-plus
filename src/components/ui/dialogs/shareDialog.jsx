@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useGraphContext } from "../../../context/GraphContext";
 import ShareLinkDialog from "./ShareLinkDialog";
+import { encodeToImportLink } from '../../../utils/urlUtils';
 
 const ShareDialog = ({ isOpen, onClose }) => {
   const { graphBounds, graphSettings, setGraphSettings, functionDefinitions } = useGraphContext();
@@ -168,7 +169,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
     
     // Convert to JSON string and then to base64
     const jsonString = JSON.stringify(shareData);
-    const base64String = btoa(jsonString);
+    const base64String = encodeToImportLink(shareData);
     
     // Generate the share link
     const baseUrl = window.location.origin + window.location.pathname;

@@ -450,7 +450,7 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
           {/* Control buttons - only show in edit mode */}
           {!isReadOnly && (
           <div className="flex gap-2 flex-shrink-0" role="group" aria-label={`Function ${index + 1} actions`}>
-              <button
+              {/* <button
                 type="button"
                 className="btn-neutral"
                 onClick={handleInstrumentChange}
@@ -460,7 +460,7 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
               >
                 {getInstrumentIcon(instrument)}
                 <span className="sr-only">{instrument}</span>
-              </button>
+              </button> */}
               <button
                 type="button"
                 className="btn-neutral"
@@ -755,7 +755,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
               Add part
             </button>
             
-            <button
+            {/* <button
               type="button"
               className="btn-neutral"
               onClick={handleInstrumentChange}
@@ -765,7 +765,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
             >
               {getInstrumentIcon(instrument)}
               <span className="sr-only">{instrument}</span>
-            </button>
+            </button> */}
             
             <button
               type="button"
@@ -773,7 +773,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
               aria-label={`Delete piecewise function ${index + 1}`}
               onClick={onDelete}
             >
-              <Delete className="w-4 h-4 text-icon" aria-hidden="true" />
+              <Delete className="w-4 text-icon" aria-hidden="true" />
             </button>
           </div>
         )}

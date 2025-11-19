@@ -105,7 +105,7 @@ export const useDynamicKBarActions = () => {
     showInfoToast(`${functionName}`, 1500);
   };
 
-  // Toggle sonification type for active function
+  // Toggle sonification type for active function and apply to all functions
   const toggleSonificationType = () => {
     if (!functionDefinitions || functionDefinitions.length === 0) return;
     
@@ -119,13 +119,17 @@ export const useDynamicKBarActions = () => {
     const newInstrument = currentInstrument === 'guitar' ? 'clarinet' : 'guitar';
     const sonificationType = newInstrument === 'guitar' ? 'discrete' : 'continuous';
     
-    const updatedDefinitions = setFunctionInstrumentN(functionDefinitions, activeIndex, newInstrument);
+    // Apply the new instrument to ALL functions
+    const updatedDefinitions = functionDefinitions.map((func, index) => 
+      setFunctionInstrumentN([func], 0, newInstrument)[0]
+    );
+    
     setFunctionDefinitions(updatedDefinitions);
 
     announce(`Sonification type changed to ${sonificationType}`);
-    showInfoToast(`Sonification: ${sonificationType}`, 1500);
+    showInfoToast(`Sonification type: ${sonificationType}`, 1500);
     
-    console.log(`Sonification type changed to ${sonificationType} (${newInstrument}) for active function`);
+    console.log(`Sonification type changed to ${sonificationType} (${newInstrument}) for all functions`);
   };
 
   // Get current sonification type for active function

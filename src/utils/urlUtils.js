@@ -7,7 +7,19 @@ export function decodeFromImportLink(base64String) {
   if (!base64String) return null;
   
   try {
-    const jsonString = atob(base64String);
+    // Convert URL-safe base64 back to standard base64
+    let decodedString = base64String.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // Add padding if necessary (removed by encodeToImportLink)
+    while (decodedString.length % 4) {
+      decodedString += '=';
+    }
+    
+    // Decode with fallback for environments without atob
+    const jsonString = typeof atob !== 'undefined' 
+      ? atob(decodedString)
+      : Buffer.from(decodedString, 'base64').toString('utf-8');
+
     const data = JSON.parse(jsonString);
     
     // Validate structure
@@ -56,4 +68,35 @@ export function clearHashParameter() {
   const url = new URL(window.location);
   url.hash = '';
   window.history.replaceState({}, '', url);
+}
+
+/**
+ * Encode data to base64 for URL sharing
+ * @param {Object} data - Data object to encode
+ * @returns {string|null} Base64 encoded string or null if error
+ */
+export function encodeToImportLink(data) {
+  try {
+    // Validate data structure before encoding
+    if (!data || typeof data !== 'object') {
+      throw new Error('Data must be an object');
+    }
+
+    console.log('Encoding data to import link:', data);
+    
+    const jsonString = JSON.stringify(data);
+    
+    // Encode with fallback for environments without btoa
+    const base64String = typeof btoa !== 'undefined'
+      ? btoa(jsonString)
+      : Buffer.from(jsonString, 'utf-8').toString('base64');
+    
+    // Ensure URL-safe base64 encoding
+    const base64String_final = base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    console.log('Encoded import link data:', base64String_final);
+    return base64String_final;
+  } catch (error) {
+    console.error('Error encoding data to import link:', error);
+    return null;
+  }
 }

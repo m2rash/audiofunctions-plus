@@ -5,6 +5,7 @@ import { useAnnouncement } from "../../../context/AnnouncementContext";
 import { updateLandmarkWithValidation, getLandmarksN, validateLandmarkCoordinates, removeLandmarkWithValidation } from "../../../utils/graphObjectOperations";
 import { create, all } from 'mathjs';
 import { checkMathSpell, transformMathConstants } from "../../../utils/parse";
+import landmarkEarconManager from "../../../utils/landmarkEarcons";
 
 const config = {};
 const math = create(all, config);
@@ -17,6 +18,8 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   const [inputErrors, setInputErrors] = useState({});
   const landmarkDataBackup = useRef(null);
   const functionDefinitionsBackup = useRef(null); // Add backup for function definitions
+  const appearanceChangedRef = useRef(false); // Track if selection changed to prevent double-playing earcon
+  const appearanceSelectOpenedRef = useRef(false); // Track if select dropdown was actually opened
   
   // Local state for landmark data
   const [localLandmark, setLocalLandmark] = useState({
@@ -79,6 +82,20 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       return 0;
     }
   };
+
+  // Initialize landmark earcon manager when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const initializeEarconManager = async () => {
+        try {
+          await landmarkEarconManager.initialize();
+        } catch (error) {
+          console.warn("Failed to initialize landmark earcon manager:", error);
+        }
+      };
+      initializeEarconManager();
+    }
+  }, [isOpen]);
 
   // Initialize landmark data when dialog opens
   useEffect(() => {
@@ -221,7 +238,49 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     // Automatically set earcon based on shape
     const earcon = `landmark_${value}`;
     console.log(`Landmark shape changed to ${value}, earcon set to ${earcon}`);
+    
+    // Mark that selection changed so blur handler knows not to play again
+    appearanceChangedRef.current = true;
+    
+    // Play earcon preview when shape is selected
+    try {
+      landmarkEarconManager.playEarcon(value);
+    } catch (error) {
+      console.warn("Failed to play landmark earcon preview:", error);
+    }
   };
+
+  // Track when dropdown actually opens (mouse click or keyboard open)
+  const handleAppearanceMouseDown = () => {
+    appearanceSelectOpenedRef.current = true;
+  };
+
+  // Track when dropdown opens via keyboard (Space, Enter, ArrowDown, ArrowUp)
+  const handleAppearanceKeyDown = (e) => {
+    // These keys open the dropdown when the select is focused
+    if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      appearanceSelectOpenedRef.current = true;
+    }
+  };
+
+  // Play earcon when select dropdown collapses (loses focus)
+  const handleAppearanceBlur = () => {
+    // Only play earcon if:
+    // 1. The select was actually opened (not just tabbed through)
+    // 2. Selection didn't change (to avoid double-playing)
+    if (appearanceSelectOpenedRef.current && !appearanceChangedRef.current) {
+      try {
+        landmarkEarconManager.playEarcon(localLandmark.appearance);
+      } catch (error) {
+        console.warn("Failed to play landmark earcon preview on blur:", error);
+      }
+    }
+    
+    // Reset the flags for next interaction
+    appearanceChangedRef.current = false;
+    appearanceSelectOpenedRef.current = false;
+  };
+
 
   // Dialog actions
   const handleAccept = () => {
@@ -532,6 +591,9 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                     id="landmark-appearance"
                     value={localLandmark.appearance}
                     onChange={(e) => handleAppearanceChange(e.target.value)}
+                    onMouseDown={handleAppearanceMouseDown}
+                    onKeyDown={handleAppearanceKeyDown}
+                    onBlur={handleAppearanceBlur}
                     className="grow text-input-inner"
                     aria-label="Landmark appearance"
                     aria-description="Visual and auditive appearance of the landmark"

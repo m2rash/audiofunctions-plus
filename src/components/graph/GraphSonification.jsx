@@ -45,6 +45,7 @@ const GraphSonification = () => {
   const [forceRecreate, setForceRecreate] = useState(false); // State to force recreation of sonification pipeline
   const batchTickCountRef = useRef(0); // Track tick count since batch exploration started
   const batchResetDoneRef = useRef(false); // Track if batch reset has been done
+  const prevActiveFunctionIdsRef = useRef(new Set()); // Track previously active function IDs to detect function switches
 
   // Initialize tick synth
   useEffect(() => {
@@ -266,6 +267,32 @@ const GraphSonification = () => {
     };
   }, [isEditFunctionDialogOpen, isAudioEnabled]);
 
+  // Reset lastPitchClass for functions that just became active (for discrete sonification)
+  useEffect(() => {
+    if (!isAudioEnabled || isEditFunctionDialogOpen) return;
+    
+    // Get currently active function IDs
+    const activeFunctionIds = new Set(
+      functionDefinitions
+        .filter(func => func.isActive)
+        .map(func => func.id)
+    );
+    
+    // Find functions that just became active (were not active before but are now)
+    const newlyActiveFunctionIds = Array.from(activeFunctionIds).filter(
+      functionId => !prevActiveFunctionIdsRef.current.has(functionId)
+    );
+    
+    // Reset lastPitchClass for newly active functions to ensure note plays on function switch
+    newlyActiveFunctionIds.forEach(functionId => {
+      lastPitchClassesRef.current.delete(functionId);
+      console.log(`Function ${functionId} just became active - resetting lastPitchClass for discrete sonification`);
+    });
+    
+    // Update the previous active function IDs (create a new Set to avoid mutation issues)
+    prevActiveFunctionIdsRef.current = new Set(activeFunctionIds);
+  }, [functionDefinitions, isAudioEnabled, isEditFunctionDialogOpen]);
+
   // Clean up tracking refs when functions change
   useEffect(() => {
     // Clean up tracking refs for functions that no longer exist
@@ -304,6 +331,13 @@ const GraphSonification = () => {
     Array.from(yAxisTriggeredRef.current.keys()).forEach(functionId => {
       if (!currentFunctionIds.has(functionId)) {
         yAxisTriggeredRef.current.delete(functionId);
+      }
+    });
+    
+    // Clean up prevActiveFunctionIdsRef
+    Array.from(prevActiveFunctionIdsRef.current).forEach(functionId => {
+      if (!currentFunctionIds.has(functionId)) {
+        prevActiveFunctionIdsRef.current.delete(functionId);
       }
     });
   }, [functionDefinitions]);

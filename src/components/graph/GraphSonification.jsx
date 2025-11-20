@@ -40,7 +40,7 @@ const GraphSonification = () => {
   const isAtBoundaryRef = useRef(false); // Track if cursor is at a boundary
   
   const { getInstrumentByName } = useInstruments();
-  const { isEditFunctionDialogOpen } = useDialog();
+  const { isEditFunctionDialogOpen, isEditLandmarkDialogOpen } = useDialog();
   const instrumentsRef = useRef(new Map()); // Map to store instrument references
   const channelsRef = useRef(new Map()); // Map to store channel references
   const lastPitchClassesRef = useRef(new Map()); // Map to store last pitch class for discrete instruments
@@ -250,9 +250,9 @@ const GraphSonification = () => {
   useEffect(() => {
     let timeoutId = null;
     
-    if (!isEditFunctionDialogOpen && isAudioEnabled) {
+    if (!isEditFunctionDialogOpen && !isEditLandmarkDialogOpen && isAudioEnabled) {
       // When edit dialog closes, force recreation of the entire sonification pipeline
-      console.log("Sonification resumed: Edit function dialog closed - forcing pipeline recreation");
+      console.log("Sonification resumed: Edit dialog closed - forcing pipeline recreation");
       
       // Stop all current tones and clear references immediately
       stopAllTones();
@@ -269,7 +269,7 @@ const GraphSonification = () => {
         clearTimeout(timeoutId);
       }
     };
-  }, [isEditFunctionDialogOpen, isAudioEnabled]);
+  }, [isEditFunctionDialogOpen, isEditLandmarkDialogOpen, isAudioEnabled]);
 
   // Clean up tracking refs when functions change
   useEffect(() => {
@@ -471,13 +471,13 @@ const GraphSonification = () => {
   };
 
   // Add a visual indicator when sonification is paused during editing
-  if (isEditFunctionDialogOpen && isAudioEnabled) {
-    console.log("Sonification paused: Edit function dialog is open");
+  if ((isEditFunctionDialogOpen || isEditLandmarkDialogOpen) && isAudioEnabled) {
+    console.log("Sonification paused: Edit dialog is open");
   }
 
   // Main effect for processing cursor coordinates and triggering sonification
   useEffect(() => {
-    if (!isAudioEnabled || isEditFunctionDialogOpen || !cursorCoords) {
+    if (!isAudioEnabled || isEditFunctionDialogOpen || isEditLandmarkDialogOpen || !cursorCoords) {
       stopAllTones();
       stopPinkNoise();
       return;
@@ -664,7 +664,7 @@ const GraphSonification = () => {
         stopTone(functionId);
       }
     });
-  }, [cursorCoords, isAudioEnabled, isEditFunctionDialogOpen, functionDefinitions, graphBounds, stepSize]);
+  }, [cursorCoords, isAudioEnabled, isEditFunctionDialogOpen, isEditLandmarkDialogOpen, functionDefinitions, graphBounds, stepSize]);
 
   // Event detection functions
   const checkChartBoundaryEvents = async (functionId, coords) => {
@@ -800,6 +800,11 @@ const GraphSonification = () => {
 
   // Check for landmark intersections and play appropriate earcons
   const checkLandmarkIntersections = (cursorCoords) => {
+    // Don't check for landmark intersections if edit-landmark dialog is open
+    if (isEditLandmarkDialogOpen) {
+      return;
+    }
+    
     if (!cursorCoords || cursorCoords.length === 0) return;
 
     // Get active functions
@@ -867,6 +872,11 @@ const GraphSonification = () => {
         }
         
         if (shouldTriggerEarcon) {
+          // Don't play earcon if edit-landmark dialog is open
+          if (isEditLandmarkDialogOpen) {
+            return;
+          }
+          
           // Check if we haven't recently triggered this landmark to avoid spam
           const lastTriggered = boundaryTriggeredRef.current.get(landmarkKey);
           const now = Date.now();

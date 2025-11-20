@@ -250,6 +250,15 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     }
   };
 
+  // Play earcon when select gets keyboard focus
+  const handleAppearanceFocus = () => {
+    try {
+      landmarkEarconManager.playEarcon(localLandmark.appearance);
+    } catch (error) {
+      console.warn("Failed to play landmark earcon preview on focus:", error);
+    }
+  };
+
   // Track when dropdown actually opens (mouse click or keyboard open)
   const handleAppearanceMouseDown = () => {
     appearanceSelectOpenedRef.current = true;
@@ -583,7 +592,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                 <div>
                   <h3 className="text-sm font-semibold text-titles mb-1">Appearance</h3>
                   <p className="text-xs text-descriptions">
-                    Choose how the landmark appears on the graph
+                    Choose how the landmark appears on the graph. Try different appearances to have a preview of how they sound.
                   </p>
                 </div>
                 <div className="text-input-outer pr-1.5 min-w-32">
@@ -591,6 +600,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                     id="landmark-appearance"
                     value={localLandmark.appearance}
                     onChange={(e) => handleAppearanceChange(e.target.value)}
+                    onFocus={handleAppearanceFocus}
                     onMouseDown={handleAppearanceMouseDown}
                     onKeyDown={handleAppearanceKeyDown}
                     onBlur={handleAppearanceBlur}

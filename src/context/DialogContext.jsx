@@ -24,9 +24,11 @@ export function DialogProvider({ children }) {
 
   // Check if edit function dialog is open
   const isEditFunctionDialogOpen = dialog.type === "edit-function";
+  // Check if edit landmark dialog is open
+  const isEditLandmarkDialogOpen = dialog.type === "edit-landmark";
 
   return (
-    <DialogContext.Provider value={{ openDialog, closeDialog, isEditFunctionDialogOpen }}>
+    <DialogContext.Provider value={{ openDialog, closeDialog, isEditFunctionDialogOpen, isEditLandmarkDialogOpen }}>
       {children}
 
       <EditFunctionDialog

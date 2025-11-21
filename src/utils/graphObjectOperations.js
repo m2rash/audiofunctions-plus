@@ -950,6 +950,12 @@ export function addLandmarkWithValidation(functionDefinitions, n, x, y, options 
     return { success: false, message: "Maximum of 10 landmarks per function reached" };
   }
 
+  // Validate coordinates
+  const coordValidation = validateLandmarkCoordinates(x, y);
+  if (!coordValidation.valid) {
+    return { success: false, message: coordValidation.message };
+  }
+
   // Check for existing landmark at position (with tolerance)
   const tolerance = 0.01;
   const existingLandmark = currentLandmarks.find(landmark => 
@@ -962,13 +968,16 @@ export function addLandmarkWithValidation(functionDefinitions, n, x, y, options 
 
   // Assign next available shortcut
   const shortcut = getNextAvailableShortcut(currentLandmarks);
+
+  // Get next available landmark number for proper naming
+  const landmarkNumber = getNextAvailableLandmarkNumber(currentLandmarks);
   
   // Create landmark with automatic earcon based on shape
-  const shape = options.shape || options.appearance || 'diamond';
+  const shape = options.shape || options.appearance || 'triangle';
   const earcon = options.earcon || `landmark_${shape}`;
   
   const newLandmark = createLandmark(x, y, {
-    label: options.label || `Landmark ${currentLandmarks.length + 1}`,
+    label: options.label || `Landmark ${landmarkNumber}`,
     shortcut: shortcut,
     earcon: earcon,
     shape: shape,
@@ -1006,6 +1015,34 @@ export function getNextAvailableShortcut(landmarks) {
   }
   
   return null; // All shortcuts used
+}
+
+/**
+ * Get next available landmark number for naming
+ * @param {Array} landmarks - Current landmarks array
+ * @returns {number} Next available number
+ */
+export function getNextAvailableLandmarkNumber(landmarks) {
+  if (!landmarks || landmarks.length === 0) return 1;
+  
+  // Extract numbers from existing landmark labels
+  const usedNumbers = new Set();
+  landmarks.forEach(landmark => {
+    if (landmark.label) {
+      const match = landmark.label.match(/^Landmark (\d+)$/);
+      if (match) {
+        usedNumbers.add(parseInt(match[1]));
+      }
+    }
+  });
+  
+  // Find the smallest unused number starting from 1
+  let number = 1;
+  while (usedNumbers.has(number)) {
+    number++;
+  }
+  
+  return number;
 }
 
 /**

@@ -51,9 +51,12 @@ class LandmarkEarconManager {
         sampleName = "landmark_triangle";
         break;
       case "diamond":
-      default:
-        // Per request: use diamond sample for circle
         sampleName = "landmark_diamond";
+        break;
+      case "triangle":
+      default:
+        // Changed: use triangle sample as default instead of diamond
+        sampleName = "landmark_triangle";
         break;
     }
 
@@ -76,7 +79,7 @@ class LandmarkEarconManager {
   playLandmarkEarcon(landmark, options = {}) {
     if (!landmark) return;
 
-    const shape = landmark.shape || landmark.appearance || "diamond";
+    const shape = landmark.shape || landmark.appearance || "triangle";
     this.playEarcon(shape, options);
   }
 

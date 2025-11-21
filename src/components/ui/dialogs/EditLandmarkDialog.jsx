@@ -26,7 +26,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     label: '',
     x: 0,
     y: 0,
-    appearance: 'diamond'
+    appearance: 'triangle'
   });
   
   // Check if there are any errors that prevent saving
@@ -116,7 +116,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
         label: landmark.label || '',
         x: landmark.x,
         y: landmark.y,
-        appearance: landmark.shape || 'diamond'
+        appearance: landmark.shape || 'triangle' 
       });
       
       setInputErrors({});
@@ -608,9 +608,9 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                     aria-label="Landmark appearance"
                     aria-description="Visual and auditive appearance of the landmark"
                   >
-                    <option value="diamond" className="bg-background text-txt">Diamond</option>
                     <option value="triangle" className="bg-background text-txt">Triangle</option>
                     <option value="square" className="bg-background text-txt">Square</option>
+                    <option value="diamond" className="bg-background text-txt">Diamond</option>
                   </select>
                 </div>
               </div>

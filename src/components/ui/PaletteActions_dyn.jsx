@@ -13,7 +13,7 @@ import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
 
 export const useDynamicKBarActions = () => {
-  const { isAudioEnabled, setIsAudioEnabled, cursorCoords, functionDefinitions, setFunctionDefinitions, setPlayFunction, graphSettings, graphBounds, updateCursor, focusChart } = useGraphContext();
+  const { isAudioEnabled, setIsAudioEnabled, cursorCoords, functionDefinitions, setFunctionDefinitions, setPlayFunction, graphSettings, graphBounds, setGraphBounds, updateCursor, focusChart } = useGraphContext();
   const { openDialog } = useDialog();
   const { announce } = useAnnouncement();
   const { showInfoToast, showLandmarkToast } = useInfoToast();
@@ -286,6 +286,50 @@ export const useDynamicKBarActions = () => {
     icon: <MapPin className="size-5 shrink-0 opacity-70" />,
   },
 
+  
+  // Individual landmark actions (jump/navigate)
+  ...landmarks.map((landmark, index) => ({
+    id: `jump-to-landmark-${index}`,
+    name: `${landmark.label || `Landmark ${index + 1}`} (${landmark.x.toFixed(2)}, ${landmark.y.toFixed(2)})`,
+    shortcut: landmark.shortcut ? [`ctrl+${landmark.shortcut}`] : undefined,
+    keywords: `landmark, jump, goto, navigate, ${landmark.label || ''}, ${landmark.shortcut ? `l${landmark.shortcut}` : ''}`,
+    parent: "landmarks",
+    priority: Priority.HIGH,
+    perform: () => {
+      jumpToLandmark(landmark);
+      setTimeout(() => focusChart(), 100);
+    },
+    icon: <MapPin className="size-5 shrink-0 opacity-70" />,
+  })),
+  
+  // Edit landmarks parent - only show if there are landmarks
+  ...(landmarks.length > 0 ? [{
+    id: "edit-landmarks",
+    name: "Edit Landmarks",
+    keywords: "edit, modify, change, landmarks, manage, update, configure",
+    parent: "landmarks",
+    icon: <Edit className="size-5 shrink-0 opacity-70" />,
+  }] : []),
+  
+  // Edit landmark actions
+  ...landmarks.map((landmark, index) => ({
+    id: `edit-landmark-${index}`,
+    name: `Edit ${landmark.label || `Landmark ${index + 1}`}`,
+    keywords: `edit, modify, change, landmark, ${landmark.label || ''}, ${landmark.shortcut ? `e${landmark.shortcut}` : ''}`,
+    parent: "edit-landmarks",
+    priority: Priority.LOW,
+    perform: () => {
+      openDialog("edit-landmark", {
+        landmarkData: {
+          functionIndex: activeFunctionIndex,
+          landmarkIndex: index,
+          landmark: landmark
+        }
+      });
+    },
+    icon: <Edit className="size-5 shrink-0 opacity-70" />,
+  })),
+
   {
     id: "add-landmark",
     name: "Add Landmark at Cursor",
@@ -298,47 +342,6 @@ export const useDynamicKBarActions = () => {
     },
     icon: <Plus className="size-5 shrink-0 opacity-70" />,
   },
-  
-  // Individual landmark actions (jump/navigate)
-  ...landmarks.map((landmark, index) => ({
-    id: `jump-to-landmark-${index}`,
-    name: `${landmark.label || `Landmark ${index + 1}`} (${landmark.x.toFixed(2)}, ${landmark.y.toFixed(2)})`,
-    shortcut: landmark.shortcut ? [`ctrl+${landmark.shortcut}`] : undefined,
-    keywords: `landmark, jump, goto, navigate, ${landmark.label || ''}`,
-    parent: "landmarks",
-    perform: () => {
-      jumpToLandmark(landmark);
-      setTimeout(() => focusChart(), 100);
-    },
-    icon: <MapPin className="size-5 shrink-0 opacity-70" />,
-  })),
-  
-  // Edit landmarks parent
-  {
-    id: "edit-landmarks",
-    name: "Edit Landmarks",
-    keywords: "edit, modify, change, landmarks, manage, update, configure",
-    parent: "landmarks",
-    icon: <Edit className="size-5 shrink-0 opacity-70" />,
-  },
-
-  // Edit landmark actions (now under edit-landmarks parent)
-  ...landmarks.map((landmark, index) => ({
-    id: `edit-landmark-${index}`,
-    name: `Edit ${landmark.label || `Landmark ${index + 1}`}`,
-    keywords: `edit, modify, change, landmark, ${landmark.label || ''}`,
-    parent: "edit-landmarks",
-    perform: () => {
-      openDialog("edit-landmark", {
-        landmarkData: {
-          functionIndex: activeFunctionIndex,
-          landmarkIndex: index,
-          landmark: landmark
-        }
-      });
-    },
-    icon: <Edit className="size-5 shrink-0 opacity-70" />,
-  })),
 
   // // Function selection section
   // {
@@ -365,8 +368,9 @@ export const useDynamicKBarActions = () => {
       id: `show-function-${func.id}`,
       name: `Show ${functionName}`,
       shortcut: index < 9 ? [(index + 1).toString()] : undefined,
-      keywords: `function, show, display, activate, select, switch, ${functionName}, graph, plot`,
+      keywords: `function, show, display, activate, select, switch, ${functionName}, graph, plot, f${index + 1}`,
       parent: "function-options",
+      priority: Priority.HIGH,
       perform: () => {showOnlyFunction(index); setTimeout(() => focusChart(), 100);},
       icon: <Eye className="size-5 shrink-0 opacity-70" />,
     };
@@ -379,6 +383,7 @@ export const useDynamicKBarActions = () => {
       name: isReadOnly ? "View Functions" : "Edit Functions",
       shortcut: ["f"],
       parent: "function-options",
+      priority: Priority.HIGH,
       keywords: isReadOnly 
         ? "function, view, read, inspect, examine, look, display, show, formula, equation, math"
         : "function, change, edit, modify, create, add, insert, remove, delete, formula, equation, math, input, type, write",
@@ -534,19 +539,6 @@ export const useDynamicKBarActions = () => {
     priority: Priority.LOW,
   },
 
-  // Test landmark earcons (development only)
-  {
-    id: "test-landmark-earcons",
-    name: "Test Landmark Earcons",
-    parent: "landmarks",
-    keywords: "test, landmark, earcon, sound, audio, development, debug, diamond, triangle, square",
-    perform: () => {
-      landmarkEarconManager.testAllEarcons();
-      announce("Testing landmark earcons: diamond, triangle, square");
-    },
-    icon: <Music className="size-5 shrink-0 opacity-70" />,
-    priority: Priority.LOW,
-  },
 
 ], [isAudioEnabled, cursorCoords, functionDefinitions, isReadOnly, focusChart, landmarks, activeFunction, activeFunctionIndex]);
 

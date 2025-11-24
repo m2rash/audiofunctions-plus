@@ -924,3 +924,266 @@ export function reorderFunctions(functionDefinitions, fromIndex, toIndex) {
   
   return newArray;
 }
+
+// =============================
+// Advanced Landmark Management
+// =============================
+
+/**
+ * Add a landmark to a function with validation and shortcut assignment
+ * @param {Array} functionDefinitions - Array of function definitions
+ * @param {number} n - Function index (0-based)
+ * @param {number} x - X coordinate
+ * @param {number} y - Y coordinate
+ * @param {Object} options - Optional properties (label, earcon, etc.)
+ * @returns {Object} Result object with { success: boolean, message: string, definitions?: Array, shortcut?: string }
+ */
+export function addLandmarkWithValidation(functionDefinitions, n, x, y, options = {}) {
+  if (!functionDefinitions || n < 0 || n >= functionDefinitions.length) {
+    return { success: false, message: "Invalid function index" };
+  }
+
+  const currentLandmarks = getLandmarksN(functionDefinitions, n);
+  
+  // Check maximum limit
+  if (currentLandmarks.length >= 10) {
+    return { success: false, message: "Maximum of 10 landmarks per function reached" };
+  }
+
+  // Validate coordinates
+  const coordValidation = validateLandmarkCoordinates(x, y);
+  if (!coordValidation.valid) {
+    return { success: false, message: coordValidation.message };
+  }
+
+  // Check for existing landmark at position (with tolerance)
+  const tolerance = 0.01;
+  const existingLandmark = currentLandmarks.find(landmark => 
+    Math.abs(landmark.x - x) < tolerance && Math.abs(landmark.y - y) < tolerance
+  );
+
+  if (existingLandmark) {
+    return { success: false, message: `Landmark already exists at position x=${x.toFixed(2)}, y=${y.toFixed(2)}` };
+  }
+
+  // Assign next available shortcut
+  const shortcut = getNextAvailableShortcut(currentLandmarks);
+
+  // Get next available landmark number for proper naming
+  const landmarkNumber = getNextAvailableLandmarkNumber(currentLandmarks);
+  
+  // Create landmark with automatic earcon based on shape
+  const shape = options.shape || options.appearance || 'triangle';
+  const earcon = options.earcon || `landmark_${shape}`;
+  
+  const newLandmark = createLandmark(x, y, {
+    label: options.label || `Landmark ${landmarkNumber}`,
+    shortcut: shortcut,
+    earcon: earcon,
+    shape: shape,
+    ...options
+  });
+
+  const updatedDefinitions = addLandmarkN(functionDefinitions, n, newLandmark);
+  
+  return { 
+    success: true, 
+    message: `Landmark added at x=${x.toFixed(2)}, y=${y.toFixed(2)}`, 
+    definitions: updatedDefinitions,
+    shortcut: shortcut
+  };
+}
+
+/**
+ * Get next available shortcut for landmarks (1-9, then 0)
+ * @param {Array} landmarks - Current landmarks array
+ * @returns {string|null} Next available shortcut or null if all are used
+ */
+export function getNextAvailableShortcut(landmarks) {
+  const usedShortcuts = new Set(landmarks.map(l => l.shortcut));
+  
+  // Check 1-9 first
+  for (let i = 1; i <= 9; i++) {
+    if (!usedShortcuts.has(i.toString())) {
+      return i.toString();
+    }
+  }
+  
+  // Check 0
+  if (!usedShortcuts.has('0')) {
+    return '0';
+  }
+  
+  return null; // All shortcuts used
+}
+
+/**
+ * Get next available landmark number for naming
+ * @param {Array} landmarks - Current landmarks array
+ * @returns {number} Next available number
+ */
+export function getNextAvailableLandmarkNumber(landmarks) {
+  if (!landmarks || landmarks.length === 0) return 1;
+  
+  // Extract numbers from existing landmark labels
+  const usedNumbers = new Set();
+  landmarks.forEach(landmark => {
+    if (landmark.label) {
+      const match = landmark.label.match(/^Landmark (\d+)$/);
+      if (match) {
+        usedNumbers.add(parseInt(match[1]));
+      }
+    }
+  });
+  
+  // Find the smallest unused number starting from 1
+  let number = 1;
+  while (usedNumbers.has(number)) {
+    number++;
+  }
+  
+  return number;
+}
+
+/**
+ * Remove a landmark from a function with validation
+ * @param {Array} functionDefinitions - Array of function definitions
+ * @param {number} n - Function index (0-based)
+ * @param {number} landmarkIndex - Index of landmark to remove
+ * @returns {Object} Result object with { success: boolean, message: string, definitions?: Array }
+ */
+export function removeLandmarkWithValidation(functionDefinitions, n, landmarkIndex) {
+  if (!functionDefinitions || n < 0 || n >= functionDefinitions.length) {
+    return { success: false, message: "Invalid function index" };
+  }
+
+  const func = functionDefinitions[n];
+  if (!func.landmarks || landmarkIndex < 0 || landmarkIndex >= func.landmarks.length) {
+    return { success: false, message: "Invalid landmark index" };
+  }
+
+  const landmark = func.landmarks[landmarkIndex];
+  const updatedDefinitions = removeLandmarkN(functionDefinitions, n, landmarkIndex);
+  
+  return { 
+    success: true, 
+    message: `Landmark "${landmark.label || 'Unnamed'}" removed`, 
+    definitions: updatedDefinitions 
+  };
+}
+
+/**
+ * Update a landmark with validation
+ * @param {Array} functionDefinitions - Array of function definitions
+ * @param {number} n - Function index (0-based)
+ * @param {number} landmarkIndex - Index of landmark to update
+ * @param {Object} updates - Updates to apply
+ * @returns {Object} Result object with { success: boolean, message: string, definitions?: Array }
+ */
+export function updateLandmarkWithValidation(functionDefinitions, n, landmarkIndex, updates) {
+  if (!functionDefinitions || n < 0 || n >= functionDefinitions.length) {
+    return { success: false, message: "Invalid function index" };
+  }
+
+  const func = functionDefinitions[n];
+  if (!func.landmarks || landmarkIndex < 0 || landmarkIndex >= func.landmarks.length) {
+    return { success: false, message: "Invalid landmark index" };
+  }
+
+  // If updating position, check for conflicts
+  if (updates.x !== undefined || updates.y !== undefined) {
+    const landmark = func.landmarks[landmarkIndex];
+    const newX = updates.x !== undefined ? updates.x : landmark.x;
+    const newY = updates.y !== undefined ? updates.y : landmark.y;
+    
+    const tolerance = 0.01;
+    const conflictingLandmark = func.landmarks.find((l, index) => 
+      index !== landmarkIndex && 
+      Math.abs(l.x - newX) < tolerance && 
+      Math.abs(l.y - newY) < tolerance
+    );
+
+    if (conflictingLandmark) {
+      return { success: false, message: `Another landmark already exists at position x=${newX.toFixed(2)}, y=${newY.toFixed(2)}` };
+    }
+  }
+
+  // If updating shortcut, check for conflicts
+  if (updates.shortcut !== undefined) {
+    const conflictingLandmark = func.landmarks.find((l, index) => 
+      index !== landmarkIndex && l.shortcut === updates.shortcut
+    );
+
+    if (conflictingLandmark) {
+      return { success: false, message: `Shortcut "${updates.shortcut}" is already in use` };
+    }
+  }
+
+  const updatedDefinitions = updateLandmarkN(functionDefinitions, n, landmarkIndex, updates);
+  
+  return { 
+    success: true, 
+    message: `Landmark updated`, 
+    definitions: updatedDefinitions 
+  };
+}
+
+/**
+ * Find landmark by shortcut in a specific function
+ * @param {Array} functionDefinitions - Array of function definitions
+ * @param {number} n - Function index (0-based)
+ * @param {string} shortcut - Shortcut to search for
+ * @returns {Object|null} Landmark object or null if not found
+ */
+export function findLandmarkByShortcut(functionDefinitions, n, shortcut) {
+  const landmarks = getLandmarksN(functionDefinitions, n);
+  return landmarks.find(l => l.shortcut === shortcut) || null;
+}
+
+/**
+ * Get all landmarks with their function information
+ * @param {Array} functionDefinitions - Array of function definitions
+ * @returns {Array} Array of objects with { functionIndex, functionName, landmark }
+ */
+export function getAllLandmarksWithFunctionInfo(functionDefinitions) {
+  if (!functionDefinitions) return [];
+  
+  const result = [];
+  functionDefinitions.forEach((func, index) => {
+    const landmarks = getLandmarksN(functionDefinitions, index);
+    landmarks.forEach(landmark => {
+      result.push({
+        functionIndex: index,
+        functionName: func.functionName || `Function ${index + 1}`,
+        landmark: landmark
+      });
+    });
+  });
+  
+  return result;
+}
+
+/**
+ * Validate landmark coordinates are within reasonable bounds
+ * @param {number} x - X coordinate
+ * @param {number} y - Y coordinate
+ * @returns {Object} Result object with { valid: boolean, message: string }
+ */
+export function validateLandmarkCoordinates(x, y) {
+  if (typeof x !== 'number' || typeof y !== 'number') {
+    return { valid: false, message: "Coordinates must be numbers" };
+  }
+  
+  if (!isFinite(x) || !isFinite(y)) {
+    return { valid: false, message: "Coordinates must be finite numbers" };
+  }
+  
+  const MAX_COORDINATE = 1000000;
+  const MIN_COORDINATE = -1000000;
+  
+  if (x > MAX_COORDINATE || x < MIN_COORDINATE || y > MAX_COORDINATE || y < MIN_COORDINATE) {
+    return { valid: false, message: `Coordinates must be between ${MIN_COORDINATE} and ${MAX_COORDINATE}` };
+  }
+  
+  return { valid: true, message: "" };
+}

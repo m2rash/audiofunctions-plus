@@ -3,7 +3,7 @@ import JXG from "jsxgraph";
 import { useGraphContext } from "../../context/GraphContext";
 import { create, all, forEach } from 'mathjs'
 import { checkMathSpell, transformAssingnments, transformMathConstants, functionDefPiecewiseToString } from "../../utils/parse";
-import { getActiveFunctions } from "../../utils/graphObjectOperations";
+import { getActiveFunctions, getLandmarksN } from "../../utils/graphObjectOperations";
 import * as Tone from "tone";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 
@@ -150,6 +150,7 @@ const GraphView = () => {
   let snapaccuracy;
   const graphObjectsRef = useRef(new Map()); // Store graph objects for each function
   const cursorsRef = useRef(new Map()); // Store cursors for each function
+  const landmarkObjectsRef = useRef(new Map()); //Store landmark objects for each function
   const parsedExpressionsRef = useRef(new Map()); // Store parsed expressions
   const lastCursorPositionRef = useRef(null); // Store the last known cursor position
   const pendingStateUpdateRef = useRef(null); // Store pending state update
@@ -161,6 +162,97 @@ const GraphView = () => {
   const lastTickIndexRef = useRef(null); // Track last ticked index globally
   const mouseTimeoutRef = useRef(null); // Track mouse movement timeout
   const handlersRef = useRef({}); // Store event handlers for cleanup
+
+  //Function to create landmark symbols
+  const createLandmarkSymbols = (board) => {
+    // Clear existing landmark objects
+    landmarkObjectsRef.current.forEach((landmarks, functionId) => {
+      landmarks.forEach(landmarkObj => {
+        if (landmarkObj && board.objects[landmarkObj.id]) {
+          board.removeObject(landmarkObj);
+        }
+      });
+    });
+    landmarkObjectsRef.current.clear();
+
+    // Get active functions and create landmarks
+    const activeFunctions = getActiveFunctions(functionDefinitions);
+    activeFunctions.forEach((func, funcIndex) => {
+      const functionIndex = functionDefinitions.findIndex(f => f.id === func.id);
+      const landmarks = getLandmarksN(functionDefinitions, functionIndex);
+      const landmarkObjects = [];
+
+      landmarks.forEach((landmark, landmarkIndex) => {
+        const { x, y, shape, label } = landmark;
+        const landmarkShape = shape || 'diamond';
+        
+        try {
+          let landmarkObject;
+          const baseOptions = {
+            fixed: true,
+            highlight: false,
+            withLabel: false,
+            showInfobox: false,
+            name: `landmark_${func.id}_${landmarkIndex}`,
+            cssClass: `landmark-${landmarkShape}`,
+          };
+
+          switch (landmarkShape) {
+            case 'diamond':
+              landmarkObject = board.create('point', [x, y], {
+                ...baseOptions,
+                face: '<>',
+                size: 8,
+              });
+              break;
+              
+            case 'triangle':
+              landmarkObject = board.create('point', [x, y], {
+                ...baseOptions,
+                face: '^',
+                size: 9,
+              });
+              break;
+              
+              
+            case 'square':
+              landmarkObject = board.create('point', [x, y], {
+                ...baseOptions,
+                face: '[]',
+                size: 6,
+              });
+              break;
+              
+            default:
+              // Fallback to cross
+              landmarkObject = board.create('point', [x, y], {
+                ...baseOptions,
+                face: 'x'
+              });
+          }
+
+          if (landmarkObject) {
+            landmarkObjects.push(landmarkObject);
+            
+            // REMOVED: Label creation code
+            // No longer creating text labels for landmarks
+          }
+        } catch (error) {
+          console.warn(`Error creating landmark symbol for ${landmarkShape}:`, error);
+          // Fallback to simple point
+          const fallbackObject = board.create('point', [x, y], {
+            ...baseOptions,
+            face: 'x'
+          });
+          landmarkObjects.push(fallbackObject);
+        }
+      });
+
+      if (landmarkObjects.length > 0) {
+        landmarkObjectsRef.current.set(func.id, landmarkObjects);
+      }
+    });
+  };
 
   useEffect(() => {
     const board = JXG.JSXGraph.initBoard("jxgbox", {
@@ -228,6 +320,7 @@ const GraphView = () => {
     // Clear old objects and cursors
     graphObjectsRef.current.clear();
     cursorsRef.current.clear();
+    landmarkObjectsRef.current.clear(); //Clear landmark objects
     parsedExpressionsRef.current.clear();
 
     // Create graph objects and cursors for each active function
@@ -374,7 +467,10 @@ const GraphView = () => {
           }));
         }
       }
-
+      
+      //Create landmark symbols after all functions are created
+      createLandmarkSymbols(board);
+      
       // Find last known position for this function's cursor
       let preservedPos = preservedCursorPositionsRef.current.get(func.id);
       let lastPos = cursorCoords && Array.isArray(cursorCoords)
@@ -409,6 +505,7 @@ const GraphView = () => {
       graphObjectsRef.current.set(func.id, graphObject);
       cursorsRef.current.set(func.id, cursor);
     });
+
 
     // Calculate division points for the x axis based on stepSize
     const divisions = [];

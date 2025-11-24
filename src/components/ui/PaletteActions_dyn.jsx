@@ -1,12 +1,14 @@
 import { useRegisterActions, Priority } from "kbar";
 import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, CircleGauge, List, ZoomIn, ZoomOut, 
-  SwatchBook, Sun, Moon, SunMoon, Contrast,
+  SwatchBook, Sun, Moon, SunMoon, Contrast, Plus, Edit,
   ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info } from "lucide-react"
 import { useGraphContext } from "../../context/GraphContext";
-import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN } from "../../utils/graphObjectOperations";
+import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN, getActiveFunctions, getLandmarksN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
+import { getScreenPosition, jumpToLandmarkWithToast, addLandmarkAtCursorPosition } from "../../utils/landmarkUtils";
+import landmarkEarconManager from "../../utils/landmarkEarcons";
 import { useDialog } from "../../context/DialogContext";
-import { setTheme } from "../../utils/theme"; // Import the theme utility
-import { useZoomBoard } from "./KeyboardHandler"; // Import the zoom utility
+import { setTheme } from "../../utils/theme";
+import { useZoomBoard } from "./KeyboardHandler";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
 
@@ -14,8 +16,27 @@ export const useDynamicKBarActions = () => {
   const { isAudioEnabled, setIsAudioEnabled, cursorCoords, functionDefinitions, setFunctionDefinitions, setPlayFunction, graphSettings, graphBounds, setGraphBounds, updateCursor, focusChart } = useGraphContext();
   const { openDialog } = useDialog();
   const { announce } = useAnnouncement();
-  const { showInfoToast } = useInfoToast();
-  
+  const { showInfoToast, showLandmarkToast } = useInfoToast();
+
+  // Function to jump to landmark using utility
+  const jumpToLandmark = (landmark) => {
+    jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, announce, showLandmarkToast);
+  };
+
+  // Function to jump to landmark by shortcut using utility
+  const jumpToLandmarkByShortcut = (shortcut) => {
+    const activeFunctions = getActiveFunctions(functionDefinitions);
+    if (activeFunctions.length === 0) return;
+    
+    const activeFunction = activeFunctions[0];
+    const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
+    
+    const landmark = findLandmarkByShortcut(functionDefinitions, activeFunctionIndex, shortcut);
+    if (landmark) {
+      jumpToLandmark(landmark);
+    }
+  };
+
   // Check if in read-only or full-restriction mode
   const isReadOnly = graphSettings?.restrictionMode === "read-only";
   const isFullyRestricted = graphSettings?.restrictionMode === "full-restriction";
@@ -145,6 +166,24 @@ export const useDynamicKBarActions = () => {
 
   const currentSonificationType = getCurrentSonificationType();
 
+  // Get active function and its landmarks
+  const activeFunctions = getActiveFunctions(functionDefinitions);
+  const activeFunction = activeFunctions.length > 0 ? activeFunctions[0] : null;
+  const activeFunctionIndex = activeFunction ? functionDefinitions.findIndex(f => f.id === activeFunction.id) : -1;
+  const landmarks = activeFunction ? getLandmarksN(functionDefinitions, activeFunctionIndex) : [];
+
+  // Function to add landmark at current cursor position using utility
+  const addLandmarkAtCursor = () => {
+    addLandmarkAtCursorPosition(
+      functionDefinitions,
+      cursorCoords,
+      setFunctionDefinitions,
+      announce,
+      showInfoToast,
+      openDialog
+    );
+  };
+
   useRegisterActions([
 
     // quick options
@@ -153,7 +192,6 @@ export const useDynamicKBarActions = () => {
       name: "Quick Options",
       shortcut: ["q"],
       keywords: "quick, quickoptions",
-      // perform: () => {},
       icon: <List className="size-5 shrink-0 opacity-70" />,
     },
 
@@ -244,12 +282,85 @@ export const useDynamicKBarActions = () => {
     icon: <RotateCcw className="size-5 shrink-0 opacity-70" />,
   },
 
-  // Function selection section
+  //landmarks
   {
-    id: "select-function",
-    name: "Switch active Function",
-    shortcut: [""],
-    keywords: "function, select, show, display, choose, pick, activate, change, switch, browse",
+    id: "landmarks",
+    name: "Landmarks",
+    keywords: "landmark, bookmarks, markers, points, navigation, jump, goto, position, coordinates",
+    icon: <MapPin className="size-5 shrink-0 opacity-70" />,
+  },
+
+  
+  // Individual landmark actions (jump/navigate)
+  ...landmarks.map((landmark, index) => ({
+    id: `jump-to-landmark-${index}`,
+    name: `${landmark.label || `Landmark ${index + 1}`} (${landmark.x.toFixed(2)}, ${landmark.y.toFixed(2)})`,
+    shortcut: landmark.shortcut ? [`ctrl+${landmark.shortcut}`] : undefined,
+    keywords: `landmark, jump, goto, navigate, ${landmark.label || ''}, ${landmark.shortcut ? `l${landmark.shortcut}` : ''}`,
+    parent: "landmarks",
+    priority: Priority.HIGH,
+    perform: () => {
+      jumpToLandmark(landmark);
+      setTimeout(() => focusChart(), 100);
+    },
+    icon: <MapPin className="size-5 shrink-0 opacity-70" />,
+  })),
+  
+  // Edit landmarks parent - only show if there are landmarks
+  ...(landmarks.length > 0 ? [{
+    id: "edit-landmarks",
+    name: "Edit Landmarks",
+    keywords: "edit, modify, change, landmarks, manage, update, configure",
+    parent: "landmarks",
+    icon: <Edit className="size-5 shrink-0 opacity-70" />,
+  }] : []),
+  
+  // Edit landmark actions
+  ...landmarks.map((landmark, index) => ({
+    id: `edit-landmark-${index}`,
+    name: `Edit ${landmark.label || `Landmark ${index + 1}`}`,
+    keywords: `edit, modify, change, landmark, ${landmark.label || ''}, ${landmark.shortcut ? `e${landmark.shortcut}` : ''}`,
+    parent: "edit-landmarks",
+    priority: Priority.LOW,
+    perform: () => {
+      openDialog("edit-landmark", {
+        landmarkData: {
+          functionIndex: activeFunctionIndex,
+          landmarkIndex: index,
+          landmark: landmark
+        }
+      });
+    },
+    icon: <Edit className="size-5 shrink-0 opacity-70" />,
+  })),
+
+  {
+    id: "add-landmark",
+    name: "Add Landmark at Cursor",
+    shortcut: ["ctrl+b"],
+    keywords: "add, create, new, landmark, bookmark, marker, current, position, cursor",
+    parent: "landmarks",
+    perform: () => {
+      addLandmarkAtCursor();
+      setTimeout(() => focusChart(), 100);
+    },
+    icon: <Plus className="size-5 shrink-0 opacity-70" />,
+  },
+
+  // // Function selection section
+  // {
+  //   id: "select-function",
+  //   name: "Switch active Function",
+  //   shortcut: [""],
+  //   keywords: "function, select, show, display, choose, pick, activate, change, switch, browse",
+  //   icon: <SquareActivity className="size-5 shrink-0 opacity-70" />,
+  // },
+
+  // Function Options
+  {
+    id: "function-options",
+    name: "Functions",
+    keywords: "function, options, settings, configure, manage, edit, change",
     icon: <SquareActivity className="size-5 shrink-0 opacity-70" />,
   },
 
@@ -261,8 +372,9 @@ export const useDynamicKBarActions = () => {
       id: `show-function-${func.id}`,
       name: `Show ${functionName}`,
       shortcut: index < 9 ? [(index + 1).toString()] : undefined,
-      keywords: `function, show, display, activate, select, switch, ${functionName}, graph, plot`,
-      parent: "select-function",
+      keywords: `function, show, display, activate, select, switch, ${functionName}, graph, plot, f${index + 1}`,
+      parent: "function-options",
+      priority: Priority.HIGH,
       perform: () => {showOnlyFunction(index); setTimeout(() => focusChart(), 100);},
       icon: <Eye className="size-5 shrink-0 opacity-70" />,
     };
@@ -274,6 +386,8 @@ export const useDynamicKBarActions = () => {
       id: "change-function",
       name: isReadOnly ? "View Functions" : "Edit Functions",
       shortcut: ["f"],
+      parent: "function-options",
+      priority: Priority.HIGH,
       keywords: isReadOnly 
         ? "function, view, read, inspect, examine, look, display, show, formula, equation, math"
         : "function, change, edit, modify, create, add, insert, remove, delete, formula, equation, math, input, type, write",
@@ -429,7 +543,8 @@ export const useDynamicKBarActions = () => {
     priority: Priority.LOW,
   },
 
-], [isAudioEnabled, cursorCoords, functionDefinitions, isReadOnly, focusChart]);
+
+], [isAudioEnabled, cursorCoords, functionDefinitions, isReadOnly, focusChart, landmarks, activeFunction, activeFunctionIndex]);
 
   return null;
 };

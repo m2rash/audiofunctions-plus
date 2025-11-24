@@ -158,11 +158,10 @@ const initGraphObject = {
         // {
         //   "x": 0,
         //   "y": 0,
-        //   "label": "landmark",      // optional
-        //   "color": "#FF0000",       // optional
-        //   "earcon": "earcon2",
-        //   "message": "user defined message",  // optional
-        //   "shortcut": "a"           // set by app or user
+        //   "label": "landmark 1",
+        //   "shape": "diamond",
+        //   "earcon": "earcon1",      
+        //   "shortcut": "1"           // set by app
         // },
       ]
     },

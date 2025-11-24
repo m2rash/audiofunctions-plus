@@ -10,6 +10,7 @@ import ExportJsonDialog from "../components/ui/dialogs/ExportJsonDialog";
 import ImportJsonDialog from "../components/ui/dialogs/ImportJsonDialog";
 import WelcomeDialog from "../components/ui/dialogs/WelcomeDialog";
 import AboutDialog from "../components/ui/dialogs/AboutDialog";
+import EditLandmarkDialog from "../components/ui/dialogs/EditLandmarkDialog";
 
 const DialogContext = createContext();
 
@@ -23,9 +24,11 @@ export function DialogProvider({ children }) {
 
   // Check if edit function dialog is open
   const isEditFunctionDialogOpen = dialog.type === "edit-function";
+  // Check if edit landmark dialog is open
+  const isEditLandmarkDialogOpen = dialog.type === "edit-landmark";
 
   return (
-    <DialogContext.Provider value={{ openDialog, closeDialog, isEditFunctionDialogOpen }}>
+    <DialogContext.Provider value={{ openDialog, closeDialog, isEditFunctionDialogOpen, isEditLandmarkDialogOpen }}>
       {children}
 
       <EditFunctionDialog
@@ -87,6 +90,12 @@ export function DialogProvider({ children }) {
         isOpen={dialog.type === "about"}
         onClose={closeDialog}
         {...dialog.props}
+      />
+
+      <EditLandmarkDialog
+        isOpen={dialog.type === "edit-landmark"}
+        onClose={closeDialog}
+        landmarkData={dialog.props?.landmarkData || null}
       />
     </DialogContext.Provider>
   );

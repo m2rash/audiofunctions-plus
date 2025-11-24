@@ -181,6 +181,47 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
       return;
     }
     
+    // Check for modified functions and clear their landmarks
+    if (functionDefinitionsBackup.current) {
+      const updatedDefinitions = functionDefinitions.map((currentFunc, index) => {
+        const backupFunc = functionDefinitionsBackup.current.find(f => f.id === currentFunc.id);
+        
+        if (backupFunc) {
+          // Helper function to normalize function definition by removing all whitespace
+          const normalizeDefinition = (def) => {
+            if (typeof def === 'string') {
+              return def.replace(/\s/g, '');
+            }
+            if (Array.isArray(def)) {
+              return def.map(([func, condition]) => [
+                (func || '').replace(/\s/g, ''),
+                (condition || '').replace(/\s/g, '')
+              ]);
+            }
+            return def;
+          };
+          
+          // Compare normalized function definitions
+          const currentFuncNormalized = JSON.stringify(normalizeDefinition(currentFunc.functionDef));
+          const backupFuncNormalized = JSON.stringify(normalizeDefinition(backupFunc.functionDef));
+          
+          // If function definition changed (ignoring whitespace), clear landmarks
+          if (currentFuncNormalized !== backupFuncNormalized) {
+            console.log(`Function ${currentFunc.functionName} (ID: ${currentFunc.id}) was modified - clearing landmarks`);
+            return {
+              ...currentFunc,
+              landmarks: []
+            };
+          }
+        }
+        
+        return currentFunc;
+      });
+      
+      // Update function definitions with cleared landmarks where necessary
+      setFunctionDefinitions(updatedDefinitions);
+    }
+    
     onClose();
     setTimeout(() => focusChart(), 100);
   };

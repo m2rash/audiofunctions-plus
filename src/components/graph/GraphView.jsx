@@ -21,6 +21,7 @@ function createEndPoints(func,board){
     // we are allowing the use of the power operator **, so we replace it by ^ to be able to parse it
     // we are also transforming the math constants to be able to parse them
     // WARNING nthroot is not implemented in mathjs, we need nthRoot, so when using mathjs, we need to change nthroot to nthRoot
+    // WARNING ln is not implemented in mathjs, we need log, so when using mathjs, we need to change ln to log
     console.log("Creating endpoints for function: ", func);
     if (func.type === "function"){
       return [[],[]];
@@ -29,9 +30,12 @@ function createEndPoints(func,board){
       console.error("createEndPoints: function type not recognized");
       return [];
     }
-    const  txtraw = functionDefPiecewiseToString(func.functionDef);
+    const txtraw = functionDefPiecewiseToString(func.functionDef);
     console.log("Raw piecewise function string:", txtraw);
-    const parsed = transformMathConstants(math.parse(txtraw.replace("**","^").replace("nthroot","nthRoot"))); 
+    const txt2mathjs = txtraw.replaceAll("**","^").replaceAll("nthroot","nthRoot").replaceAll("ln","log");
+    console.log("Transformed piecewise function string for mathjs:", txt2mathjs);
+    const parsed = transformMathConstants(math.parse(txt2mathjs)); 
+    console.log("Parsed piecewise function:", parsed.toString());
     const types_to_be_deleted= ["isolated", "unequal"]; // we remove these types of points of interest, since they will be redefined
     const filteredPoints = func.pointOfInterests.filter(
       point => !types_to_be_deleted.includes(point.type)
@@ -573,7 +577,7 @@ const GraphView = () => {
                 mouseY: mouseY !== null ? mouseY.toFixed(2) : null
               });
             } else {
-              console.warn(`Invalid y value for function ${func.id} at x=${snappedX}: ${y}`);
+              console.warn(`Invalid y value for function ${func.id} at x=${snappedX}: ${y}`); // TODO That happens for "non-functions" -> maybe we should delete the warning?
               // Hide cursor visually but still pass the invalid y value for sonification
               cursor.hide();
               // Position cursor at a point outside the visible area when function is invalid
@@ -847,13 +851,18 @@ const GraphView = () => {
   //   return () => wrapper.removeEventListener('keydown', handleKeyDown);
   // }, []);
 
+  // Get the currently active function name for aria-label
+  const activeFunctions = getActiveFunctions(functionDefinitions);
+  const activeFunction = activeFunctions.length > 0 ? activeFunctions[0] : null;
+  const activeFunctionName = activeFunction ? activeFunction.functionName : 'No function';
+  
   return (
     <div 
       ref={wrapperRef}
       id="chart"
       role="application"
       tabIndex={0}
-      aria-label="Interactive graph."
+      aria-label={`Interactive graph. Currently active: ${activeFunctionName}`}
       style={{ 
         outline: 'none', 
         width: "100%", 

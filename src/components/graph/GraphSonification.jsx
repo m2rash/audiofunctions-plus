@@ -691,23 +691,39 @@ const GraphSonification = () => {
         stopTone(functionId);
       }
     });
-  }, [cursorCoords, isAudioEnabled, isEditFunctionDialogOpen, isEditLandmarkDialogOpen, functionDefinitions, graphBounds, stepSize]);
+  }, [cursorCoords, isAudioEnabled, isEditFunctionDialogOpen, isEditLandmarkDialogOpen, functionDefinitions, graphBounds, stepSize, explorationMode]);
 
   // Event detection functions
   const checkChartBoundaryEvents = async (functionId, coords) => {
     const x = parseFloat(coords.x);
     const y = parseFloat(coords.y);
     
-    // Calculate tolerance based on current graph bounds to be more robust with zoom
+    // Calculate base tolerance based on current graph bounds to be more robust with zoom
     const xRange = graphBounds.xMax - graphBounds.xMin;
     const yRange = graphBounds.yMax - graphBounds.yMin;
-    const tolerance = Math.max(0.02, Math.min(xRange, yRange) * 0.001); // Adaptive tolerance
+    const baseTolerance = Math.max(0.02, Math.min(xRange, yRange) * 0.001); // Adaptive tolerance
     
-    // Check if cursor is at any of the four boundaries (cursor is clamped, so it can't go beyond)
-    const isAtLeftBoundary = Math.abs(x - (graphBounds.xMin + tolerance)) < tolerance * 0.1;
-    const isAtRightBoundary = Math.abs(x - (graphBounds.xMax - tolerance)) < tolerance * 0.1;
-    const isAtBottomBoundary = Math.abs(y - (graphBounds.yMin + tolerance)) < tolerance * 0.1;
-    const isAtTopBoundary = Math.abs(y - (graphBounds.yMax - tolerance)) < tolerance * 0.1;
+    let isAtLeftBoundary = false;
+    let isAtRightBoundary = false;
+    let isAtBottomBoundary = false;
+    let isAtTopBoundary = false;
+
+    if (explorationMode === "mouse") {
+      // For mouse navigation, use a wider 1% threshold of the visible range
+      const xWindow = xRange * 0.01;
+      const yWindow = yRange * 0.01;
+
+      isAtLeftBoundary = x <= graphBounds.xMin + xWindow;
+      isAtRightBoundary = x >= graphBounds.xMax - xWindow;
+      isAtBottomBoundary = y <= graphBounds.yMin + yWindow;
+      isAtTopBoundary = y >= graphBounds.yMax - yWindow;
+    } else {
+      // For keyboard / batch navigation keep the previous, tighter behaviour
+      isAtLeftBoundary = Math.abs(x - (graphBounds.xMin + baseTolerance)) < baseTolerance * 0.1;
+      isAtRightBoundary = Math.abs(x - (graphBounds.xMax - baseTolerance)) < baseTolerance * 0.1;
+      isAtBottomBoundary = Math.abs(y - (graphBounds.yMin + baseTolerance)) < baseTolerance * 0.1;
+      isAtTopBoundary = Math.abs(y - (graphBounds.yMax - baseTolerance)) < baseTolerance * 0.1;
+    }
     
     // Get previous boundary state for this function
     const prevState = prevBoundaryStateRef.current.get(functionId) || {

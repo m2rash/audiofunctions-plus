@@ -11,6 +11,8 @@ website:
         href: shortcuts.md
       - text: "Earcons"
         href: earcons.md
+      - text: "Exporting/Importing files"
+        href: json.md
     # right:
     #   - about.qmd
   

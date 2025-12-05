@@ -1,3 +1,14 @@
+# Documentation
+
+This folder contains the documentation for Audiofunctions+. It has been prepared using [quarto](https://quarto.org/).
+
+These are the basic steps to build the documentation locally:
+
+- To preview, use `quarto preview` in the `docs` folder.
+- To render the documentation, use `quarto render` in the `docs` folder.
+
+You can publish the documentation to GitHub Pages by using `quarto publish gh-pages` in the `docs` folder. However, this step is already automated using GitHub Actions.
+
 # Audiofunctions+
 
 Audiofunctions+ is a web app designed to facilitate visually impaired students’ learning of mathematical functions. Audiofunctions+ allows users to interpret the shape of a function’s graph by listening to its sonification.  

@@ -757,19 +757,20 @@ const GraphSonification = () => {
     
     let shouldTriggerEarcon = false;
     
-    // Case 1: Reached x=0 (y-axis) - play earcon regardless of previous position
-    if (currentXSign === 0) {
-      shouldTriggerEarcon = true;
-    }
-    // Case 2: Crossed the y-axis (x coordinate sign changed) - but not if we're leaving x=0
-    else if (prevXSign !== null && prevXSign !== undefined && prevXSign !== currentXSign && prevXSign !== 0) {
-      shouldTriggerEarcon = true;
-    }
-    // Case 3: Special case for batch mode - if we start very close to y-axis and cross it
-    else if (explorationMode === "batch" && prevXSign === null && Math.abs(x) < 0.1) {
-      // If this is the first tick in batch mode and we're very close to y-axis, 
-      // treat it as a potential y-axis intersection
-      shouldTriggerEarcon = true;
+    // Only trigger if we have a previous position (not initial state) and the sign actually changed
+    // This means we crossed from negative to positive or positive to negative
+    // We exclude cases where prevXSign is null/undefined (initial state) or 0 (already at y-axis)
+    if (prevXSign !== null && prevXSign !== undefined && prevXSign !== 0 && prevXSign !== currentXSign) {
+      // Calculate the x-axis range and 90% of it centered on x=0
+      const xRange = graphBounds.xMax - graphBounds.xMin;
+      const range90Percent = xRange * 0.9;
+      const lowerBound = -range90Percent / 2;
+      const upperBound = range90Percent / 2;
+      
+      // Only trigger if we're within 90% of the y-axis (centered on x=0)
+      if (x >= lowerBound && x <= upperBound) {
+        shouldTriggerEarcon = true;
+      }
     }
     
     if (shouldTriggerEarcon) {

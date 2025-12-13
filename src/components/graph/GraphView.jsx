@@ -3,9 +3,11 @@ import JXG from "jsxgraph";
 import { useGraphContext } from "../../context/GraphContext";
 import { create, all, forEach } from 'mathjs'
 import { checkMathSpell, transformAssingnments, transformMathConstants, functionDefPiecewiseToString } from "../../utils/parse";
-import { getActiveFunctions, getLandmarksN } from "../../utils/graphObjectOperations";
+import { getActiveFunctions, getLandmarksN, getFunctionInstrumentN } from "../../utils/graphObjectOperations";
 import * as Tone from "tone";
 import { useAnnouncement } from '../../context/AnnouncementContext';
+import { useInstruments } from "../../context/InstrumentsContext";
+import { InstrumentFrequencyType } from "../../config/instruments";
 
 const config = { }
 const math = create(all, config)
@@ -144,8 +146,9 @@ const GraphView = () => {
   const wrapperRef = useRef(null);
   const graphContainerRef = useRef(null);
   const boardRef = useRef(null);
-  const { functionDefinitions, cursorCoords, setCursorCoords, setInputErrors, graphBounds, PlayFunction, playActiveRef, updateCursor, setUpdateCursor, setPlayFunction, timerRef, stepSize, isAudioEnabled, setExplorationMode, explorationMode } = useGraphContext();
+  const { functionDefinitions, cursorCoords, setCursorCoords, setInputErrors, graphBounds, PlayFunction, playActiveRef, updateCursor, setUpdateCursor, setPlayFunction, timerRef, stepSize, isAudioEnabled, setExplorationMode, explorationMode, setDiscreteBatchValidStartX } = useGraphContext();
   const { announce } = useAnnouncement();
+  const { getInstrumentByName } = useInstruments();
   let endpoints = [];
   let snapaccuracy;
   const graphObjectsRef = useRef(new Map()); // Store graph objects for each function
@@ -162,6 +165,27 @@ const GraphView = () => {
   const lastTickIndexRef = useRef(null); // Track last ticked index globally
   const mouseTimeoutRef = useRef(null); // Track mouse movement timeout
   const handlersRef = useRef({}); // Store event handlers for cleanup
+
+  // Helper: map a Y value to a discrete pitch-class index for a given instrument
+  const getDiscretePitchClassIndex = (y, instrumentConfig) => {
+    if (
+      y === null ||
+      y === undefined ||
+      typeof y !== "number" ||
+      !isFinite(y) ||
+      !instrumentConfig ||
+      !instrumentConfig.availablePitchClasses ||
+      instrumentConfig.availablePitchClasses.length === 0
+    ) {
+      return null;
+    }
+
+    const normalizedY = (y - graphBounds.yMin) / (graphBounds.yMax - graphBounds.yMin);
+    const clampedNormalizedY = Math.max(0, Math.min(1, normalizedY));
+    const rawIndex = Math.floor(clampedNormalizedY * instrumentConfig.availablePitchClasses.length);
+    const clampedIndex = Math.max(0, Math.min(rawIndex, instrumentConfig.availablePitchClasses.length - 1));
+    return clampedIndex;
+  };
 
   //Function to create landmark symbols
   const createLandmarkSymbols = (board) => {
@@ -667,6 +691,156 @@ const GraphView = () => {
       } else {
         startX = PlayFunction.speed > 0 ? graphBounds.xMin : graphBounds.xMax;
       }
+
+      // When in discrete sonification and using batch sonification ("play" source),
+      // calculate the valid start position (but don't move the cursor):
+      // - after the first x-axis step (based on stepSize) AND
+      // - after the first y pitch-class interval crossing;
+      // exception: if all active functions stay within a single pitch class over the view,
+      // only apply the first x-axis step without requiring a pitch-class crossing.
+      // This valid start position is stored in context and used to control audio gain.
+      if (PlayFunction.source === "play" && stepSize && stepSize > 0) {
+        const activeFunctionsForBatch = getActiveFunctions(functionDefinitions);
+
+        if (activeFunctionsForBatch.length > 0) {
+          // Assume global sonification mode is determined by the active function's instrument
+          const activeFunction = activeFunctionsForBatch[0];
+          const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
+          const instrumentName = getFunctionInstrumentN(functionDefinitions, activeFunctionIndex);
+          const instrumentConfig = getInstrumentByName(instrumentName);
+
+          if (instrumentConfig && instrumentConfig.instrumentType === InstrumentFrequencyType.discretePitchClassBased) {
+            const direction = PlayFunction.speed >= 0 ? 1 : -1;
+            const tolerance = 0.02;
+            const minMove = stepSize;
+            const dx = stepSize / 10;
+
+            // Collect parsed expressions for all active functions
+            const activeFunctionData = activeFunctionsForBatch.map(func => {
+              const expr = parsedExpressionsRef.current.get(func.id);
+              if (!expr) return null;
+
+              try {
+                const evaluator = board.jc.snippet(expr, true, "x", true);
+                return { func, expr, evaluator };
+              } catch {
+                return null;
+              }
+            }).filter(item => item !== null);
+
+            if (activeFunctionData.length > 0) {
+              // Compute initial pitch-class index for each function at the original startX
+              const initialPitchByFunctionId = new Map();
+              activeFunctionData.forEach(({ func, evaluator }) => {
+                try {
+                  const y = evaluator(startX);
+                  if (typeof y === "number" && isFinite(y)) {
+                    const pitchIndex = getDiscretePitchClassIndex(y, instrumentConfig);
+                    if (pitchIndex !== null) {
+                      initialPitchByFunctionId.set(func.id, pitchIndex);
+                    }
+                  }
+                } catch {
+                  // Ignore evaluation errors for initial position
+                }
+              });
+
+              let simulatedX = startX;
+              let travelled = 0;
+              let foundPitchCrossAfterStep = false;
+              let validStartX = startX;
+
+              // Track if any function ever leaves its initial pitch class
+              const hasPitchCrossSomewhere = new Map();
+              activeFunctionData.forEach(({ func }) => {
+                hasPitchCrossSomewhere.set(func.id, false);
+              });
+
+              const maxIterations = 2000;
+              let iterations = 0;
+
+              while (iterations < maxIterations) {
+                iterations += 1;
+                simulatedX += direction * dx;
+                travelled += dx;
+
+                // Stop if we would cross chart boundaries
+                if (simulatedX <= graphBounds.xMin + tolerance || simulatedX >= graphBounds.xMax - tolerance) {
+                  break;
+                }
+
+                // Evaluate all active functions at this simulated X
+                let anyPitchClassChangedNow = false;
+
+                activeFunctionData.forEach(({ func, evaluator }) => {
+                  const initialPitchIndex = initialPitchByFunctionId.get(func.id);
+                  if (initialPitchIndex === undefined) return;
+
+                  try {
+                    const y = evaluator(simulatedX);
+                    if (typeof y !== "number" || !isFinite(y)) return;
+
+                    const pitchIndex = getDiscretePitchClassIndex(y, instrumentConfig);
+                    if (pitchIndex === null) return;
+
+                    if (pitchIndex !== initialPitchIndex) {
+                      anyPitchClassChangedNow = true;
+                      hasPitchCrossSomewhere.set(func.id, true);
+                    }
+                  } catch {
+                    // Ignore evaluation errors at this sample
+                  }
+                });
+
+                // We only accept a new starting position once:
+                // after we've moved at least one x step AND detected a pitch-class crossing.
+                if (!foundPitchCrossAfterStep && travelled >= minMove && anyPitchClassChangedNow) {
+                  foundPitchCrossAfterStep = true;
+                  validStartX = simulatedX;
+                  break;
+                }
+              }
+
+              if (!foundPitchCrossAfterStep) {
+                // Check if every function stayed in a single pitch class
+                const allStayInSinglePitchClass = activeFunctionData.every(({ func }) => {
+                  const initialPitchIndex = initialPitchByFunctionId.get(func.id);
+                  // If we never had a valid initial pitch or never saw a crossing, treat as single-interval
+                  if (initialPitchIndex === undefined) return true;
+                  return hasPitchCrossSomewhere.get(func.id) === false;
+                });
+
+                if (allStayInSinglePitchClass) {
+                  // Exception case: move only after the first x-axis step without requiring pitch-class crossing
+                  let candidateX = startX + direction * minMove;
+                  if (candidateX <= graphBounds.xMin + tolerance) {
+                    candidateX = graphBounds.xMin + tolerance;
+                  } else if (candidateX >= graphBounds.xMax - tolerance) {
+                    candidateX = graphBounds.xMax - tolerance;
+                  }
+                  validStartX = candidateX;
+                }
+              }
+
+              // Store the valid start position in context (but don't move the cursor)
+              setDiscreteBatchValidStartX(validStartX);
+            } else {
+              // No valid function data, clear the valid start position
+              setDiscreteBatchValidStartX(null);
+            }
+          } else {
+            // Not discrete sonification, clear the valid start position
+            setDiscreteBatchValidStartX(null);
+          }
+        } else {
+          // No active functions, clear the valid start position
+          setDiscreteBatchValidStartX(null);
+        }
+      } else {
+        // Not batch mode or no stepSize, clear the valid start position
+        setDiscreteBatchValidStartX(null);
+      }
+
       PlayFunction.x = startX;
       currentTimerRef.current = setInterval(() => {
         // Guard against board not being initialized

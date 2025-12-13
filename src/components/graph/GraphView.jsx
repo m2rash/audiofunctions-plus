@@ -146,7 +146,7 @@ const GraphView = () => {
   const wrapperRef = useRef(null);
   const graphContainerRef = useRef(null);
   const boardRef = useRef(null);
-  const { functionDefinitions, cursorCoords, setCursorCoords, setInputErrors, graphBounds, PlayFunction, playActiveRef, updateCursor, setUpdateCursor, setPlayFunction, timerRef, stepSize, isAudioEnabled, setExplorationMode, explorationMode } = useGraphContext();
+  const { functionDefinitions, cursorCoords, setCursorCoords, setInputErrors, graphBounds, PlayFunction, playActiveRef, updateCursor, setUpdateCursor, setPlayFunction, timerRef, stepSize, isAudioEnabled, setExplorationMode, explorationMode, setDiscreteBatchValidStartX } = useGraphContext();
   const { announce } = useAnnouncement();
   const { getInstrumentByName } = useInstruments();
   let endpoints = [];
@@ -693,11 +693,12 @@ const GraphView = () => {
       }
 
       // When in discrete sonification and using batch sonification ("play" source),
-      // move the initial cursor position:
+      // calculate the valid start position (but don't move the cursor):
       // - after the first x-axis step (based on stepSize) AND
       // - after the first y pitch-class interval crossing;
       // exception: if all active functions stay within a single pitch class over the view,
       // only apply the first x-axis step without requiring a pitch-class crossing.
+      // This valid start position is stored in context and used to control audio gain.
       if (PlayFunction.source === "play" && stepSize && stepSize > 0) {
         const activeFunctionsForBatch = getActiveFunctions(functionDefinitions);
 
@@ -747,7 +748,7 @@ const GraphView = () => {
               let simulatedX = startX;
               let travelled = 0;
               let foundPitchCrossAfterStep = false;
-              let newStartX = startX;
+              let validStartX = startX;
 
               // Track if any function ever leaves its initial pitch class
               const hasPitchCrossSomewhere = new Map();
@@ -795,7 +796,7 @@ const GraphView = () => {
                 // after we've moved at least one x step AND detected a pitch-class crossing.
                 if (!foundPitchCrossAfterStep && travelled >= minMove && anyPitchClassChangedNow) {
                   foundPitchCrossAfterStep = true;
-                  newStartX = simulatedX;
+                  validStartX = simulatedX;
                   break;
                 }
               }
@@ -817,14 +818,27 @@ const GraphView = () => {
                   } else if (candidateX >= graphBounds.xMax - tolerance) {
                     candidateX = graphBounds.xMax - tolerance;
                   }
-                  newStartX = candidateX;
+                  validStartX = candidateX;
                 }
               }
 
-              startX = newStartX;
+              // Store the valid start position in context (but don't move the cursor)
+              setDiscreteBatchValidStartX(validStartX);
+            } else {
+              // No valid function data, clear the valid start position
+              setDiscreteBatchValidStartX(null);
             }
+          } else {
+            // Not discrete sonification, clear the valid start position
+            setDiscreteBatchValidStartX(null);
           }
+        } else {
+          // No active functions, clear the valid start position
+          setDiscreteBatchValidStartX(null);
         }
+      } else {
+        // Not batch mode or no stepSize, clear the valid start position
+        setDiscreteBatchValidStartX(null);
       }
 
       PlayFunction.x = startX;

@@ -27,6 +27,7 @@ export const GraphContextProvider = ({ children }) => {
   const [stepSize, setStepSize] = useState(0.25); // Default value 0.5
   const [explorationMode, setExplorationMode] = useState("none"); // "none", "mouse", "keyboard_stepwise", "keyboard_smooth", "batch"
   const [isShiftPressed, setIsShiftPressed] = useState(false); // Track Shift key state
+  const [discreteBatchValidStartX, setDiscreteBatchValidStartX] = useState(null); // Valid start X position for discrete batch sonification
   const inputRefs = {
     function: useRef(null),
     speed: useRef(null),
@@ -120,6 +121,8 @@ export const GraphContextProvider = ({ children }) => {
         setExplorationMode,
         isShiftPressed,
         setIsShiftPressed,
+        discreteBatchValidStartX,
+        setDiscreteBatchValidStartX,
         focusChart,
       }}
     >

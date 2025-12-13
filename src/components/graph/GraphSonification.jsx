@@ -24,7 +24,8 @@ const GraphSonification = () => {
     stepSize, // <-- get stepSize from context
     PlayFunction, // <-- get PlayFunction to detect exploration mode
     explorationMode, // <-- get exploration mode for robust detection
-    isShiftPressed // <-- get Shift key state
+    isShiftPressed, // <-- get Shift key state
+    discreteBatchValidStartX // <-- get valid start X position for discrete batch sonification
   } = useGraphContext();
   
   // Refs to track previous states for event detection
@@ -38,6 +39,7 @@ const GraphSonification = () => {
   const tickSynthRef = useRef(null); // Reference to tick synth
   const tickChannelRef = useRef(null); // Reference to tick channel for panning
   const isAtBoundaryRef = useRef(false); // Track if cursor is at a boundary
+  const masterGainRef = useRef(null); // Reference to master gain node for discrete batch sonification control
   
   const { getInstrumentByName } = useInstruments();
   const { isEditFunctionDialogOpen, isEditLandmarkDialogOpen } = useDialog();
@@ -69,7 +71,14 @@ const GraphSonification = () => {
       tickChannelRef.current = new Tone.Channel({
         pan: 0,
         volume: 0
-      }).toDestination();
+      });
+      
+      // Connect to master gain if available, otherwise to destination
+      if (masterGainRef.current) {
+        tickChannelRef.current.connect(masterGainRef.current);
+      } else {
+        tickChannelRef.current.toDestination();
+      }
 
       // Connect tick synth to its channel
       tickSynthRef.current.connect(tickChannelRef.current);
@@ -81,6 +90,7 @@ const GraphSonification = () => {
         tickSynthRef.current = null;
       }
       if (tickChannelRef.current) {
+        tickChannelRef.current.disconnect();
         tickChannelRef.current.dispose();
         tickChannelRef.current = null;
       }
@@ -98,6 +108,32 @@ const GraphSonification = () => {
       if (pinkNoiseRef.current) {
         pinkNoiseRef.current.dispose();
         pinkNoiseRef.current = null;
+      }
+    };
+  }, []);
+
+  // Initialize master gain node for discrete batch sonification control
+  useEffect(() => {
+    if (!masterGainRef.current) {
+      masterGainRef.current = new Tone.Gain(1).toDestination();
+      
+      // Reconnect all existing channels to master gain
+      channelsRef.current.forEach((channel) => {
+        channel.disconnect();
+        channel.connect(masterGainRef.current);
+      });
+      
+      // Reconnect tick channel if it exists
+      if (tickChannelRef.current) {
+        tickChannelRef.current.disconnect();
+        tickChannelRef.current.connect(masterGainRef.current);
+      }
+    }
+
+    return () => {
+      if (masterGainRef.current) {
+        masterGainRef.current.dispose();
+        masterGainRef.current = null;
       }
     };
   }, []);
@@ -147,7 +183,14 @@ const GraphSonification = () => {
           pan: 0,
           mute: !isFunctionActiveN(functionDefinitions, index),
           volume: 0
-        }).toDestination();
+        });
+        
+        // Connect to master gain node if available, otherwise to destination
+        if (masterGainRef.current) {
+          channel.connect(masterGainRef.current);
+        } else {
+          channel.toDestination();
+        }
         
         channelsRef.current.set(functionId, channel);
       } else {
@@ -162,15 +205,20 @@ const GraphSonification = () => {
     // Clean up unused channels
     Array.from(channelsRef.current.keys()).forEach(functionId => {
       if (!getFunctionById(functionDefinitions, functionId)) {
-        if (channelsRef.current.get(functionId)) {
-          channelsRef.current.get(functionId).dispose();
+        const channel = channelsRef.current.get(functionId);
+        if (channel) {
+          channel.disconnect();
+          channel.dispose();
         }
         channelsRef.current.delete(functionId);
       }
     });
 
     return () => {
-      channelsRef.current.forEach(channel => channel.dispose());
+      channelsRef.current.forEach(channel => {
+        channel.disconnect();
+        channel.dispose();
+      });
       channelsRef.current.clear();
     };
   }, [functionDefinitions, forceRecreate]);
@@ -527,6 +575,39 @@ const GraphSonification = () => {
       // Reset flags when not in batch mode or when batch stops
       batchResetDoneRef.current = false;
       batchTickCountRef.current = 0;
+    }
+
+    // Control master gain based on cursor position vs valid start position for discrete batch sonification
+    if (masterGainRef.current) {
+      if (discreteBatchValidStartX !== null && cursorCoords && cursorCoords.length > 0 && 
+          explorationMode === "batch" && PlayFunction.active && PlayFunction.source === "play") {
+        // Get the current cursor X position (use first coordinate as reference)
+        const currentX = parseFloat(cursorCoords[0].x);
+        
+        if (typeof currentX === 'number' && !isNaN(currentX) && isFinite(currentX)) {
+          // Determine direction based on PlayFunction speed
+          const direction = PlayFunction.speed >= 0 ? 1 : -1;
+          
+          // Calculate gain: 0 if before valid start, 1 if at or after
+          let gainValue = 1;
+          if (direction > 0) {
+            // Moving forward: gain is 0 if currentX < validStartX
+            gainValue = currentX >= discreteBatchValidStartX ? 1 : 0;
+          } else {
+            // Moving backward: gain is 0 if currentX > validStartX
+            gainValue = currentX <= discreteBatchValidStartX ? 1 : 0;
+          }
+          
+          // Set the gain value
+          masterGainRef.current.gain.value = gainValue;
+        } else {
+          // Invalid cursor position, set gain to normal
+          masterGainRef.current.gain.value = 1;
+        }
+      } else {
+        // Not in discrete batch mode or no valid start position, set gain to normal (1)
+        masterGainRef.current.gain.value = 1;
+      }
     }
 
     // Check if any active function has a y-value below zero

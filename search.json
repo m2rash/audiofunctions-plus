@@ -1,26 +1,5 @@
 [
   {
-    "objectID": "earcons.html",
-    "href": "earcons.html",
-    "title": "Earcons",
-    "section": "",
-    "text": "Audiofunctions uses several earcons (audio icons) to provide auditory feedback to the user. Below are the earcons used in the application:\n\nDing\n\n\n\n\n\nBell"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Audiofunctions+",
-    "section": "",
-    "text": "This folder contains the documentation for Audiofunctions+. It has been prepared using quarto.\nThese are the basic steps to build the documentation locally:\n\nTo preview, use quarto preview in the docs folder.\nTo render the documentation, use quarto render in the docs folder.\n\nYou can publish the documentation to GitHub Pages by using quarto publish gh-pages in the docs folder. However, this step is already automated using GitHub Actions."
-  },
-  {
-    "objectID": "index.html#funding",
-    "href": "index.html#funding",
-    "title": "Audiofunctions+",
-    "section": "Funding",
-    "text": "Funding\nThis project is supported by the SONification for Accessible and Inclusive Representation of GRAPHs in Education (SONAIRGRAPH) project, which is an Erasmus+ key action 2 (project number 2024-1-IT02-KA220-HED-000244481), funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them."
-  },
-  {
     "objectID": "json.html",
     "href": "json.html",
     "title": "Exporting/Importing files",
@@ -54,6 +33,27 @@
     "title": "Exporting/Importing files",
     "section": "Tweaking JSON Files",
     "text": "Tweaking JSON Files\nYou can manually edit the JSON file to modify function definitions or graph settings before importing it back into Audiofunctions+. For instance, you can visualize the following “non-graph” function\n\n\n\nPlotting two functions simultaneously\n\n\nexample in the following way.\nInsert the following date in the edit functions menu:\n\n\n\nEditing a non-graph function\n\n\nExport it to a JSON file as explained above, and then open the JSON file in a text editor. You will see something like this:\n{\n  \"functions\": [\n    {\n      \"id\": \"f1\",\n      \"functionName\": \"Function 1\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\n          \"0\",\n          \"x&lt;0\"\n        ],\n        [\n          \"1/10 x^2\",\n          \"x&gt;=0\"\n        ]\n      ],\n      \"isActive\": false,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    },\n    {\n      \"id\": \"f2\",\n      \"functionName\": \"Function 2\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\n          \"-1/20 x^2\",\n          \"x&gt;=0\"\n        ]\n      ],\n      \"isActive\": true,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    }\n  ],\n  \"graphSettings\": {\n    \"defaultView\": [\n      -10,\n      10,\n      10,\n      -10\n    ],\n    \"minBoundDifference\": 0.1,\n    \"maxBoundDifference\": 100,\n    \"showGrid\": true,\n    \"showAxes\": true,\n    \"gridColor\": \"#CCCCCC\",\n    \"restrictionMode\": \"none\"\n  }\n}\nChange the field isActive of the first function from false to true, save the file and import it back into Audiofunctions+ as explained above.\nWhen you activate the sonification, you will hear both functions sonified simultaneously."
+  },
+  {
+    "objectID": "earcons.html",
+    "href": "earcons.html",
+    "title": "Earcons",
+    "section": "",
+    "text": "Audiofunctions uses several earcons (audio icons) to provide auditory feedback to the user. Below are the earcons used in the application:\n\nDing\n\n\n\n\n\nBell"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "This folder contains the documentation for Audiofunctions+. It has been prepared using quarto.\nThese are the basic steps to build the documentation locally:\n\nTo preview, use quarto preview in the docs folder.\nTo render the documentation, use quarto render in the docs folder.\n\nYou can publish the documentation to GitHub Pages by using quarto publish gh-pages in the docs folder. However, this step is already automated using GitHub Actions."
+  },
+  {
+    "objectID": "index.html#funding",
+    "href": "index.html#funding",
+    "title": "Audiofunctions+",
+    "section": "Funding",
+    "text": "Funding\nThis project is supported by the SONification for Accessible and Inclusive Representation of GRAPHs in Education (SONAIRGRAPH) project, which is an Erasmus+ key action 2 (project number 2024-1-IT02-KA220-HED-000244481), funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them."
   },
   {
     "objectID": "shortcuts.html",

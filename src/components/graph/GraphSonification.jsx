@@ -51,6 +51,8 @@ const GraphSonification = () => {
   const batchTickCountRef = useRef(0); // Track tick count since batch exploration started
   const batchResetDoneRef = useRef(false); // Track if batch reset has been done
   const prevActiveFunctionIdsRef = useRef(new Set()); // Track previously active function IDs to detect function switches
+  const batchStartEarconPlayedRef = useRef(false); // Track if chart_border_start earcon has been played for current batch
+  const wasAtLeftBoundaryRef = useRef(false); // Track if cursor was at left boundary in previous tick
 
   // Initialize tick synth
   useEffect(() => {
@@ -570,11 +572,16 @@ const GraphSonification = () => {
         yAxisTriggeredRef.current.clear();
         batchTickCountRef.current = 0;
         batchResetDoneRef.current = true;
+        // Reset batch start earcon tracking
+        batchStartEarconPlayedRef.current = false;
+        wasAtLeftBoundaryRef.current = false;
       }
     } else {
       // Reset flags when not in batch mode or when batch stops
       batchResetDoneRef.current = false;
       batchTickCountRef.current = 0;
+      batchStartEarconPlayedRef.current = false;
+      wasAtLeftBoundaryRef.current = false;
     }
 
     // Control master gain based on cursor position vs valid start position for discrete batch sonification
@@ -618,6 +625,7 @@ const GraphSonification = () => {
 
     // Check if any cursor is at a boundary (we need to check this before processing individual coordinates)
     let isAnyAtBoundary = false;
+    let isAtLeftBoundaryNow = false;
     for (const coord of cursorCoords) {
       const x = parseFloat(coord.x);
       const y = parseFloat(coord.y);
@@ -632,10 +640,30 @@ const GraphSonification = () => {
       const isAtBottomBoundary = Math.abs(y - (graphBounds.yMin + tolerance)) < tolerance * 0.1;
       const isAtTopBoundary = Math.abs(y - (graphBounds.yMax - tolerance)) < tolerance * 0.1;
       
+      if (isAtLeftBoundary) {
+        isAtLeftBoundaryNow = true;
+      }
+      
       if (isAtLeftBoundary || isAtRightBoundary || isAtBottomBoundary || isAtTopBoundary) {
         isAnyAtBoundary = true;
         break;
       }
+    }
+
+    // Check if batch sonification is leaving the left boundary (for chart_border_start earcon)
+    if (explorationMode === "batch" && PlayFunction.active && PlayFunction.source === "play" && 
+        cursorCoords && cursorCoords.length > 0) {
+      // If we were at the left boundary before and now we're not, play the start earcon
+      if (wasAtLeftBoundaryRef.current && !isAtLeftBoundaryNow && !batchStartEarconPlayedRef.current) {
+        // Only play if moving forward (positive speed) - leaving left boundary going right
+        if (PlayFunction.speed > 0) {
+          playAudioSample("chart_border_start", { volume: -15 });
+          batchStartEarconPlayedRef.current = true;
+          console.log("Batch sonification leaving left boundary - playing chart_border_start.mp3");
+        }
+      }
+      // Update the tracking ref for next tick
+      wasAtLeftBoundaryRef.current = isAtLeftBoundaryNow;
     }
 
     // Check for landmark intersections

@@ -59,7 +59,7 @@ export function jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, ann
   updateCursor(landmark.x);
   
   const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
-  showLandmarkToastAtPosition(landmark, screenPosition, 2000, showLandmarkToast);
+  // showLandmarkToastAtPosition(landmark, screenPosition, 2000, showLandmarkToast);
   
   // Play landmark earcon immediately when jumping via shortcut
   // This ensures the earcon plays even if cursor was already at the landmark
@@ -69,7 +69,7 @@ export function jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, ann
   });
   
   // Announce for screen readers
-  announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
+  // announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
 }
 
 /**

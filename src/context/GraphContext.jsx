@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import { decodeFromImportLink, getHashParameter, clearHashParameter } from "../utils/urlUtils";
+import audioSampleManager from "../utils/audioSamples";
 
 const GraphContext = createContext();
 
@@ -8,12 +9,12 @@ export const GraphContextProvider = ({ children }) => {
   const [functionDefinitions, setFunctionDefinitions] = useState(initGraphObject.functions);
   const [graphSettings, setGraphSettings] = useState(initGraphObject.graphSettings);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [functionInput, setFunctionInput] = useState("[[x+5,x < -4],[1/2*x^2,-4<=x < 1],[x-2,1<=x < 3],[5,x==3],[x-2,3 < x < 5],[3,5<= x]]"); // TODO delete
   const [cursorCoords, setCursorCoords] = useState([]);
   const [inputErrorMes, setInputErrorMes] = useState(null); // TODO delete
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
-  const [graphBounds, setGraphBounds] = useState({
+  const [graphBounds, setGraphBoundsInternal] = useState({
     xMin: -10,
     xMax: 10,
     yMin: -10,
@@ -46,15 +47,15 @@ export const GraphContextProvider = ({ children }) => {
           if (decodedData) {
             setFunctionDefinitions(decodedData.functions);
             setGraphSettings(decodedData.graphSettings);
-            
+
             // Set graph bounds from loaded settings if available
             if (decodedData.graphSettings.defaultView) {
               const [xMin, xMax, yMax, yMin] = decodedData.graphSettings.defaultView;
-              setGraphBounds({ xMin, xMax, yMin, yMax });
+              setGraphBoundsInternal({ xMin, xMax, yMin, yMax });
             }
-            
+
             console.log('Loaded data from import link:', decodedData);
-            
+
             // Clear the hash parameter after loading
             // clearHashParameter();
           } else {
@@ -79,6 +80,63 @@ export const GraphContextProvider = ({ children }) => {
       </div>
     );
   }
+
+  // Validated setGraphBounds that respects minBoundDifference and maxBoundDifference
+  const setGraphBounds = (newBounds) => {
+    const minDiff = graphSettings?.minBoundDifference || 0.1;
+    const maxDiff = graphSettings?.maxBoundDifference || 100;
+
+    // If newBounds is a function, call it with current bounds
+    const bounds = typeof newBounds === 'function' ? newBounds(graphBounds) : newBounds;
+
+    // Validate bounds and track if any corrections were made
+    let xDiff = bounds.xMax - bounds.xMin;
+    let yDiff = bounds.yMax - bounds.yMin;
+    let boundsWereCorrected = false;
+
+    // Ensure minimum difference is respected
+    if (xDiff < minDiff) {
+      const center = (bounds.xMin + bounds.xMax) / 2;
+      bounds.xMin = center - minDiff / 2;
+      bounds.xMax = center + minDiff / 2;
+      xDiff = minDiff;
+      boundsWereCorrected = true;
+    }
+
+    if (yDiff < minDiff) {
+      const center = (bounds.yMin + bounds.yMax) / 2;
+      bounds.yMin = center - minDiff / 2;
+      bounds.yMax = center + minDiff / 2;
+      yDiff = minDiff;
+      boundsWereCorrected = true;
+    }
+
+    // Ensure maximum difference is respected
+    if (xDiff > maxDiff) {
+      const center = (bounds.xMin + bounds.xMax) / 2;
+      bounds.xMin = center - maxDiff / 2;
+      bounds.xMax = center + maxDiff / 2;
+      boundsWereCorrected = true;
+    }
+
+    if (yDiff > maxDiff) {
+      const center = (bounds.yMin + bounds.yMax) / 2;
+      bounds.yMin = center - maxDiff / 2;
+      bounds.yMax = center + maxDiff / 2;
+      boundsWereCorrected = true;
+    }
+
+    // Play deny earcon if bounds were corrected and audio is enabled
+    if (boundsWereCorrected && isAudioEnabled) {
+      try {
+        audioSampleManager.playSample("deny", { volume: -15 });
+      } catch (error) {
+        console.log("Could not play deny earcon:", error);
+      }
+    }
+
+    setGraphBoundsInternal(bounds);
+  };
 
   // Utility function to focus the chart
   const focusChart = () => {
@@ -107,7 +165,7 @@ export const GraphContextProvider = ({ children }) => {
         setIsAudioEnabled,
         graphBounds,
         setGraphBounds,
-        PlayFunction, 
+        PlayFunction,
         setPlayFunction,
         playActiveRef,
         timerRef,
@@ -163,7 +221,7 @@ const initGraphObject = {
         //   "y": 0,
         //   "label": "landmark 1",
         //   "shape": "diamond",
-        //   "earcon": "earcon1",      
+        //   "earcon": "earcon1",
         //   "shortcut": "1"           // set by app
         // },
       ]
@@ -200,7 +258,7 @@ const initGraphObject = {
       "showGrid": true,
       "showAxes": true,
       "gridColor": "#CCCCCC",
-      
+
       "restrictionMode": "none" // "none", "read-only", "full-restriction"
   }
 };

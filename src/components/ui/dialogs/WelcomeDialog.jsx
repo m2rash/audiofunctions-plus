@@ -214,7 +214,12 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
 
   const handleClose = () => {
     // Mark as seen in localStorage so it doesn't show again on startup
-    localStorage.setItem('audiofunctions-welcome-seen', 'true');
+    try {
+      localStorage.setItem('audiofunctions-welcome-seen', 'true');
+    } catch (error) {
+      console.warn('Unable to save welcome dialog state to localStorage:', error);
+      // Dialog will show again on next visit if localStorage is disabled
+    }
     onClose();
   };
 

@@ -10,28 +10,28 @@ import landmarkEarconManager from './landmarkEarcons';
  */
 export function getScreenPosition(graphX, graphY, graphBounds) {
   const chartElement = document.getElementById('jxgbox');
-  
+
   if (!chartElement) {
     console.warn('Chart element not found, using fallback position');
     return { x: 150, y: 150 };
   }
 
   const chartRect = chartElement.getBoundingClientRect();
-  
+
   const xRange = graphBounds.xMax - graphBounds.xMin;
   const yRange = graphBounds.yMax - graphBounds.yMin;
-  
+
   if (xRange === 0 || yRange === 0) {
     console.warn('Invalid graph bounds range');
     return { x: 150, y: 150 };
   }
-  
+
   const relativeX = (graphX - graphBounds.xMin) / xRange;
   const relativeY = (graphBounds.yMax - graphY) / yRange;
-  
+
   const screenX = chartRect.left + (relativeX * chartRect.width);
   const screenY = chartRect.top + (relativeY * chartRect.height);
-  
+
   return { x: screenX, y: screenY };
 }
 
@@ -57,17 +57,13 @@ export function showLandmarkToastAtPosition(landmark, screenPosition, duration, 
  */
 export function jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, announce, showLandmarkToast) {
   updateCursor(landmark.x);
-  
-  const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
+
+  // const screenPosition = getScreenPosition(landmark.x, landmark.y, graphBounds);
   // showLandmarkToastAtPosition(landmark, screenPosition, 2000, showLandmarkToast);
-  
+
   // Play landmark earcon immediately when jumping via shortcut
   // This ensures the earcon plays even if cursor was already at the landmark
-  const shape = landmark.shape || landmark.appearance || "triangle";
-  landmarkEarconManager.playLandmarkEarcon(landmark, {
-    pan: (landmark.x - graphBounds.xMin) / (graphBounds.xMax - graphBounds.xMin) * 2 - 1 // -1 to 1
-  });
-  
+
   // Announce for screen readers
   // announce(`Jumped to ${landmark.label || 'landmark'} at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
 }
@@ -81,8 +77,8 @@ export function jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, ann
 export function validateActiveFunction(functionDefinitions, cursorCoords) {
   const activeFunctions = getActiveFunctions(functionDefinitions);
   if (activeFunctions.length === 0) {
-    return { 
-      valid: false, 
+    return {
+      valid: false,
       message: "No active function available",
       activeFunction: null,
       activeFunctionIndex: -1,
@@ -94,8 +90,8 @@ export function validateActiveFunction(functionDefinitions, cursorCoords) {
   const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
 
   if (!cursorCoords || cursorCoords.length === 0) {
-    return { 
-      valid: false, 
+    return {
+      valid: false,
       message: "No cursor position available",
       activeFunction,
       activeFunctionIndex,
@@ -105,8 +101,8 @@ export function validateActiveFunction(functionDefinitions, cursorCoords) {
 
   const cursorCoord = cursorCoords.find(coord => coord.functionId === activeFunction.id);
   if (!cursorCoord) {
-    return { 
-      valid: false, 
+    return {
+      valid: false,
       message: "No cursor position for active function",
       activeFunction,
       activeFunctionIndex,
@@ -132,7 +128,7 @@ export function validateActiveFunction(functionDefinitions, cursorCoords) {
  * @returns {Object} Result with found landmark index or -1
  */
 export function findLandmarkAtPosition(landmarks, x, y, tolerance = 0.01) {
-  const existingLandmarkIndex = landmarks.findIndex(landmark => 
+  const existingLandmarkIndex = landmarks.findIndex(landmark =>
     Math.abs(landmark.x - x) < tolerance && Math.abs(landmark.y - y) < tolerance
   );
 
@@ -153,7 +149,7 @@ export function findLandmarkAtPosition(landmarks, x, y, tolerance = 0.01) {
  */
 export function handleExistingLandmarkFound(landmark, landmarkIndex, functionIndex, openDialog, announce) {
   announce(`Opening existing landmark at x = ${landmark.x.toFixed(2)}, y = ${landmark.y.toFixed(2)}`);
-  
+
   openDialog("edit-landmark", {
     landmarkData: {
       functionIndex: functionIndex,
@@ -174,11 +170,11 @@ export function handleExistingLandmarkFound(landmark, landmarkIndex, functionInd
  * @returns {Object} Result object
  */
 export function addLandmarkAtCursorPosition(
-  functionDefinitions, 
-  cursorCoords, 
+  functionDefinitions,
+  cursorCoords,
   setFunctionDefinitions,
-  announce, 
-  showInfoToast, 
+  announce,
+  showInfoToast,
   openDialog
 ) {
   // Validate active function and cursor
@@ -198,10 +194,10 @@ export function addLandmarkAtCursorPosition(
 
   if (existingResult.found) {
     handleExistingLandmarkFound(
-      existingResult.landmark, 
-      existingResult.index, 
-      activeFunctionIndex, 
-      openDialog, 
+      existingResult.landmark,
+      existingResult.index,
+      activeFunctionIndex,
+      openDialog,
       announce
     );
     return { success: true, message: "Existing landmark opened" };
@@ -209,7 +205,7 @@ export function addLandmarkAtCursorPosition(
 
   // Create new landmark
   const result = addLandmarkWithValidation(functionDefinitions, activeFunctionIndex, x, y);
-  
+
   if (!result.success) {
     announce(result.message);
     if (result.message.includes("Maximum")) {
@@ -272,7 +268,7 @@ export function calculateYFromX(xValue, functionDef, functionType) {
         error: null
       };
     }
-    
+
     return {
       success: false,
       yValue: NaN,

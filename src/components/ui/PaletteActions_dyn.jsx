@@ -258,7 +258,7 @@ export const useDynamicKBarActions = () => {
   {
     id: "zoom-in",
     name: "Zoom In",
-    shortcut: ["z"],
+    shortcut: ["z (may hold)"],
     keywords: "zoom, in, closer, magnify, enlarge, scale, view, detail",
     parent: "quick-options",
     perform: () => {ZoomBoard(false);; setTimeout(() => focusChart(), 100);},
@@ -268,7 +268,7 @@ export const useDynamicKBarActions = () => {
   {
     id: "zoom-out",
     name: "Zoom Out",
-    shortcut: ["shift+z"],
+    shortcut: ["shift+z (may hold)"],
     keywords: "zoom, out, farther, shrink, reduce, scale, view, overview",
     parent: "quick-options",
     perform: () => {ZoomBoard(true);; setTimeout(() => focusChart(), 100);},

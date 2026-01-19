@@ -9,7 +9,7 @@ import { useDialog } from "../../context/DialogContext";
 
 // Export the ZoomBoard function so it can be used in other components
 export const useZoomBoard = () => {
-  const { setGraphBounds, graphSettings, isAudioEnabled } = useGraphContext();
+  const { setGraphBounds } = useGraphContext();
 
   return (out, xOnly = false, yOnly = false) => {
     const scaleFactor = {x: 0.9, y: 0.9};
@@ -30,6 +30,57 @@ export const useZoomBoard = () => {
         yMax: centerY + halfWidthY,
       };
     });
+  };
+};
+
+// Export the CenterAtCursor function so it can be used in other components
+export const useCenterAtCursor = () => {
+  const { setGraphBounds, cursorCoords, graphBounds } = useGraphContext();
+  const { announce } = useAnnouncement();
+  const { showInfoToast } = useInfoToast();
+
+  return () => {
+    if (!cursorCoords || cursorCoords.length === 0) {
+      announce("No cursor position available");
+      return;
+    }
+
+    // Use the first cursor coordinate (primary cursor position)
+    const currentCursor = cursorCoords[0];
+    const cursorX = Number(currentCursor.x);
+    const cursorY = Number(currentCursor.y);
+
+    // Get current view dimensions
+    const { xMin, xMax, yMin, yMax } = graphBounds;
+    const viewWidth = xMax - xMin;
+    const viewHeight = yMax - yMin;
+
+    // Calculate the current center of the view
+    const currentCenterX = (xMin + xMax) / 2;
+    const currentCenterY = (yMin + yMax) / 2;
+
+    // Calculate the offset needed to center the cursor
+    const offsetX = cursorX - currentCenterX;
+    const offsetY = cursorY - currentCenterY;
+
+    // Calculate new bounds by shifting the current bounds
+    const newXMin = xMin + offsetX;
+    const newXMax = xMax + offsetX;
+    const newYMin = yMin + offsetY;
+    const newYMax = yMax + offsetY;
+
+    // Set the new bounds
+    setGraphBounds({
+      xMin: newXMin,
+      xMax: newXMax,
+      yMin: newYMin,
+      yMax: newYMax
+    });
+
+    const roundedX = Number(cursorX).toFixed(2);
+    const roundedY = Number(cursorY).toFixed(2);
+    announce(`View centered at cursor position: x = ${roundedX}, y = ${roundedY}`);
+    showInfoToast(`Centered at (${roundedX}, ${roundedY})`, 1500);
   };
 };
 
@@ -68,6 +119,9 @@ export default function KeyboardHandler() {
 
     // Use the exported zoom function
     const ZoomBoard = useZoomBoard();
+    
+    // Use the exported center at cursor function
+    const centerAtCursor = useCenterAtCursor();
 
     // Function to get sorted navigation points (current bounds + landmarks within view)
     const getSortedNavigationPoints = () => {
@@ -222,6 +276,8 @@ export default function KeyboardHandler() {
         }
     };
 
+
+
     useEffect(() => {
         // Function to handle key down events
         const handleKeyDown = async (event) => {
@@ -255,6 +311,14 @@ export default function KeyboardHandler() {
                     showInfoToast,
                     openDialog
                 );
+                return;
+            }
+
+            // Handle Ctrl+Z for centering view at cursor
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey && !event.altKey) {
+                event.preventDefault();
+                event.stopPropagation();
+                centerAtCursor();
                 return;
             }
 

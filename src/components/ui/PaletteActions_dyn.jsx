@@ -1,14 +1,14 @@
 import { useRegisterActions, Priority } from "kbar";
 import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, CircleGauge, List, ZoomIn, ZoomOut,
   SwatchBook, Sun, Moon, SunMoon, Contrast, Plus, Edit,
-  ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info } from "lucide-react"
+  ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info, Target } from "lucide-react"
 import { useGraphContext } from "../../context/GraphContext";
 import { getFunctionNameN, updateFunctionN, setFunctionInstrumentN, getFunctionInstrumentN, getActiveFunctions, getLandmarksN, findLandmarkByShortcut } from "../../utils/graphObjectOperations";
 import { getScreenPosition, jumpToLandmarkWithToast, addLandmarkAtCursorPosition } from "../../utils/landmarkUtils";
 import landmarkEarconManager from "../../utils/landmarkEarcons";
 import { useDialog } from "../../context/DialogContext";
 import { setTheme } from "../../utils/theme";
-import { useZoomBoard } from "./KeyboardHandler";
+import { useZoomBoard, useCenterAtCursor } from "./KeyboardHandler";
 import { useAnnouncement } from '../../context/AnnouncementContext';
 import { useInfoToast } from '../../context/InfoToastContext';
 
@@ -42,6 +42,7 @@ export const useDynamicKBarActions = () => {
   const isFullyRestricted = graphSettings?.restrictionMode === "full-restriction";
 
   const ZoomBoard = useZoomBoard();
+  const centerAtCursor = useCenterAtCursor();
 
   const showCoordinates = () => {
     if (!cursorCoords || cursorCoords.length === 0) {
@@ -242,6 +243,36 @@ export const useDynamicKBarActions = () => {
     parent: "quick-options",
     perform: () => {showViewBounds(); setTimeout(() => focusChart(), 100);},
     icon: <Ruler className="size-5 shrink-0 opacity-70" />,
+  },
+
+  {
+    id: "center-at-cursor",
+    name: "Center View at Cursor",
+    shortcut: ["ctrl+z"],
+    keywords: "center, cursor, view, middle, position, focus, centering, navigate, jump, move",
+    parent: "quick-options",
+    perform: () => {centerAtCursor(); setTimeout(() => focusChart(), 100);},
+    icon: <Target className="size-5 shrink-0 opacity-70" />,
+  },
+
+  {
+    id: "zoom-in",
+    name: "Zoom In",
+    shortcut: ["z"],
+    keywords: "zoom, in, closer, magnify, enlarge, scale, view, detail",
+    parent: "quick-options",
+    perform: () => {ZoomBoard(false);; setTimeout(() => focusChart(), 100);},
+    icon: <ZoomIn className="size-5 shrink-0 opacity-70" />
+  },
+
+  {
+    id: "zoom-out",
+    name: "Zoom Out",
+    shortcut: ["shift+z"],
+    keywords: "zoom, out, farther, shrink, reduce, scale, view, overview",
+    parent: "quick-options",
+    perform: () => {ZoomBoard(true);; setTimeout(() => focusChart(), 100);},
+    icon: <ZoomOut className="size-5 shrink-0 opacity-70" />,
   },
 
   {

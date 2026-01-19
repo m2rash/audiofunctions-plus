@@ -1,5 +1,5 @@
 import { useRegisterActions, Priority } from "kbar";
-import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, CircleGauge, List, ZoomIn, ZoomOut, 
+import { Volume2, VolumeX, MapPin, Eye, Play, SquareActivity, ChartSpline, CircleGauge, List, ZoomIn, ZoomOut,
   SwatchBook, Sun, Moon, SunMoon, Contrast, Plus, Edit,
   ChartArea, FileChartLine, Import, Share2, FileUp, FileDown, ListRestart, RotateCcw, Music, Ruler, HelpCircle, BookOpen, Info } from "lucide-react"
 import { useGraphContext } from "../../context/GraphContext";
@@ -27,10 +27,10 @@ export const useDynamicKBarActions = () => {
   const jumpToLandmarkByShortcut = (shortcut) => {
     const activeFunctions = getActiveFunctions(functionDefinitions);
     if (activeFunctions.length === 0) return;
-    
+
     const activeFunction = activeFunctions[0];
     const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
-    
+
     const landmark = findLandmarkByShortcut(functionDefinitions, activeFunctionIndex, shortcut);
     if (landmark) {
       jumpToLandmark(landmark);
@@ -54,13 +54,29 @@ export const useDynamicKBarActions = () => {
         const functionName = getFunctionNameN(functionDefinitions, functionIndex) || `Function ${functionIndex + 1}`;
         const roundedX = Number(coord.x).toFixed(2);
         const roundedY = Number(coord.y).toFixed(2);
-        return `${functionName}: x = ${roundedX}, y = ${roundedY}`;
+
+        // Check if there's a landmark at the current position
+        const landmarks = getLandmarksN(functionDefinitions, functionIndex);
+        const epsilon = 0.01; // Small tolerance for floating point comparison
+        const landmarkAtPosition = landmarks.find(landmark =>
+            Math.abs(landmark.x - coord.x) < epsilon &&
+            Math.abs(landmark.y - coord.y) < epsilon
+        );
+
+        let message = `${functionName}: `;
+        if (landmarkAtPosition) {
+            message += `"${landmarkAtPosition.label}" at \n`;
+        }
+        message += `x = ${roundedX}, y = ${roundedY}`;
+
+        return message;
     });
 
     const message = messages.join('\n');
     announce(`Current Coordinates:\n\n${message}`);
     showInfoToast(`Current Coordinates:\n\n${message}`);
   };
+
 
   const showViewBounds = () => {
     const { xMin, xMax, yMin, yMax } = graphBounds;
@@ -76,10 +92,10 @@ export const useDynamicKBarActions = () => {
   // Switch to next active function
   const switchToNextFunction = () => {
     if (!functionDefinitions || functionDefinitions.length === 0) return;
-    
+
     // Find currently active function
     const currentActiveIndex = functionDefinitions.findIndex(func => func.isActive);
-    
+
     // If no function is active, activate the first one
     if (currentActiveIndex === -1) {
       if (functionDefinitions.length > 0) {
@@ -91,18 +107,18 @@ export const useDynamicKBarActions = () => {
       }
       return;
     }
-    
+
     // Find next function index (rotate through the list)
     const nextIndex = (currentActiveIndex + 1) % functionDefinitions.length;
-    
+
     // Deactivate all functions and activate the next one
     const updatedDefinitions = functionDefinitions.map((func, index) => ({
       ...func,
       isActive: index === nextIndex
     }));
-    
+
     setFunctionDefinitions(updatedDefinitions);
-    
+
     // Announce the switch
     const functionName = getFunctionNameN(functionDefinitions, nextIndex) || `Function ${nextIndex + 1}`;
     announce(`Switched to ${functionName}`);
@@ -112,14 +128,14 @@ export const useDynamicKBarActions = () => {
   // Show specific function and hide all others
   const showOnlyFunction = (targetIndex) => {
     if (!functionDefinitions || targetIndex < 0 || targetIndex >= functionDefinitions.length) return;
-    
+
     const updatedDefinitions = functionDefinitions.map((func, index) => ({
       ...func,
       isActive: index === targetIndex
     }));
-    
+
     setFunctionDefinitions(updatedDefinitions);
-    
+
     // Announce the switch
     const functionName = getFunctionNameN(functionDefinitions, targetIndex) || `Function ${targetIndex + 1}`;
     announce(`Switched to ${functionName}`);
@@ -129,37 +145,37 @@ export const useDynamicKBarActions = () => {
   // Toggle sonification type for active function and apply to all functions
   const toggleSonificationType = () => {
     if (!functionDefinitions || functionDefinitions.length === 0) return;
-    
+
     // Find currently active function
     const activeIndex = functionDefinitions.findIndex(func => func.isActive);
     if (activeIndex === -1) return;
-    
+
     const currentInstrument = getFunctionInstrumentN(functionDefinitions, activeIndex);
-    
+
     // Toggle between discrete (guitar) and continuous (clarinet) sonification
     const newInstrument = currentInstrument === 'guitar' ? 'clarinet' : 'guitar';
     const sonificationType = newInstrument === 'guitar' ? 'discrete' : 'continuous';
-    
+
     // Apply the new instrument to ALL functions
-    const updatedDefinitions = functionDefinitions.map((func, index) => 
+    const updatedDefinitions = functionDefinitions.map((func, index) =>
       setFunctionInstrumentN([func], 0, newInstrument)[0]
     );
-    
+
     setFunctionDefinitions(updatedDefinitions);
 
     announce(`Sonification type changed to ${sonificationType}`);
     showInfoToast(`Sonification type: ${sonificationType}`, 1500);
-    
+
     console.log(`Sonification type changed to ${sonificationType} (${newInstrument}) for all functions`);
   };
 
   // Get current sonification type for active function
   const getCurrentSonificationType = () => {
     if (!functionDefinitions || functionDefinitions.length === 0) return 'continuous';
-    
+
     const activeIndex = functionDefinitions.findIndex(func => func.isActive);
     if (activeIndex === -1) return 'continuous';
-    
+
     const currentInstrument = getFunctionInstrumentN(functionDefinitions, activeIndex);
     return currentInstrument === 'guitar' ? 'discrete' : 'continuous';
   };
@@ -203,8 +219,8 @@ export const useDynamicKBarActions = () => {
       keywords: "audio, sound, enable, disable, start, stop, toggle, sonify, sonification, music, tone, mute, unmute, volume, hearing",
       parent: "quick-options",
       perform: () => {setIsAudioEnabled(prev => !prev); setTimeout(() => focusChart(), 100);},
-      icon: isAudioEnabled 
-        ? <VolumeX className="size-5 shrink-0 opacity-70" /> 
+      icon: isAudioEnabled
+        ? <VolumeX className="size-5 shrink-0 opacity-70" />
         : <Volume2 className="size-5 shrink-0 opacity-70" />,
     },
 
@@ -237,7 +253,7 @@ export const useDynamicKBarActions = () => {
     perform: () => {switchToNextFunction(); setTimeout(() => focusChart(), 100);},
     icon: <ListRestart className="size-5 shrink-0 opacity-70" />,
   },
-  
+
   {
     id: "play-function",
     name: "Play Function",
@@ -273,7 +289,7 @@ export const useDynamicKBarActions = () => {
           setGraphBounds({ xMin: -10, xMax: 10, yMin: -10, yMax: 10 });
         }
         updateCursor(0);
-        
+
         announce("View reset to default values");
         showInfoToast("Default view", 1500);
 
@@ -290,7 +306,7 @@ export const useDynamicKBarActions = () => {
     icon: <MapPin className="size-5 shrink-0 opacity-70" />,
   },
 
-  
+
   // Individual landmark actions (jump/navigate)
   ...landmarks.map((landmark, index) => ({
     id: `jump-to-landmark-${index}`,
@@ -305,7 +321,7 @@ export const useDynamicKBarActions = () => {
     },
     icon: <MapPin className="size-5 shrink-0 opacity-70" />,
   })),
-  
+
   // Edit landmarks parent - only show if there are landmarks
   ...(landmarks.length > 0 ? [{
     id: "edit-landmarks",
@@ -314,7 +330,7 @@ export const useDynamicKBarActions = () => {
     parent: "landmarks",
     icon: <Edit className="size-5 shrink-0 opacity-70" />,
   }] : []),
-  
+
   // Edit landmark actions
   ...landmarks.map((landmark, index) => ({
     id: `edit-landmark-${index}`,
@@ -367,7 +383,7 @@ export const useDynamicKBarActions = () => {
   // Individual function selection actions
   ...(functionDefinitions || []).map((func, index) => {
     const functionName = getFunctionNameN(functionDefinitions, index) || `Function ${index + 1}`;
-    
+
     return {
       id: `show-function-${func.id}`,
       name: `Show ${functionName}`,
@@ -388,7 +404,7 @@ export const useDynamicKBarActions = () => {
       shortcut: ["f"],
       parent: "function-options",
       priority: Priority.HIGH,
-      keywords: isReadOnly 
+      keywords: isReadOnly
         ? "function, view, read, inspect, examine, look, display, show, formula, equation, math"
         : "function, change, edit, modify, create, add, insert, remove, delete, formula, equation, math, input, type, write",
       perform: () => {openDialog("edit-function");},
@@ -430,7 +446,7 @@ export const useDynamicKBarActions = () => {
       name: "Import/Export",
       keywords: "import, export, json, file, save, load, share, backup, restore, transfer, exchange",
       icon: <Import className="size-5 shrink-0 opacity-70" />,
-      priority: Priority.LOW      
+      priority: Priority.LOW
     },
     {
       id: "share",

@@ -9,7 +9,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [inputErrors, setInputErrors] = useState({});
-  
+
   // Local state for export settings (not saved until export is clicked)
   const [exportSettings, setExportSettings] = useState({
     minBoundDifference: 0.1,
@@ -43,7 +43,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
   // Validation functions
   const validateBoundDifference = (value, field) => {
     const errors = [];
-    
+
     // Check if value is empty or just a minus sign
     if (value === '' || value === '-') {
       errors.push("Value cannot be empty");
@@ -74,7 +74,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
 
   const validateBoundDifferences = (settings) => {
     const errors = {};
-    
+
     // Validate individual fields
     ['minBoundDifference', 'maxBoundDifference'].forEach(field => {
       const fieldErrors = validateBoundDifference(settings[field], field);
@@ -157,7 +157,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
       minBoundDifference: exportSettings.minBoundDifference,
       maxBoundDifference: exportSettings.maxBoundDifference
     }));
-    
+
     // Create export data object
     const exportData = {
       functions: functionDefinitions,
@@ -169,12 +169,12 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
         restrictionMode: exportSettings.restrictionMode
       }
     };
-    
+
     try {
       const jsonString = JSON.stringify(exportData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       const a = document.createElement('a');
       a.href = url;
       a.download = 'audiofunctions-export.json';
@@ -182,7 +182,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       setDownloadSuccess(true);
       announceStatus('JSON file downloaded successfully.');
       onClose();
@@ -203,12 +203,12 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
     // Allow empty strings, minus signs and valid numbers during typing
     if (value === '' || value === '-' || !isNaN(parseFloat(value))) {
       const newValue = value === '' || value === '-' ? value : parseFloat(value);
-      const newSettings = { 
-        ...exportSettings, 
-        [field]: newValue 
+      const newSettings = {
+        ...exportSettings,
+        [field]: newValue
       };
       setExportSettings(newSettings);
-      
+
       // Validate in real-time but only show errors after user interaction
       const errors = validateBoundDifferences(newSettings);
       setInputErrors(errors);
@@ -218,18 +218,18 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
   const handleBlur = (field, value) => {
     // On blur, ensure a valid value is set
     let finalValue = value;
-    
+
     if (value === '' || value === '-') {
       finalValue = field === 'minBoundDifference' ? 0.1 : 100;
       const newSettings = { ...exportSettings, [field]: finalValue };
       setExportSettings(newSettings);
     }
-    
+
     // Validate after blur to show any errors
     const currentSettings = { ...exportSettings, [field]: finalValue };
     const errors = validateBoundDifferences(currentSettings);
     setInputErrors(errors);
-    
+
     if (errors[field]) {
       announceStatus(`Error in ${field}: ${errors[field].join('. ')}`);
     }
@@ -259,7 +259,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
           />
         </div>
         {hasError && (
-          <div 
+          <div
             id={`${id}-error`}
             className="error-message mt-1 text-sm"
             role="alert"
@@ -287,11 +287,11 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
               Export the current state including all defined functions with their sonifications, movement adjustment values, the current view, and the active function. Configure additional export settings below.
             </Description>
           </div>
-          
+
           {/* Live region for status announcements */}
-          <div 
-            aria-live="polite" 
-            aria-atomic="true" 
+          <div
+            aria-live="polite"
+            aria-atomic="true"
             className="sr-only"
             role="status"
           >
@@ -365,6 +365,7 @@ const ExportJsonDialog = ({ isOpen, onClose }) => {
                       {renderBoundInput('maxBoundDifference', 'Max Axis Interval', 'max-bound-diff')}
                     </div>
                   </div>
+                  <br />
                 </div>
               )}
             </div>

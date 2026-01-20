@@ -4,7 +4,7 @@ subtitle: "Sonnification of mathematical functions"
 lang: en
 ---
 
-{{< include README.md >}}
+{{< include home.md >}}
 
 <!--
 ::: {.column-margin}

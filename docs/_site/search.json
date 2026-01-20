@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Audiofunctions+",
     "section": "",
-    "text": "This folder contains the documentation for Audiofunctions+. It has been prepared using quarto.\nThese are the basic steps to build the documentation locally:\n\nTo preview, use quarto preview in the docs folder.\nTo render the documentation, use quarto render in the docs folder.\n\nYou can publish the documentation to GitHub Pages by using quarto publish gh-pages in the docs folder. However, this step is already automated using GitHub Actions."
+    "text": "Audiofunctions+ is a web application that helps visually impaired students learn mathematical functions through sound. By converting function graphs into audio, you can explore and understand mathematical relationships through hearing.\n\n\n\nExplore functions with sound: Move through graphs and hear how functions change\nNavigate easily: Use simple keyboard shortcuts to control everything\nWork with multiple functions: Define and compare different mathematical expressions\nSet landmarks: Mark important points for quick navigation\n\n\n\n\n\nOpen the app and press F to define your first function\nMove around using arrow keys or J/L to explore the graph\nTurn on sound by pressing P to start hearing the function\nAdjust the view with Z for zoom, W A S D to move around\n\n\n\n\n\n\nComplete list of all keyboard controls for navigating and using Audiofunctions+.\n\n\n\nLearn about the different sounds that guide you through the application.\n\n\n\nHow to export and import your function definitions and settings.\n\n\n\n\nFirst time using Audiofunctions+? Start by pressing Ctrl+K (or Cmd+K on Mac) to open the command menu - it will guide you through available actions.\nHaving issues or suggestions? We’d love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone.\n\nAudiofunctions+ is part of the SONAIRGRAPH project, funded by the European Union through the Erasmus+ programme."
   },
   {
     "objectID": "index.html#funding",
@@ -46,20 +46,279 @@
     "href": "json.html#json-file-structure",
     "title": "Exporting/Importing files",
     "section": "JSON file structure",
-    "text": "JSON file structure\nThe JSON file used for importing and exporting configurations contains a list of the defined functions and the graph settings. Below is an example of a JSON file structure:\n{\n  \"functions\": [\n    {\n      \"id\": \"f1\",\n      \"functionName\": \"Function 1\",\n      \"type\": \"function\",\n      \"functionDef\": \"sin(x)\",\n      \"isActive\": true,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    },\n    {\n      \"id\": \"f2\",\n      \"functionName\": \"Function 2\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\n          \"x^2\",\n          \"x &lt;= 0\"\n        ],\n        [\n          \"x + 1\",\n          \" 0 &lt; x\"\n        ]\n      ],\n      \"isActive\": false,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    }\n  ],\n  \"graphSettings\": {\n    \"defaultView\": [\n      -10,\n      10,\n      10,\n      -10\n    ],\n    \"minBoundDifference\": 0.1,\n    \"maxBoundDifference\": 100,\n    \"showGrid\": true,\n    \"showAxes\": true,\n    \"gridColor\": \"#CCCCCC\",\n    \"restrictionMode\": \"none\"\n  }\n}\nIn this example, the JSON file contains two functions: a sine function and a piecewise function. The graphSettings section includes various settings for the graph display, such as the default view boundaries and grid visibility."
+    "text": "JSON file structure\nThe JSON file used for importing and exporting configurations contains a list of the defined functions and the graph settings. Below is an example of a JSON file structure:\n{\n  \"functions\": [\n    {\n      \"id\": \"f1\",\n      \"functionName\": \"Function 1\",\n      \"type\": \"function\",\n      \"functionDef\": \"sin(x)\",\n      \"isActive\": true,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    },\n    {\n      \"id\": \"f2\",\n      \"functionName\": \"Function 2\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\"x^2\", \"x &lt;= 0\"],\n        [\"x + 1\", \" 0 &lt; x\"]\n      ],\n      \"isActive\": false,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    }\n  ],\n  \"graphSettings\": {\n    \"defaultView\": [-10, 10, 10, -10],\n    \"minBoundDifference\": 0.1,\n    \"maxBoundDifference\": 100,\n    \"showGrid\": true,\n    \"showAxes\": true,\n    \"gridColor\": \"#CCCCCC\",\n    \"restrictionMode\": \"none\"\n  }\n}\nIn this example, the JSON file contains two functions: a sine function and a piecewise function. The graphSettings section includes various settings for the graph display, such as the default view boundaries and grid visibility."
   },
   {
     "objectID": "json.html#tweaking-json-files",
     "href": "json.html#tweaking-json-files",
     "title": "Exporting/Importing files",
     "section": "Tweaking JSON Files",
-    "text": "Tweaking JSON Files\nYou can manually edit the JSON file to modify function definitions or graph settings before importing it back into Audiofunctions+. For instance, you can visualize the following “non-graph” function\n\n\n\nPlotting two functions simultaneously\n\n\nexample in the following way.\nInsert the following date in the edit functions menu:\n\n\n\nEditing a non-graph function\n\n\nExport it to a JSON file as explained above, and then open the JSON file in a text editor. You will see something like this:\n{\n  \"functions\": [\n    {\n      \"id\": \"f1\",\n      \"functionName\": \"Function 1\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\n          \"0\",\n          \"x&lt;0\"\n        ],\n        [\n          \"1/10 x^2\",\n          \"x&gt;=0\"\n        ]\n      ],\n      \"isActive\": false,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    },\n    {\n      \"id\": \"f2\",\n      \"functionName\": \"Function 2\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\n          \"-1/20 x^2\",\n          \"x&gt;=0\"\n        ]\n      ],\n      \"isActive\": true,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    }\n  ],\n  \"graphSettings\": {\n    \"defaultView\": [\n      -10,\n      10,\n      10,\n      -10\n    ],\n    \"minBoundDifference\": 0.1,\n    \"maxBoundDifference\": 100,\n    \"showGrid\": true,\n    \"showAxes\": true,\n    \"gridColor\": \"#CCCCCC\",\n    \"restrictionMode\": \"none\"\n  }\n}\nChange the field isActive of the first function from false to true, save the file and import it back into Audiofunctions+ as explained above.\nWhen you activate the sonification, you will hear both functions sonified simultaneously."
+    "text": "Tweaking JSON Files\nYou can manually edit the JSON file to modify function definitions or graph settings before importing it back into Audiofunctions+. For instance, you can visualize the following “non-graph” function\n\n\n\nPlotting two functions simultaneously\n\n\nexample in the following way.\nInsert the following date in the edit functions menu:\n\n\n\nEditing a non-graph function\n\n\nExport it to a JSON file as explained above, and then open the JSON file in a text editor. You will see something like this:\n{\n  \"functions\": [\n    {\n      \"id\": \"f1\",\n      \"functionName\": \"Function 1\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [\n        [\"0\", \"x&lt;0\"],\n        [\"1/10 x^2\", \"x&gt;=0\"]\n      ],\n      \"isActive\": false,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    },\n    {\n      \"id\": \"f2\",\n      \"functionName\": \"Function 2\",\n      \"type\": \"piecewise_function\",\n      \"functionDef\": [[\"-1/20 x^2\", \"x&gt;=0\"]],\n      \"isActive\": true,\n      \"instrument\": \"clarinet\",\n      \"pointOfInterests\": [],\n      \"landmarks\": []\n    }\n  ],\n  \"graphSettings\": {\n    \"defaultView\": [-10, 10, 10, -10],\n    \"minBoundDifference\": 0.1,\n    \"maxBoundDifference\": 100,\n    \"showGrid\": true,\n    \"showAxes\": true,\n    \"gridColor\": \"#CCCCCC\",\n    \"restrictionMode\": \"none\"\n  }\n}\nSet the field isActive of all functions from true, save the file and import it back into Audiofunctions+ as explained above.\nWhen you activate the sonification, you will hear both functions sonified simultaneously."
   },
   {
     "objectID": "shortcuts.html",
     "href": "shortcuts.html",
     "title": "Keyboard Shortcuts",
     "section": "",
-    "text": "Command\nAction\nKeyboard shortcut\n\n\n\n\nshow/hide menu\nshow menu to select a command\nctrl+K (cmd+K on Mac)\n\n\nmove cursor (stepwise)\nmove cursor horizontally (stepwise)\nleft and right arrows or J and L keys\n\n\nmove cursor (fluid)\nmove cursor horizontally (fluid)\nshift+(left and right arrows or J and L keys) or mouse move\n\n\njump to left or right edge\nmove cursor to the left (minX) or right (maxX) edge of the view\nctrl+(left and right arrows) (cmd+arrow on Mac)\n\n\nspeed change\nshow menu to increase or decrease playing speed\nM\n\n\nstep size change\nshow menu to increase or decrease step size\nM\n\n\nmove view\nmove the displayed view up, left, down, or right\nW A S D\n\n\nzoom in/out (both axes)\nzoom in/out in both axes\nZ and shift+Z\n\n\nzoom in/out (X axis)\nzoom in/out only on the X axis (only minX and maxX change)\nX+(Z or shift+Z)\n\n\nzoom in/out (Y axis)\nzoom in/out only on the Y axis (only minY and maxY change)\nY+(Z or shift+Z)\n\n\nreset view to default\nset the view position and zoom to its default value\nR\n\n\nturn on/off sonification\nactivate or mute sonification\nP\n\n\nplay function\nstart the function playback—the entire function will be sonified from left to right at given speed\nB\n\n\nswitch sonification\nswitch sonification mode—discrete or continuous\nI\n\n\nshow coordinates\nshow/read out current cursor coordinates (x and y)\nC\n\n\nshow view-bounds\nshow/read out current view boundaries\nV\n\n\nedit function(s)\nactivate form for editing one or more functions\nF\n\n\nnext function\nswitch to next defined function\nN\n\n\nchoose specific function\nswitch to a specific function (max 10 functions—if more functions defined, use command palette)\n1‒9"
+    "text": "Command\nAction\nKeyboard shortcut\n\n\n\n\nshow/hide menu\nshow menu to select a command\nctrl+K (cmd+K on Mac)\n\n\nmove cursor (stepwise)\nmove cursor horizontally (stepwise)\nleft and right arrows or J and L keys\n\n\nmove cursor (fluid)\nmove cursor horizontally (fluid)\nshift+(left and right arrows or J and L keys) or mouse move\n\n\njump to left or right edge\nmove cursor to the left (minX) or right (maxX) edge of the view\nPos1/Home and End\n\n\nspeed change\nshow menu to increase or decrease playing speed\nM\n\n\nstep size change\nshow menu to increase or decrease step size\nM\n\n\nmove view\nmove the displayed view up, left, down, or right\nW A S D\n\n\ncenter cursor\nreorientates the view, that the cursor is in the center\nctrl+Z (cmd+Z on Mac)\n\n\nzoom in/out (both axes)\nrescales both axes to enlarge or shrink the view around its center\nZ and shift+Z (may hold)\n\n\nzoom in/out (only X-axis)\nrescales only in the X-axis to enlarge or shrink the view around its center (only minX and maxX change)\nX+(Z or shift+Z)\n\n\nzoom in/out (only Y-axis)\nrescales only in the Y-axis to enlarge or shrink the view around its center (only minY and maxY change)\nY+(Z or shift+Z)\n\n\nreset view to default\nset the view position and zoom to its default value\nR\n\n\nturn on/off sonification\nactivate or mute sonification\nP\n\n\nplay function\nstart the function playback—the entire function will be sonified from left to right at given speed\nB\n\n\nswitch sonification\nswitch sonification mode—discrete or continuous\nI\n\n\nshow coordinates\nshow/read out current cursor coordinates (x and y)\nC\n\n\nshow view-bounds\nshow/read out current view boundaries\nV\n\n\nedit function(s)\nactivate form for editing one or more functions\nF\n\n\nnext function\nswitch to next defined function\nN\n\n\nchoose specific function\nswitch to a specific function (max 10 functions—if more functions defined, use command palette)\n1‒9\n\n\ncreate/edit landmark\ncreates a new landmark at the cursor position or edits the existing one\nctrl+b\n\n\njumo between landmarks\njumps to the next or previous landmark in the view, if available\ncrtl+(left and right arrow or J and L keys) (cmd+arrow keys on mac)\n\n\njump to landmark\njumps to a specific landmark (in order of creation)\nctrl+(1-9) (cmd+number key on mac)"
+  },
+  {
+    "objectID": "home.html",
+    "href": "home.html",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Audiofunctions+ is a web application that helps visually impaired students learn mathematical functions through sound. By converting function graphs into audio, you can explore and understand mathematical relationships through hearing.\n\n\n\nExplore functions with sound: Move through graphs and hear how functions change\nNavigate easily: Use simple keyboard shortcuts to control everything\nWork with multiple functions: Define and compare different mathematical expressions\nSet landmarks: Mark important points for quick navigation\n\n\n\n\n\nOpen command palette: Ctrl+K (Cmd+K on Mac)\nBasic navigation:\n\nMove cursor: Arrow keys or J/L\nMove view: W, A, S, D\nShow coordinates: C\n\nManage functions:\n\nNew function: Press F and use function editor\nSwitch between functions: N or number keys 1-9\n\nAudio controls:\n\nSonification on/off: P\nPlay entire function: B\nSwitch sonification type: I\n\n\n\n\n\n\nTake full control of your navigation with these advanced movement options:\n\nFluid/stepwise movement: Shift+Arrow keys for smooth movement\nZoom/Scale controls: Z and Shift+Z to enlarge/shrink the view around its center\nAxis-specific zooming/scaling: X+Z and Shift+X+Z for X-axis, Y+Z and Shift+Y+Z for Y-axis\nCenter cursor: Ctrl+Z to reorientate the view, that the cursor is in the center\nMouse movement with volume feedback: Move your mouse across the graph to hear function values through volume changes - louder sounds indicate higher values, quieter sounds indicate lower values\n\n\n\n\nCreate interactive markers at important points on your functions - landmarks help you quickly navigate to specific coordinates and understand key features of mathematical graphs:\n\nCreate/edit landmark: Ctrl+B (Cmd+B on Mac) at desired position\nJump between landmarks: Ctrl+Arrow keys or J and L (Cmd+Arrow keys on Mac)\nJump to specific landmark: Ctrl+Number key (Cmd+Number key on Mac)\n\n\n\n\n\n\n\n\nComplete list of all keyboard controls for navigating and using Audiofunctions+.\n\n\n\nLearn about the different sounds that guide you through the application.\n\n\n\nShare your set of functions with others and control how they can interact with them.\n\n\n\nHow to export and import your function definitions and settings.\n\n\n\n\nFirst time using Audiofunctions+? Start by pressing Ctrl+K (or Cmd+K on Mac) to open the command menu - it will guide you through available actions. You can also press F1 at any time to open the help menu.\nHaving issues or suggestions? We’d love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone.\n\nAudiofunctions+ is part of the SONAIRGRAPH project, funded by the European Union through the Erasmus+ programme."
+  },
+  {
+    "objectID": "home.html#main-features",
+    "href": "home.html#main-features",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Continuous and discrete playback: Choose between two different sonification modes\nMultiple functions: Define and manage multiple functions simultaneously\nVarious instruments: Different timbres for different functions\n\n\n\n\n\nCursor control: Move fluidly or step-wise through the function graph\nZoom functions: Enlarge and reduce the view on both axes independently\nLandmarks: Set markers at important points for quick navigation\n\n\n\n\n\nComplete keyboard control: All functions are accessible via keyboard shortcuts\nAudio feedback: Earcons (audio icons) for important events and states\nScreen reader compatibility: Optimized for assistive technologies"
+  },
+  {
+    "objectID": "home.html#quick-start",
+    "href": "home.html#quick-start",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Define function: Press F to define a mathematical function\nStart navigation: Use arrow keys or J/L for cursor movement\nActivate sonification: Press P to start audio playback\nAdjust view: Use Z and Shift+Z for zooming"
+  },
+  {
+    "objectID": "home.html#documentation",
+    "href": "home.html#documentation",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Complete list of all keyboard controls for navigating and using Audiofunctions+.\n\n\n\nLearn about the different sounds that guide you through the application.\n\n\n\nShare your set of functions with others and control how they can interact with them.\n\n\n\nHow to export and import your function definitions and settings."
+  },
+  {
+    "objectID": "home.html#technical-details",
+    "href": "home.html#technical-details",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Version: 0.9.0\nTechnology: React, JSXGraph, Tone.js, Math.js\nLicense: CC BY-NC-SA 4.0\nBrowser Compatibility: Modern web browsers with Web Audio API support"
+  },
+  {
+    "objectID": "home.html#target-audience",
+    "href": "home.html#target-audience",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Audiofunctions+ was developed for:\n\nVisually impaired and blind students\nMathematics educators seeking inclusive teaching methods\nResearchers in accessible educational technologies\nAnyone who wants to experience mathematical functions in a new way"
+  },
+  {
+    "objectID": "home.html#about-the-sonairgraph-project",
+    "href": "home.html#about-the-sonairgraph-project",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Audiofunctions+ is a deliverable of the SONAIRGRAPH Erasmus+ project, which is dedicated to sonification for accessible and inclusive representation of graphs in education.\n\n\n\nLukas Schölch - Lead Developer\nMattia Ducci - Development and Design\nPedro A García Sánchez - Concept and Testing\nOndřej Nečas - Research and Evaluation"
+  },
+  {
+    "objectID": "home.html#support-and-community",
+    "href": "home.html#support-and-community",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "For questions or issues, you can:\n\nSearch through the documentation\nCreate issues in the GitHub repository\nContact the development team"
+  },
+  {
+    "objectID": "home.html#getting-started",
+    "href": "home.html#getting-started",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Open command palette: Ctrl+K (Cmd+K on Mac)\nBasic navigation:\n\nMove cursor: Arrow keys or J/L\nMove view: W, A, S, D\nShow coordinates: C\n\nManage functions:\n\nNew function: Press F and use function editor\nSwitch between functions: N or number keys 1-9\n\nAudio controls:\n\nSonification on/off: P\nPlay entire function: B\nSwitch sonification type: I\n\n\n\n\n\n\nTake full control of your navigation with these advanced movement options:\n\nFluid/stepwise movement: Shift+Arrow keys for smooth movement\nZoom/Scale controls: Z and Shift+Z to enlarge/shrink the view around its center\nAxis-specific zooming/scaling: X+Z and Shift+X+Z for X-axis, Y+Z and Shift+Y+Z for Y-axis\nCenter cursor: Ctrl+Z to reorientate the view, that the cursor is in the center\nMouse movement with volume feedback: Move your mouse across the graph to hear function values through volume changes - louder sounds indicate higher values, quieter sounds indicate lower values\n\n\n\n\nCreate interactive markers at important points on your functions - landmarks help you quickly navigate to specific coordinates and understand key features of mathematical graphs:\n\nCreate/edit landmark: Ctrl+B (Cmd+B on Mac) at desired position\nJump between landmarks: Ctrl+Arrow keys or J and L (Cmd+Arrow keys on Mac)\nJump to specific landmark: Ctrl+Number key (Cmd+Number key on Mac)"
+  },
+  {
+    "objectID": "home.html#special-features",
+    "href": "home.html#special-features",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Set markers at important points:\n\nCreate landmark: Ctrl+B at desired position\nJump between landmarks: Ctrl+Arrow keys\nJump to specific landmark: Ctrl+Number key\n\n\n\n\n\nStandard functions: sin(x), x^2, ln(x), etc.\nPiecewise defined functions\nCombined functions for complex representations\n\n\n\n\n\nFluid/stepwise movement: Shift+Arrow keys for smooth movement\nAxis-specific zooming: X+Z for X-axis, Y+Z for Y-axis\nCenter cursor: Ctrl+Z"
+  },
+  {
+    "objectID": "index.html#main-features",
+    "href": "index.html#main-features",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Continuous and discrete playback: Choose between two different sonification modes\nMultiple functions: Define and manage multiple functions simultaneously\nVarious instruments: Different timbres for different functions\n\n\n\n\n\nCursor control: Move fluidly or step-wise through the function graph\nZoom functions: Enlarge and reduce the view on both axes independently\nLandmarks: Set markers at important points for quick navigation\n\n\n\n\n\nComplete keyboard control: All functions are accessible via keyboard shortcuts\nAudio feedback: Earcons (audio icons) for important events and states\nScreen reader compatibility: Optimized for assistive technologies"
+  },
+  {
+    "objectID": "index.html#quick-start",
+    "href": "index.html#quick-start",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Define function: Press F to define a mathematical function\nStart navigation: Use arrow keys or J/L for cursor movement\nActivate sonification: Press P to start audio playback\nAdjust view: Use Z and Shift+Z for zooming"
+  },
+  {
+    "objectID": "index.html#documentation",
+    "href": "index.html#documentation",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Complete list of all keyboard controls for navigating and using Audiofunctions+.\n\n\n\nLearn about the different sounds that guide you through the application.\n\n\n\nHow to export and import your function definitions and settings."
+  },
+  {
+    "objectID": "index.html#technical-details",
+    "href": "index.html#technical-details",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Version: 0.9.0\nTechnology: React, JSXGraph, Tone.js, Math.js\nLicense: CC BY-NC-SA 4.0\nBrowser Compatibility: Modern web browsers with Web Audio API support"
+  },
+  {
+    "objectID": "index.html#target-audience",
+    "href": "index.html#target-audience",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Audiofunctions+ was developed for:\n\nVisually impaired and blind students\nMathematics educators seeking inclusive teaching methods\nResearchers in accessible educational technologies\nAnyone who wants to experience mathematical functions in a new way"
+  },
+  {
+    "objectID": "index.html#about-the-sonairgraph-project",
+    "href": "index.html#about-the-sonairgraph-project",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Audiofunctions+ is a deliverable of the SONAIRGRAPH Erasmus+ project, which is dedicated to sonification for accessible and inclusive representation of graphs in education.\n\n\n\nLukas Schölch - Lead Developer\nMattia Ducci - Development and Design\nPedro A García Sánchez - Concept and Testing\nOndřej Nečas - Research and Evaluation"
+  },
+  {
+    "objectID": "index.html#support-and-community",
+    "href": "index.html#support-and-community",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "For questions or issues, you can:\n\nSearch through the documentation\nCreate issues in the GitHub repository\nContact the development team"
+  },
+  {
+    "objectID": "index.html#getting-started",
+    "href": "index.html#getting-started",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Open the app and press F to define your first function\nMove around using arrow keys or J/L to explore the graph\nTurn on sound by pressing P to start hearing the function\nAdjust the view with Z for zoom, W A S D to move around"
+  },
+  {
+    "objectID": "index.html#special-features",
+    "href": "index.html#special-features",
+    "title": "Audiofunctions+ - Making Mathematical Functions Audible",
+    "section": "",
+    "text": "Set markers at important points:\n\nCreate landmark: Ctrl+B at desired position\nJump between landmarks: Ctrl+Arrow keys\nJump to specific landmark: Ctrl+Number key\n\n\n\n\n\nStandard functions: sin(x), x^2, ln(x), etc.\nPiecewise defined functions\nCombined functions for complex representations\n\n\n\n\n\nFluid/stepwise movement: Shift+Arrow keys for smooth movement\nAxis-specific zooming: X+Z for X-axis, Y+Z for Y-axis\nCenter cursor: Ctrl+Z\n\n\nDeveloped with ❤️ by the SONAIRGRAPH team to promote inclusive mathematical education."
+  },
+  {
+    "objectID": "home.html#what-you-can-do",
+    "href": "home.html#what-you-can-do",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Explore functions with sound: Move through graphs and hear how functions change\nNavigate easily: Use simple keyboard shortcuts to control everything\nWork with multiple functions: Define and compare different mathematical expressions\nSet landmarks: Mark important points for quick navigation"
+  },
+  {
+    "objectID": "home.html#need-help",
+    "href": "home.html#need-help",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "First time using Audiofunctions+? Start by pressing Ctrl+K (or Cmd+K on Mac) to open the command menu - it will guide you through available actions. You can also press F1 at any time to open the help menu.\nHaving issues or suggestions? We’d love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone.\n\nAudiofunctions+ is part of the SONAIRGRAPH project, funded by the European Union through the Erasmus+ programme."
+  },
+  {
+    "objectID": "index.html#what-you-can-do",
+    "href": "index.html#what-you-can-do",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "Explore functions with sound: Move through graphs and hear how functions change\nNavigate easily: Use simple keyboard shortcuts to control everything\nWork with multiple functions: Define and compare different mathematical expressions\nSet landmarks: Mark important points for quick navigation"
+  },
+  {
+    "objectID": "index.html#need-help",
+    "href": "index.html#need-help",
+    "title": "Audiofunctions+",
+    "section": "",
+    "text": "First time using Audiofunctions+? Start by pressing Ctrl+K (or Cmd+K on Mac) to open the command menu - it will guide you through available actions.\nHaving issues or suggestions? We’d love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone.\n\nAudiofunctions+ is part of the SONAIRGRAPH project, funded by the European Union through the Erasmus+ programme."
+  },
+  {
+    "objectID": "sharing-restrictions.html",
+    "href": "sharing-restrictions.html",
+    "title": "Sharing & Restriction Modes",
+    "section": "",
+    "text": "Audiofunctions+ provides powerful sharing capabilities and restriction modes that allow you to control how others interact with your mathematical functions. Whether you’re an educator preparing materials or a student sharing work, these features give you precise control over the experience."
+  },
+  {
+    "objectID": "sharing-restrictions.html#sharing-functions",
+    "href": "sharing-restrictions.html#sharing-functions",
+    "title": "Sharing & Restriction Modes",
+    "section": "Sharing Functions",
+    "text": "Sharing Functions\n\nQuick Share\nThe easiest way to share your functions is through the built-in sharing feature:\n\nOpen the command palette by pressing Ctrl+K (or Cmd+K on Mac)\nType “share” and select the “Share” option\nConfigure your settings (optional) and click “Create Share Link”\nCopy and send the generated link to others\n\n\n\nShare Options\nWhen sharing, you can customize several aspects:\n\nRestriction Mode: Control what users can do with your shared functions\nView Bounds: Set minimum and maximum zoom levels\nAdvanced Settings: Fine-tune the sharing experience\n\n\n\nAlternative Sharing Methods\nYou can also share functions by:\n\nSaving as file: Export to JSON and share the file directly\nManual sharing: Copy your function definitions for others to input manually"
+  },
+  {
+    "objectID": "sharing-restrictions.html#restriction-modes",
+    "href": "sharing-restrictions.html#restriction-modes",
+    "title": "Sharing & Restriction Modes",
+    "section": "Restriction Modes",
+    "text": "Restriction Modes\nRestriction modes give you control over how recipients can interact with your shared functions. There are three levels available:\n\nNone (Default)\n\nFull access: Users can modify, edit, and explore everything\nComplete functionality: All features are available\nBest for: Collaborative work, learning environments where exploration is encouraged\n\n\n\nRead Only\n\nView and explore: Users can navigate and hear the functions\nNo editing: Cannot modify function definitions or add new functions\nLimited changes: Can adjust view settings like zoom and position\nBest for: Sharing completed work, demonstrations where you want to prevent accidental changes\n\n\n\nFull Restriction\n\nViewing only: Users can only see and hear the predefined functions\nNo modifications: Cannot edit functions, change settings, or import/export\nFixed experience: Ensures everyone sees exactly what you intended\nBest for: Presentations, assessments, situations requiring identical experiences for all users"
+  },
+  {
+    "objectID": "sharing-restrictions.html#how-restriction-modes-work",
+    "href": "sharing-restrictions.html#how-restriction-modes-work",
+    "title": "Sharing & Restriction Modes",
+    "section": "How Restriction Modes Work",
+    "text": "How Restriction Modes Work\nWhen you share a link with restrictions:\n\nRecipients open the link in their browser\nAudiofunctions+ loads with your functions and settings\nInterface adapts based on the restriction level you set\nFeatures are hidden/disabled according to the restrictions\n\n\nWhat’s Restricted\n\n\n\nFeature\nNone\nRead Only\nFull Restriction\n\n\n\n\nNavigate & explore functions\n✅\n✅\n✅\n\n\nHear sonification\n✅\n✅\n✅\n\n\nEdit function definitions\n✅\n❌\n❌\n\n\nAdd/remove functions\n✅\n❌\n❌\n\n\nImport/export files\n✅\n❌\n❌\n\n\nAdjust view bounds\n✅\n✅\n❌\n\n\nCreate landmarks\n✅\n✅\n❌\n\n\nChange audio settings\n✅\n✅\n❌"
+  },
+  {
+    "objectID": "sharing-restrictions.html#practical-examples",
+    "href": "sharing-restrictions.html#practical-examples",
+    "title": "Sharing & Restriction Modes",
+    "section": "Practical Examples",
+    "text": "Practical Examples\n\nFor Educators\n\"restrictionMode\": \"read-only\"\nShare homework solutions where students can explore and understand the functions without accidentally modifying them.\n\n\nFor Presentations\n\"restrictionMode\": \"full-restriction\"\nEnsure your audience sees exactly the same view during a presentation or demonstration.\n\n\nFor Collaboration\n\"restrictionMode\": \"none\"\nLet team members freely edit and build upon your work."
+  },
+  {
+    "objectID": "sharing-restrictions.html#setting-up-restrictions",
+    "href": "sharing-restrictions.html#setting-up-restrictions",
+    "title": "Sharing & Restriction Modes",
+    "section": "Setting Up Restrictions",
+    "text": "Setting Up Restrictions\n\nThrough the Share Dialog\n\nOpen command palette (Ctrl+K)\nSelect “Share”\nChoose your Restriction Mode from the dropdown:\n\nNone\nRead Only\n\nFull Restriction\n\nConfigure any additional settings\nCreate and share your link\n\n\n\nThrough File Export\nWhen exporting JSON files, you can also set restriction modes:\n\nOpen command palette (Ctrl+K)\nSelect “Export as file”\nSet the Restriction Mode in the export settings\nSave and share the JSON file"
+  },
+  {
+    "objectID": "sharing-restrictions.html#tips-for-effective-sharing",
+    "href": "sharing-restrictions.html#tips-for-effective-sharing",
+    "title": "Sharing & Restriction Modes",
+    "section": "Tips for Effective Sharing",
+    "text": "Tips for Effective Sharing\n\nChoose the Right Mode\n\nUse None for collaborative work\nUse Read Only for demonstrations where exploration is encouraged\nUse Full Restriction for controlled presentations\n\n\n\nTest Before Sharing\nAlways test your shared link to ensure it works as expected and provides the intended experience.\n\n\nCommunicate Clearly\nLet recipients know what they can and cannot do with the shared functions to set proper expectations.\n\n\nConsider Your Audience\n\nStudents learning: Read Only often works best\nColleagues collaborating: None gives full flexibility\nPublic presentations: Full Restriction ensures consistency"
+  },
+  {
+    "objectID": "sharing-restrictions.html#troubleshooting",
+    "href": "sharing-restrictions.html#troubleshooting",
+    "title": "Sharing & Restriction Modes",
+    "section": "Troubleshooting",
+    "text": "Troubleshooting\n\nLink Not Working\n\nCheck that the restriction mode is appropriate for your intended use\nEnsure the link was generated correctly\nTry regenerating the share link\n\n\n\nFeatures Missing\nIf certain features seem unavailable, check the restriction mode - this is likely intentional based on the sharing settings.\n\n\nCan’t Edit Functions\nThis is normal behavior in Read Only and Full Restriction modes. Contact the person who shared the link if you need editing access.\n\nSharing and restriction modes help you control the mathematical exploration experience while maintaining the accessibility and educational value of Audiofunctions+."
+  },
+  {
+    "objectID": "sharing.html",
+    "href": "sharing.html",
+    "title": "Sharing Functions",
+    "section": "",
+    "text": "Share your mathematical functions with others and control how they can interact with them."
+  },
+  {
+    "objectID": "sharing.html#how-to-share",
+    "href": "sharing.html#how-to-share",
+    "title": "Sharing Functions",
+    "section": "How to Share",
+    "text": "How to Share\n\nPress Ctrl+K (or Cmd+K on Mac) to open the command menu\nType “share” and select “Share”\nChoose your restriction mode (see below)\nClick “Create Share Link”\nCopy and send the link to others"
+  },
+  {
+    "objectID": "sharing.html#restriction-modes",
+    "href": "sharing.html#restriction-modes",
+    "title": "Sharing Functions",
+    "section": "Restriction Modes",
+    "text": "Restriction Modes\nNone - Full access - Recipients can edit functions and change all settings - Use for: Collaborative work, group projects\nRead Only - View and explore only - Recipients can navigate and hear functions but cannot edit them - Can still zoom, move view, and create landmarks - Use for: Sharing homework solutions, demonstrations\nFull Restriction - Viewing only - Recipients can only see and hear the exact functions you set up - Cannot change anything - Use for: Presentations, tests, controlled experiences"
+  },
+  {
+    "objectID": "sharing.html#alternative-methods",
+    "href": "sharing.html#alternative-methods",
+    "title": "Sharing Functions",
+    "section": "Alternative Methods",
+    "text": "Alternative Methods\nExport as file: 1. Press Ctrl+K → “Export as file” 2. Choose restriction mode in settings 3. Save and share the JSON file\nManual sharing: Simply tell others your function definitions to type in themselves."
+  },
+  {
+    "objectID": "sharing.html#what-recipients-see",
+    "href": "sharing.html#what-recipients-see",
+    "title": "Sharing Functions",
+    "section": "What Recipients See",
+    "text": "What Recipients See\nWhen someone opens your shared link: - Your functions load automatically - Interface adapts based on restriction level - Restricted features are hidden or disabled\n\nTip: Always test your shared link before sending to ensure it works as expected."
+  },
+  {
+    "objectID": "sharing.html#what-gets-shared",
+    "href": "sharing.html#what-gets-shared",
+    "title": "Sharing Functions",
+    "section": "What Gets Shared",
+    "text": "What Gets Shared\nWhen you create a share link, the complete state is saved: - All your function definitions - Current visibility of each function - Current view position and zoom level as standard - Any landmarks you’ve created\nThis means recipients see exactly what you see when you create the link."
   }
 ]

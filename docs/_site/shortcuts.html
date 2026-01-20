@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.26">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -37,14 +37,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b758ccaa5987ceb1b75504551e579abf.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-4d9afe2b8d18ee9fa5d0d57b5ed4214d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-cb468e5da8310d9e984627748a2fc8ad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-cb468e5da8310d9e984627748a2fc8ad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-cb468e5da8310d9e984627748a2fc8ad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-5435091208cf0a4a437689b35d20d233.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5435091208cf0a4a437689b35d20d233.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-5435091208cf0a4a437689b35d20d233.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -146,9 +146,9 @@ ul.task-list li input[type="checkbox"] {
 
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 13%">
+<col style="width: 52%">
+<col style="width: 34%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -176,7 +176,7 @@ ul.task-list li input[type="checkbox"] {
 <tr class="even">
 <td style="text-align: left;">jump to left or right edge</td>
 <td style="text-align: left;">move cursor to the left (minX) or right (maxX) edge of the view</td>
-<td style="text-align: left;">ctrl+(left and right arrows) (cmd+arrow on Mac)</td>
+<td style="text-align: left;">Pos1/Home and End</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">speed change</td>
@@ -194,64 +194,84 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">W A S D</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">zoom in/out (both axes)</td>
-<td style="text-align: left;">zoom in/out in both axes</td>
-<td style="text-align: left;">Z and shift+Z</td>
+<td style="text-align: left;">center cursor</td>
+<td style="text-align: left;">reorientates the view, that the cursor is in the center</td>
+<td style="text-align: left;">ctrl+Z (cmd+Z on Mac)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">zoom in/out (X axis)</td>
-<td style="text-align: left;">zoom in/out only on the X axis (only minX and maxX change)</td>
-<td style="text-align: left;">X+(Z or shift+Z)</td>
+<td style="text-align: left;">zoom in/out (both axes)</td>
+<td style="text-align: left;">rescales both axes to enlarge or shrink the view around its center</td>
+<td style="text-align: left;">Z and shift+Z (may hold)</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">zoom in/out (Y axis)</td>
-<td style="text-align: left;">zoom in/out only on the Y axis (only minY and maxY change)</td>
-<td style="text-align: left;">Y+(Z or shift+Z)</td>
+<td style="text-align: left;">zoom in/out (only X-axis)</td>
+<td style="text-align: left;">rescales only in the X-axis to enlarge or shrink the view around its center (only minX and maxX change)</td>
+<td style="text-align: left;">X+(Z or shift+Z)</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">zoom in/out (only Y-axis)</td>
+<td style="text-align: left;">rescales only in the Y-axis to enlarge or shrink the view around its center (only minY and maxY change)</td>
+<td style="text-align: left;">Y+(Z or shift+Z)</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">reset view to default</td>
 <td style="text-align: left;">set the view position and zoom to its default value</td>
 <td style="text-align: left;">R</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">turn on/off sonification</td>
 <td style="text-align: left;">activate or mute sonification</td>
 <td style="text-align: left;">P</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">play function</td>
 <td style="text-align: left;">start the function playback—the entire function will be sonified from left to right at given speed</td>
 <td style="text-align: left;">B</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">switch sonification</td>
 <td style="text-align: left;">switch sonification mode—discrete or continuous</td>
 <td style="text-align: left;">I</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">show coordinates</td>
 <td style="text-align: left;">show/read out current cursor coordinates (x and y)</td>
 <td style="text-align: left;">C</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">show view-bounds</td>
 <td style="text-align: left;">show/read out current view boundaries</td>
 <td style="text-align: left;">V</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">edit function(s)</td>
 <td style="text-align: left;">activate form for editing one or more functions</td>
 <td style="text-align: left;">F</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">next function</td>
 <td style="text-align: left;">switch to next defined function</td>
 <td style="text-align: left;">N</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">choose specific function</td>
 <td style="text-align: left;">switch to a specific function (max 10 functions—if more functions defined, use command palette)</td>
 <td style="text-align: left;">1‒9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">create/edit landmark</td>
+<td style="text-align: left;">creates a new landmark at the cursor position or edits the existing one</td>
+<td style="text-align: left;">ctrl+b</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">jumo between landmarks</td>
+<td style="text-align: left;">jumps to the next or previous landmark in the view, if available</td>
+<td style="text-align: left;">crtl+(left and right arrow or J and L keys) (cmd+arrow keys on mac)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">jump to landmark</td>
+<td style="text-align: left;">jumps to a specific landmark (in order of creation)</td>
+<td style="text-align: left;">ctrl+(1-9) (cmd+number key on mac)</td>
 </tr>
 </tbody>
 </table>

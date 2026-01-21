@@ -1,13 +1,12 @@
 ---
-title: "Audiofunctions+"
-subtitle: "Making Mathematical Functions Audible"
+title: "Welcome to Audiofunctions++"
 lang: en
 toc: false
 ---
 
 # Welcome to Audiofunctions+
 
-Audiofunctions+ is a web application that helps visually impaired students learn mathematical functions through sound. By converting function graphs into audio, you can explore and understand mathematical relationships through hearing.
+Audiofunctions+ is a web application designed to facilitate visually impaired users' learning of mathematical functions. By converting function graphs into audio, Audiofunctions+ allows users to interpret the shape of a function's graph by listening to its sonification and explore mathematical relationships through hearing.
 
 ## What You Can Do
 
@@ -17,7 +16,35 @@ Audiofunctions+ is a web application that helps visually impaired students learn
 - **Set landmarks**: Mark important points for quick navigation
 
 
+## How Function Sonification Works
+
+Audiofunctions+ converts mathematical functions into sound using **pitch** and **stereo positioning**. As you move along a function, the **pitch (frequency)** represents the Y-value - higher function values produce higher tones, lower values produce lower tones. **Stereo panning** indicates your X-position - sounds move from left speaker (negative X) to right speaker (positive X), with center representing X=0.
+
+The application supports two sonification modes:
+- **Continuous sonification**: Smooth, flowing tones that change pitch gradually as you navigate
+- **Discrete sonification**: Individual musical notes from a predefined scale that are triggered when the function value changes significantly
+
+Here's how a sine function sounds with both sonification modes:
+
+**Continuous sonification**: 
+<audio controls style="display: block; margin: auto;"> 
+  <source src="earcons/bell.mp3" type="audio/wav"/>
+</audio>
+
+**Discrete sonification**: 
+<audio controls style="display: block; margin: auto;"> 
+  <source src="earcons/bell.mp3" type="audio/wav"/>
+</audio>
+
+Notice how the discrete version plays notes at different speeds - faster during steep sections of the curve and slower where the function is nearly flat, while the continuous version maintains steady movement throughout.
+
+
+
 ## Getting Started
+
+To start exploring, all functions except the basic navigation are accessible through the command palette. Here are the essential controls to get you started:
+
+### Basic Controls
 
 1. **Open command palette**: `Ctrl+K` (`Cmd+K` on Mac)
 2. **Basic navigation**:
@@ -32,9 +59,8 @@ Audiofunctions+ is a web application that helps visually impaired students learn
    - Play entire function: `B`
    - Switch sonification type: `I`
 
-### Special Features
 
-#### Advanced Navigation
+### Advanced Navigation
 
 Take full control of your navigation with these advanced movement options:
 
@@ -42,11 +68,12 @@ Take full control of your navigation with these advanced movement options:
 - **Zoom/Scale controls**: `Z` and `Shift+Z` to enlarge/shrink the view around its center
 - **Axis-specific zooming/scaling**: `X+Z` and `Shift+X+Z` for X-axis, `Y+Z` and `Shift+Y+Z` for Y-axis
 - **Center cursor**: `Ctrl+Z` to reorientate the view, that the cursor is in the center
+- **Show current view bounds**: `V` to display the current viewing area coordinates
 
 - **Mouse movement with volume feedback**: Move your mouse across the graph to hear function values through volume changes - louder sounds indicate higher values, quieter sounds indicate lower values
 
 
-#### Landmarks System
+### Landmarks System
 
 Create interactive markers at important points on your functions - landmarks help you quickly navigate to specific coordinates and understand key features of mathematical graphs:
 
@@ -56,7 +83,9 @@ Create interactive markers at important points on your functions - landmarks hel
 
 
 
-## Documentation
+## Learn More
+
+Explore these detailed guides to master all features of Audiofunctions+.
 
 ### [Keyboard Shortcuts](shortcuts.md)
 Complete list of all keyboard controls for navigating and using Audiofunctions+.
@@ -77,8 +106,16 @@ How to export and import your function definitions and settings.
 **First time using Audiofunctions+?** Start by pressing `Ctrl+K` (or `Cmd+K` on Mac) to open the command menu - it will guide you through available actions. You can also press `F1` at any time to open the help menu.
 
 
-**Having issues or suggestions?** We'd love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone.
+**Having issues or suggestions?** We'd love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone. 
+
+TODO: Email and github link
+
+
+
+<br />
+<br />
+
 
 ---
 
-*Audiofunctions+ is part of the [SONAIRGRAPH](https://sonairgraph.unito.it/) project, funded by the European Union through the Erasmus+ programme.*
+*This project is supported by the SONification for Accessible and Inclusive Representation of GRAPHs in Education ([SONAIRGRAPH](https://sonairgraph.unito.it/)) project, which is an Erasmus+ key action 2 (project number 2024-1-IT02-KA220-HED-000244481), funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.*

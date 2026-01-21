@@ -1,5 +1,5 @@
 ---
-title: "Earcons"
+title: "Audio Signals"
 toc: false
 ---
 
@@ -19,3 +19,9 @@ Audiofunctions uses several earcons (audio icons) to provide auditory feedback t
   <source src="earcons/bell.mp3" type="audio/wav"/>
 </audio>
 
+
+- White noise
+- y-axis crossing
+- Bound reached
+- landmarks
+- notification

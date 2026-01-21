@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Audiofunctions+</title>
+<title>Welcome to Audiofunctions++ – Audiofunctions+</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -107,6 +107,10 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Earcons</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./sharing.html"> 
+<span class="menu-text">Sharing</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./json.html"> 
 <span class="menu-text">Exporting/Importing files</span></a>
   </li>  
@@ -127,8 +131,8 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Audiofunctions+</h1>
-<p class="subtitle lead">Making Mathematical Functions Audible</p>
+<h1 class="title">Welcome to Audiofunctions++</h1>
+<p class="subtitle lead">Sonnification of mathematical functions</p>
 </div>
 
 
@@ -147,7 +151,7 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="welcome-to-audiofunctions" class="level1">
 <h1>Welcome to Audiofunctions+</h1>
-<p>Audiofunctions+ is a web application that helps visually impaired students learn mathematical functions through sound. By converting function graphs into audio, you can explore and understand mathematical relationships through hearing.</p>
+<p>Audiofunctions+ is a web application designed to facilitate visually impaired users’ learning of mathematical functions. By converting function graphs into audio, Audiofunctions+ allows users to interpret the shape of a function’s graph by listening to its sonification and explore mathematical relationships through hearing.</p>
 <section id="what-you-can-do" class="level2">
 <h2 class="anchored" data-anchor-id="what-you-can-do">What You Can Do</h2>
 <ul>
@@ -157,36 +161,91 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Set landmarks</strong>: Mark important points for quick navigation</li>
 </ul>
 </section>
+<section id="how-function-sonification-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-function-sonification-works">How Function Sonification Works</h2>
+<p>Audiofunctions+ converts mathematical functions into sound using <strong>pitch</strong> and <strong>stereo positioning</strong>. As you move along a function, the <strong>pitch (frequency)</strong> represents the Y-value - higher function values produce higher tones, lower values produce lower tones. <strong>Stereo panning</strong> indicates your X-position - sounds move from left speaker (negative X) to right speaker (positive X), with center representing X=0.</p>
+<p>The application supports two sonification modes: - <strong>Continuous sonification</strong>: Smooth, flowing tones that change pitch gradually as you navigate - <strong>Discrete sonification</strong>: Individual musical notes from a predefined scale that are triggered when the function value changes significantly</p>
+<p>Here’s how a sine function sounds with both sonification modes:</p>
+<p><strong>Continuous sonification</strong>: <audio controls="" style="display: block; margin: auto;"> <source src="earcons/bell.mp3" type="audio/wav"> </audio></p>
+<p><strong>Discrete sonification</strong>: <audio controls="" style="display: block; margin: auto;"> <source src="earcons/bell.mp3" type="audio/wav"> </audio></p>
+<p>Notice how the discrete version plays notes at different speeds - faster during steep sections of the curve and slower where the function is nearly flat, while the continuous version maintains steady movement throughout.</p>
+</section>
 <section id="getting-started" class="level2">
 <h2 class="anchored" data-anchor-id="getting-started">Getting Started</h2>
+<p>To start exploring, all functions except the basic navigation are accessible through the command palette. Here are the essential controls to get you started:</p>
+<section id="basic-controls" class="level3">
+<h3 class="anchored" data-anchor-id="basic-controls">Basic Controls</h3>
 <ol type="1">
-<li><strong>Open the app</strong> and press <code>F</code> to define your first function</li>
-<li><strong>Move around</strong> using arrow keys or <code>J</code>/<code>L</code> to explore the graph</li>
-<li><strong>Turn on sound</strong> by pressing <code>P</code> to start hearing the function</li>
-<li><strong>Adjust the view</strong> with <code>Z</code> for zoom, <code>W A S D</code> to move around</li>
+<li><strong>Open command palette</strong>: <code>Ctrl+K</code> (<code>Cmd+K</code> on Mac)</li>
+<li><strong>Basic navigation</strong>:
+<ul>
+<li>Move cursor: Arrow keys or <code>J</code>/<code>L</code></li>
+<li>Move view: <code>W</code>, <code>A</code>, <code>S</code>, <code>D</code></li>
+<li>Show coordinates: <code>C</code></li>
+</ul></li>
+<li><strong>Manage functions</strong>:
+<ul>
+<li>New function: Press <code>F</code> and use function editor</li>
+<li>Switch between functions: <code>N</code> or number keys <code>1</code>-<code>9</code></li>
+</ul></li>
+<li><strong>Audio controls</strong>:
+<ul>
+<li>Sonification on/off: <code>P</code></li>
+<li>Play entire function: <code>B</code></li>
+<li>Switch sonification type: <code>I</code></li>
+</ul></li>
 </ol>
 </section>
-<section id="documentation" class="level2">
-<h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
+<section id="advanced-navigation" class="level3">
+<h3 class="anchored" data-anchor-id="advanced-navigation">Advanced Navigation</h3>
+<p>Take full control of your navigation with these advanced movement options:</p>
+<ul>
+<li><p><strong>Fluid/stepwise movement</strong>: <code>Shift+Arrow keys</code> for smooth movement</p></li>
+<li><p><strong>Zoom/Scale controls</strong>: <code>Z</code> and <code>Shift+Z</code> to enlarge/shrink the view around its center</p></li>
+<li><p><strong>Axis-specific zooming/scaling</strong>: <code>X+Z</code> and <code>Shift+X+Z</code> for X-axis, <code>Y+Z</code> and <code>Shift+Y+Z</code> for Y-axis</p></li>
+<li><p><strong>Center cursor</strong>: <code>Ctrl+Z</code> to reorientate the view, that the cursor is in the center</p></li>
+<li><p><strong>Show current view bounds</strong>: <code>V</code> to display the current viewing area coordinates</p></li>
+<li><p><strong>Mouse movement with volume feedback</strong>: Move your mouse across the graph to hear function values through volume changes - louder sounds indicate higher values, quieter sounds indicate lower values</p></li>
+</ul>
+</section>
+<section id="landmarks-system" class="level3">
+<h3 class="anchored" data-anchor-id="landmarks-system">Landmarks System</h3>
+<p>Create interactive markers at important points on your functions - landmarks help you quickly navigate to specific coordinates and understand key features of mathematical graphs:</p>
+<ul>
+<li><strong>Create/edit landmark</strong>: <code>Ctrl+B</code> (<code>Cmd+B</code> on Mac) at desired position</li>
+<li><strong>Jump between landmarks</strong>: <code>Ctrl+Arrow keys</code> or <code>J</code> and <code>L</code> (<code>Cmd+Arrow keys</code> on Mac)</li>
+<li><strong>Jump to specific landmark</strong>: <code>Ctrl+Number key</code> (<code>Cmd+Number key</code> on Mac)</li>
+</ul>
+</section>
+</section>
+<section id="learn-more" class="level2">
+<h2 class="anchored" data-anchor-id="learn-more">Learn More</h2>
+<p>Explore these detailed guides to master all features of Audiofunctions+.</p>
 <section id="keyboard-shortcuts" class="level3">
-<h3 class="anchored" data-anchor-id="keyboard-shortcuts"><a href="./shortcuts.html">📖 Keyboard Shortcuts</a></h3>
+<h3 class="anchored" data-anchor-id="keyboard-shortcuts"><a href="./shortcuts.html">Keyboard Shortcuts</a></h3>
 <p>Complete list of all keyboard controls for navigating and using Audiofunctions+.</p>
 </section>
 <section id="audio-signals" class="level3">
-<h3 class="anchored" data-anchor-id="audio-signals"><a href="./earcons.html">🔊 Audio Signals</a></h3>
+<h3 class="anchored" data-anchor-id="audio-signals"><a href="./earcons.html">Audio Signals</a></h3>
 <p>Learn about the different sounds that guide you through the application.</p>
 </section>
-<section id="save-load-functions" class="level3">
-<h3 class="anchored" data-anchor-id="save-load-functions"><a href="./json.html">💾 Save &amp; Load Functions</a></h3>
+<section id="sharing" class="level3">
+<h3 class="anchored" data-anchor-id="sharing"><a href="./sharing.html">Sharing</a></h3>
+<p>Share your set of functions with others and control how they can interact with them.</p>
+</section>
+<section id="exportimport-functions" class="level3">
+<h3 class="anchored" data-anchor-id="exportimport-functions"><a href="./json.html">Export/Import Functions</a></h3>
 <p>How to export and import your function definitions and settings.</p>
 </section>
 </section>
 <section id="need-help" class="level2">
 <h2 class="anchored" data-anchor-id="need-help">Need Help?</h2>
-<p><strong>First time using Audiofunctions+?</strong> Start by pressing <code>Ctrl+K</code> (or <code>Cmd+K</code> on Mac) to open the command menu - it will guide you through available actions.</p>
+<p><strong>First time using Audiofunctions+?</strong> Start by pressing <code>Ctrl+K</code> (or <code>Cmd+K</code> on Mac) to open the command menu - it will guide you through available actions. You can also press <code>F1</code> at any time to open the help menu.</p>
 <p><strong>Having issues or suggestions?</strong> We’d love to hear from you! You can reach out to the development team or share your feedback to help us improve the application for everyone.</p>
+<p>TODO: Email and github link</p>
+<p><br> <br></p>
 <hr>
-<p><em>Audiofunctions+ is part of the <a href="https://sonairgraph.unito.it/">SONAIRGRAPH</a> project, funded by the European Union through the Erasmus+ programme.</em></p>
+<p><em>This project is supported by the SONification for Accessible and Inclusive Representation of GRAPHs in Education (<a href="https://sonairgraph.unito.it/">SONAIRGRAPH</a>) project, which is an Erasmus+ key action 2 (project number 2024-1-IT02-KA220-HED-000244481), funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.</em></p>
 <!--
 ::: {.column-margin}
 

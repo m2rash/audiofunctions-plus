@@ -25,29 +25,22 @@ This means recipients see exactly what you see when you create the link.
 
 ## Restriction Modes
 
-**None** - Full access
-- Recipients can edit functions and change all settings
-- Use for: Collaborative work, group projects
+**None** - Recipients have full access; they can edit functions and change all settings
 
-**Read Only** - View and explore only
-- Recipients can navigate and hear functions but cannot edit them
-- Can still zoom, move view, and create landmarks
-- Use for: Sharing homework solutions, demonstrations
+**Read Only** - Recipients can explore all defined functions. They can only see and not edit the function definitions.
 
-**Full Restriction** - Viewing only
-- Recipients can only see and hear the exact functions you set up
-- Cannot change anything
-- Use for: Presentations, tests, controlled experiences
+**Full Restriction** - Recipients can explore all defined functions. They are not able to see or edit the function definitions.
 
 ## Alternative Methods
 
 **Export as file:**
+
 1. Press `Ctrl+K` → "Export as file"
 2. Choose restriction mode in settings
 3. Save and share the JSON file
 
-**Manual sharing:**
-Simply tell others your function definitions to type in themselves.
+For more details, see the [Export/Import Functions](json.md).
+
 
 ## What Recipients See
 

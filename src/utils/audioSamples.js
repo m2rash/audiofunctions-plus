@@ -10,11 +10,11 @@ class AudioSampleManager {
   // Initialize the audio context
   async initialize() {
     if (this.isInitialized) return;
-    
+
     try {
       await Tone.start();
       this.isInitialized = true;
-      console.log("AudioSampleManager initialized");
+      // console.log("AudioSampleManager initialized");
     } catch (error) {
       console.error("Failed to initialize AudioSampleManager:", error);
     }
@@ -34,10 +34,10 @@ class AudioSampleManager {
       }
 
       const samplePath = `/audio-samples/${filename}`;
-      
+
       // Create a new player
       const player = new Tone.Player().toDestination();
-      
+
       // Store both the player and metadata
       this.samples.set(sampleName, {
         player,
@@ -48,14 +48,14 @@ class AudioSampleManager {
 
       // Load the sample and wait for it to be ready
       await player.load(samplePath);
-      
+
       // Wait a bit more to ensure the buffer is fully loaded
       await new Promise(resolve => setTimeout(resolve, 50));
-      
+
       // Mark as loaded
       this.samples.get(sampleName).loaded = true;
-      console.log(`Audio sample ${sampleName} loaded successfully`);
-      
+      // console.log(`Audio sample ${sampleName} loaded successfully`);
+
     } catch (error) {
       console.error(`Failed to load audio sample ${sampleName}:`, error);
       // Remove from samples if loading failed
@@ -65,13 +65,13 @@ class AudioSampleManager {
 
   // Load multiple samples at once
   async loadSamples(sampleConfigs) {
-    const loadPromises = sampleConfigs.map(config => 
+    const loadPromises = sampleConfigs.map(config =>
       this.loadSample(config.name, config.filename)
     );
-    
+
     try {
       await Promise.all(loadPromises);
-      console.log("All audio samples loaded successfully");
+      // console.log("All audio samples loaded successfully");
     } catch (error) {
       console.error("Some audio samples failed to load:", error);
     }
@@ -80,10 +80,10 @@ class AudioSampleManager {
   // Play a specific sample (loads on-demand if not already loaded)
   async playSample(sampleName, options = {}) {
     let sample = this.samples.get(sampleName);
-    
+
     // If sample doesn't exist, try to load it
     if (!sample) {
-      console.log(`Loading audio sample ${sampleName} on-demand...`);
+      // console.log(`Loading audio sample ${sampleName} on-demand...`);
       try {
         await this.loadSample(sampleName, this.getFilenameForSample(sampleName));
         sample = this.samples.get(sampleName);
@@ -100,34 +100,34 @@ class AudioSampleManager {
 
     try {
       const player = sample.player;
-      
+
       // Check if the player is ready to play
       if (!player.loaded) {
         console.warn(`Audio sample ${sampleName} player not ready`);
         return;
       }
-      
+
       // Apply options
       if (options.volume !== undefined) {
         player.volume.value = options.volume;
       }
-      
+
       if (options.playbackRate !== undefined) {
         player.playbackRate = options.playbackRate;
       }
-      
+
       // Use a simple approach: stop any current playback and start fresh
       try {
         player.stop();
       } catch (error) {
         // Ignore stop errors
       }
-      
+
       // Play immediately without timing constraints
       player.start();
-      
-      console.log(`Playing audio sample: ${sampleName}`);
-      
+
+      // console.log(`Playing audio sample: ${sampleName}`);
+
     } catch (error) {
       console.error(`Failed to play audio sample ${sampleName}:`, error);
     }
@@ -153,11 +153,11 @@ class AudioSampleManager {
   // Stop a specific sample
   stopSample(sampleName) {
     const sample = this.samples.get(sampleName);
-    
+
     if (sample && sample.loaded) {
       try {
         sample.player.stop();
-        console.log(`Stopped audio sample: ${sampleName}`);
+        // console.log(`Stopped audio sample: ${sampleName}`);
       } catch (error) {
         console.error(`Failed to stop audio sample ${sampleName}:`, error);
       }
@@ -209,14 +209,14 @@ class AudioSampleManager {
         }
       }
     });
-    
+
     this.samples.clear();
     this.isInitialized = false;
-    console.log("AudioSampleManager disposed");
+    // console.log("AudioSampleManager disposed");
   }
 }
 
 // Create a singleton instance
 const audioSampleManager = new AudioSampleManager();
 
-export default audioSampleManager; 
+export default audioSampleManager;

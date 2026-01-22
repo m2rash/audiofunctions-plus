@@ -9,12 +9,12 @@ const SpeedAdjustmentDialog = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       speedBackup.current = PlayFunction.speed;
-      console.log("Open: speed =", speedBackup.current);
+      // console.log("Open: speed =", speedBackup.current);
     }
   }, [isOpen, PlayFunction.speed]);
 
   const handleCancel = () => {
-    console.log("Cancel: restoring speed =", speedBackup.current);
+    // console.log("Cancel: restoring speed =", speedBackup.current);
     if (speedBackup.current !== null) {
       setPlayFunction(prev => ({ ...prev, speed: speedBackup.current }));
     }

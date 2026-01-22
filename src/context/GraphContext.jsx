@@ -42,7 +42,7 @@ export const GraphContextProvider = ({ children }) => {
       try {
         const importData = getHashParameter('import');
         if (importData) {
-          console.log('Found import data in URL hash:', importData);
+          // console.log('Found import data in URL hash:', importData);
           const decodedData = decodeFromImportLink(importData);
           if (decodedData) {
             setFunctionDefinitions(decodedData.functions);
@@ -54,7 +54,7 @@ export const GraphContextProvider = ({ children }) => {
               setGraphBoundsInternal({ xMin, xMax, yMin, yMax });
             }
 
-            console.log('Loaded data from import link:', decodedData);
+            // console.log('Loaded data from import link:', decodedData);
 
             // Clear the hash parameter after loading
             // clearHashParameter();
@@ -131,7 +131,7 @@ export const GraphContextProvider = ({ children }) => {
       try {
         audioSampleManager.playSample("deny", { volume: -15 });
       } catch (error) {
-        console.log("Could not play deny earcon:", error);
+        console.warn("Could not play deny earcon:", error);
       }
     }
 

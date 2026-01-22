@@ -119,7 +119,7 @@ export default function KeyboardHandler() {
 
     // Use the exported zoom function
     const ZoomBoard = useZoomBoard();
-    
+
     // Use the exported center at cursor function
     const centerAtCursor = useCenterAtCursor();
 
@@ -259,7 +259,7 @@ export default function KeyboardHandler() {
         announce(`Switched to ${functionName}`);
         showInfoToast(`${functionName}`, 1500);
 
-        console.log(`Switched to function ${targetIndex + 1}`);
+        // console.log(`Switched to function ${targetIndex + 1}`);
     };
 
     // Function to jump to landmark by shortcut
@@ -422,7 +422,7 @@ export default function KeyboardHandler() {
                     if (PlayFunction.active && PlayFunction.source === "play") {
                         setPlayFunction(prev => ({ ...prev, active: false }));
                         setExplorationMode("none");
-                        console.log("Batch sonification stopped by arrow key");
+                        // console.log("Batch sonification stopped by arrow key");
                         break;
                     }
 

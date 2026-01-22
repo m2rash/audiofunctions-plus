@@ -91,7 +91,7 @@ const createOrganInstrument = () => {
           chorus.start();
           isStarted = true;
         } catch (e) {
-          console.log("Effects start error:", e.message);
+          // console.log("Effects start error:", e.message);
         }
       }
     },
@@ -113,7 +113,7 @@ const createOrganInstrument = () => {
         }
         fmSynth.triggerAttack(freq);
       } catch (e) {
-        console.log("Trigger attack error:", e.message);
+        // console.log("Trigger attack error:", e.message);
       }
     },
     triggerRelease: () => {

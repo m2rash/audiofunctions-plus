@@ -10,11 +10,11 @@ export function initializeTheme() {
   let savedTheme = null;
   try {
     savedTheme = localStorage.getItem('theme');
-    console.log("Saved theme:", savedTheme);
+    // console.log("Saved theme:", savedTheme);
   } catch (error) {
     console.warn('localStorage not available for theme, using system preference:', error);
   }
-  
+
   // Apply the saved theme or use system preference as fallback
   if (savedTheme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -57,7 +57,7 @@ function handleSystemThemeChange(e) {
   } catch (error) {
     console.warn('localStorage not available for theme check:', error);
   }
-  
+
   if (!hasThemeInStorage) {
     if (e.matches) {
       // System switched to dark mode
@@ -74,7 +74,7 @@ function handleSystemThemeChange(e) {
  * @param {string} theme - Theme name ('light', 'dark', 'high-contrast', 'colorblind-friendly', or 'system')
  */
 export function setTheme(theme) {
-  console.log("Setting theme to:", theme);
+  // console.log("Setting theme to:", theme);
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     try {

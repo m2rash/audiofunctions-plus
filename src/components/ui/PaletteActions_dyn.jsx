@@ -167,7 +167,7 @@ export const useDynamicKBarActions = () => {
     announce(`Sonification type changed to ${sonificationType}`);
     showInfoToast(`Sonification type: ${sonificationType}`, 1500);
 
-    console.log(`Sonification type changed to ${sonificationType} (${newInstrument}) for all functions`);
+    // console.log(`Sonification type changed to ${sonificationType} (${newInstrument}) for all functions`);
   };
 
   // Get current sonification type for active function

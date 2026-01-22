@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 
-const InfoToast = ({ 
-  message, 
-  isVisible, 
-  onClose, 
+const InfoToast = ({
+  message,
+  isVisible,
+  onClose,
   timeout = 10000,
   position = "fixed", // "fixed" (default) or "cursor"
   cursorPosition = { x: 0, y: 0 }
@@ -15,7 +15,7 @@ const InfoToast = ({
   useEffect(() => {
     if (isVisible && message) {
       setShouldRender(true);
-      console.log(timeout)
+      // console.log(timeout)
       // Auto-hide after specified timeout (default 10 seconds)
       const timer = setTimeout(() => {
         if (onClose) {
@@ -38,11 +38,11 @@ const InfoToast = ({
   useEffect(() => {
     if (position === "cursor") {
       const { x, y } = cursorPosition;
-      
+
       // Add offset to position tooltip above and to the right of cursor
       const offsetX = 15;
       const offsetY = -45;
-      
+
       // Initial positioning (will be refined after mount)
       setCursorStyles({
         left: `${x + offsetX}px`,
@@ -61,29 +61,29 @@ const InfoToast = ({
     if (isVisible && position === "cursor" && toastRef.current && shouldRender) {
       const toast = toastRef.current;
       const { x, y } = cursorPosition;
-      
+
       // Add offset to position tooltip above and to the right of cursor
       const offsetX = 15;
       const offsetY = -45;
-      
+
       // Get viewport dimensions to prevent tooltip from going off-screen
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       const toastRect = toast.getBoundingClientRect();
-      
+
       let finalX = x + offsetX;
       let finalY = y + offsetY;
-      
+
       // Adjust if toast would go off right edge
       if (finalX + toastRect.width > viewportWidth - 10) {
         finalX = x - toastRect.width - offsetX;
       }
-      
+
       // Adjust if toast would go off top edge
       if (finalY < 10) {
         finalY = y + Math.abs(offsetY) + 10;
       }
-      
+
       // Update styles with refined position
       setCursorStyles({
         left: `${finalX}px`,
@@ -100,7 +100,7 @@ const InfoToast = ({
   }
 
   // Define positioning classes based on position prop
-  const positionClasses = position === "cursor" 
+  const positionClasses = position === "cursor"
     ? "fixed z-[1000]" // High z-index for cursor positioning
     : "fixed top-24 right-4 z-40"; // Default top-right positioning
 
@@ -111,8 +111,8 @@ const InfoToast = ({
     <div
       ref={toastRef}
       className={`${positionClasses} max-w-sm transition-all duration-300 ease-in-out ${
-        isVisible 
-          ? "opacity-100 translate-y-0" 
+        isVisible
+          ? "opacity-100 translate-y-0"
           : "opacity-0 -translate-y-2"
       }`}
       style={finalStyles}

@@ -981,6 +981,49 @@ const GraphView = () => {
     }
   }, []);
 
+  // Handle window resize using JSXGraph's resizeContainer method
+  // Skip Firefox due to known JSXGraph resize bugs
+  useEffect(() => {
+    // Detect Firefox
+    const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+    
+    if (isFirefox) {
+      // Skip resize handling for Firefox to avoid JSXGraph bugs
+      return;
+    }
+
+    let resizeTimer;
+
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (boardRef.current && graphContainerRef.current) {
+          try {
+            // Check container dimensions before resizing
+            const container = graphContainerRef.current;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Only resize if dimensions are valid
+            if (width > 0 && height > 0 && !isNaN(width) && !isNaN(height)) {
+              boardRef.current.resizeContainer();
+              boardRef.current.update();
+            }
+          } catch (error) {
+            // Silent fallback
+          }
+        }
+      }, 200);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // useEffect(() => {
   //   const wrapper = wrapperRef.current;
   //   if (!wrapper) return;

@@ -18,7 +18,7 @@ Audiofunctions+ is a web application designed to facilitate visually impaired us
 
 ## How Function Sonification Works
 
-Audiofunctions+ converts mathematical functions into sound using **pitch** and **stereo positioning**. As you move along a function, the **pitch (frequency)** represents the Y-value - higher function values produce higher tones, lower values produce lower tones. **Stereo panning** indicates your X-position - sounds move from left speaker (negative X) to right speaker (positive X), with center representing X=0.
+Audiofunctions+ converts mathematical functions into sound using **pitch** and **stereo positioning**. As you move along a function, the **pitch (frequency)** represents the Y-value - higher function values produce higher tones, lower values produce lower tones. **Stereo panning** indicates your X-position - sounds move from left speaker (negative X) to right speaker (positive X).
 
 The application supports two sonification modes:
 - **Continuous sonification**: Smooth, flowing tones that change pitch gradually as you navigate

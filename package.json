@@ -1,7 +1,7 @@
 {
   "name": "audiofunctions-plus",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.9.5",
   "description": "Sonification of mathematical functions",
   "author": "Lukas Schölch, Mattia Ducci, Pedro A García Sánchez, Ondřej Nečas",
   "license": "CC BY-NC-SA 4.0",

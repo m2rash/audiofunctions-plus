@@ -64,7 +64,7 @@ To start exploring, all functions except the basic navigation are accessible thr
 
 Take full control of your navigation with these advanced movement options:
 
-- **Fluid/stepwise movement**: `Shift+Arrow keys` for smooth movement
+- **Fluid movement**: `Shift+Arrow keys` for smooth movement
 - **Zoom/Scale controls**: `Z` and `Shift+Z` to enlarge/shrink the view around its center
 - **Axis-specific zooming/scaling**: `X+Z` and `Shift+X+Z` for X-axis, `Y+Z` and `Shift+Y+Z` for Y-axis
 - **Center cursor**: `Ctrl+Z` to reorientate the view, that the cursor is in the center

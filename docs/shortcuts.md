@@ -26,5 +26,5 @@ toc: false
 | next function              | switch to next defined function                                                                         | N                                                                   |
 | choose specific function   | switch to a specific function (max 10 functions—if more functions defined, use command palette)         | 1‒9                                                                 |
 | create/edit landmark       | creates a new landmark at the cursor position or edits the existing one                                 | ctrl+b                                                              |
-| jumo between landmarks     | jumps to the next or previous landmark in the view, if available                                        | crtl+(left and right arrow or J and L keys) (cmd+arrow keys on mac) |
+| jump between landmarks     | jumps to the next or previous landmark in the view, if available                                        | ctrl+(left and right arrow or J and L keys) (cmd+arrow keys on mac) |
 | jump to landmark           | jumps to a specific landmark (in order of creation)                                                     | ctrl+(1-9) (cmd+number key on mac)                                  |

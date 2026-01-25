@@ -2,8 +2,365 @@
 // Include theme-specific fonts
 @import url("https://fonts.googleapis.com/css?family=Atkinson Hyperlegible");
 
+// Farben von der WebApp
+$sag-green: #32cb32;
+$light-blue: #4e95d9;
+$dark-blue: #104862;
+$dark-green-3: #2a8209;
+
 // fonts
-$mainFont: "Atkinson Hyperlegible";
-$headingFont: "Atkinson Hyperlegible";
-$font-family-sans-serif: "Atkinson Hyperlegible";
-$presentation-heading-font: "Atkinson Hyperlegible";
+$font-family-sans-serif: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$headings-font-family: "Atkinson Hyperlegible", $font-family-sans-serif;
+
+/*-- scss:rules --*/
+
+// CSS Custom Properties für Theme-Switching
+:root {
+  --sag-green: #{$sag-green};
+  --sag-light-blue: #{$light-blue};
+  --sag-dark-green: #{$dark-green-3};
+}
+
+/* Audiofunctions+ Documentation Styles */
+
+/* Keyboard Shortcuts Styling */
+.kbd, kbd {
+  background-color: #1f2937;
+  border: 1px solid #d1d5db;
+  color: #f9fafb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+/* Seitenhintergrund heller machen */
+body {
+  background-color: #fafbfc;
+}
+
+/* Header like in WebApp - NOT green */
+.navbar {
+  background-color: white;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.navbar-brand {
+  color: #1a1a1a;
+  font-weight: bold;
+  font-size: 1.75rem;
+}
+
+.navbar-brand img {
+  height: 2.5rem;
+  width: auto;
+  max-height: none !important;
+}
+
+/* Additional selectors for Quarto logo system */
+.navbar .navbar-brand img,
+.brand img,
+.quarto-navbar .navbar-brand img {
+  height: 2.5rem !important;
+  width: auto;
+  max-height: none !important;
+}
+
+.navbar-nav .nav-link {
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+/* Only green accents on hover */
+.navbar-nav .nav-link:hover, .navbar-brand:hover {
+  color: var(--sag-green);
+  text-decoration: underline;
+}
+
+.navbar-nav .nav-link.active {
+  color: var(--sag-green);
+}
+
+/* Header Icons (Search, Burger Menu) - Light Mode */
+.navbar #quarto-search.type-overlay .aa-Autocomplete svg.aa-SubmitIcon {
+  color: #1a1a1a !important;
+  fill: #1a1a1a !important;
+}
+
+/* Burger Menu Icon - Light Mode */
+.navbar .navbar-toggler-icon {
+  filter: brightness(0) saturate(100%) invert(8%) sepia(8%) saturate(1171%) hue-rotate(197deg) brightness(96%) contrast(95%) !important;
+}
+
+/* Header Icons Hover - green accent */
+.navbar #quarto-search.type-overlay .aa-Autocomplete svg.aa-SubmitIcon:hover {
+  color: var(--sag-green) !important;
+  fill: var(--sag-green) !important;
+}
+
+/* Burger Menu Icon Hover - green accent */
+.navbar .navbar-toggler:hover .navbar-toggler-icon {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(2106%) hue-rotate(90deg) brightness(101%) contrast(85%) !important;
+}
+
+/* Rounded corners everywhere */
+.card, .content, .sidebar {
+  border-radius: 0.75rem;
+}
+
+pre, code {
+  border-radius: 0.5rem;
+}
+
+.btn {
+  border-radius: 0.5rem;
+}
+
+/* Code blocks mit theme-angepasstem Styling */
+pre, div.sourceCode, div.sourceCode pre {
+  background-color: #f1f5f9 !important;
+  border: none !important;
+  padding: 0.5rem !important;
+  border-radius: 0.75rem !important;
+  color: #1e293b !important;
+}
+
+/* Code inside Pre blocks */
+pre code, div.sourceCode code, .sourceCode code {
+  background-color: transparent !important;
+  color: #1e293b !important;
+  padding: 0 !important;
+  border: none !important;
+  font-size: 0.9rem !important;
+  line-height: 1.6 !important;
+}
+
+code:not(pre code) {
+  background-color: #e5e7eb !important;
+  color: #374151 !important;
+  padding: 0.125rem 0.375rem;
+  border: none;
+  font-weight: 500;
+}
+
+/* Specific inline code rules - only outside of pre */
+p code:not(pre code), li code:not(pre code), .content code:not(pre code) {
+  background-color: #e5e7eb !important;
+  color: #374151 !important;
+}
+
+/* Tables - only header green */
+.table {
+  border-top: none;
+}
+
+.table th {
+  background-color: #1f7a1f;
+  color: white;
+  border-top: none;
+}
+
+.table th:first-child {
+  border-radius: 0.375rem 0 0 0;
+}
+
+.table th:last-child {
+  border-radius: 0 0.375rem 0 0;
+}
+
+/* Audio elements */
+audio {
+  width: 100%;
+  margin: 1rem 0 !important;
+  border-radius: 0.5rem;
+}
+
+/* Spezifische Audio Selektoren */
+p audio, div audio, .content audio {
+  margin: 1rem 0 !important;
+}
+
+/* Footer hellerer Hintergrund */
+.nav-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+/* Links green as accent */
+a {
+  color: #22c55e;
+}
+
+a:hover {
+  color: #16a34a;
+}
+
+/* Primary buttons green */
+.btn-primary {
+  background-color: var(--sag-green);
+  border-color: var(--sag-green);
+}
+
+.btn-primary:hover {
+  background-color: var(--sag-dark-green);
+  border-color: var(--sag-dark-green);
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #030712;
+  }
+
+  .navbar {
+    background-color: #101828;
+    border-bottom-color: #364153;
+  }
+
+  .navbar-brand {
+    color: white;
+  }
+
+  .navbar-nav .nav-link {
+    color: white;
+  }
+
+  /* Header Icons - Dark Mode */
+  .navbar #quarto-search.type-overlay .aa-Autocomplete svg.aa-SubmitIcon {
+    color: white !important;
+    fill: white !important;
+  }
+
+  /* Burger Menu Icon - Dark Mode */
+  .navbar .navbar-toggler-icon {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%) !important;
+  }
+
+  /* Main content text white in Dark Mode */
+  body, .content, main, p, h1, h2, h3, h4, h5, h6, li, td {
+    color: white;
+  }
+
+  /* Keyboard shortcuts in Dark Mode */
+  .kbd, kbd {
+    background-color: #1f2937;
+    border-color: #6b7280;
+    color: #ffffff;
+  }
+
+  code:not(pre code) {
+    background-color: #111827;
+    color: #f3f4f6;
+    border: 1px solid #374151;
+  }
+
+  /* Specific inline code rules Dark Mode - only outside of pre */
+  p code:not(pre code), li code:not(pre code), .content code:not(pre code) {
+    background-color: #111827 !important;
+    color: #f3f4f6 !important;
+  }
+
+  pre, div.sourceCode, div.sourceCode pre {
+    background-color: #1e293b !important;
+    border: none !important;
+    color: #e2e8f0 !important;
+  }
+
+  /* Code inside Pre blocks Dark Mode */
+  pre code, div.sourceCode code, .sourceCode code {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Syntax-Highlighting with WCAG-compliant Dark Mode colors */
+  .sourceCode .kw { color: #4ade80 !important; } /* Keywords lighter green */
+  .sourceCode .st { color: #60a5fa !important; } /* Strings blue */
+  .sourceCode .co { color: #cbd5e1 !important; } /* Comments lighter gray */
+  .sourceCode .dt { color: #fbbf24 !important; } /* Data types yellow */
+  .sourceCode .dv { color: #a78bfa !important; } /* Numbers light purple */
+  .sourceCode .fl { color: #a78bfa !important; } /* Floats light purple */
+  .sourceCode .bn { color: #a78bfa !important; } /* Base-N numbers light purple */
+  .sourceCode .cn { color: #fb7185 !important; } /* Constants light red instead of dark red */
+  .sourceCode .op { color: #e5e7eb !important; } /* Operators light */
+  .sourceCode .fu { color: #fde047 !important; } /* Functions yellow */
+  .sourceCode .va { color: #e2e8f0 !important; } /* Variables standard */
+
+
+
+
+
+
+  .nav-footer {
+    background-color: #101828;
+    border-color: #364153;
+  }
+}
+
+/* Earcons Page - luftiger machen */
+.earcons-page h2 {
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.earcons-page h3 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.earcons-page audio {
+  margin: 1.5rem auto !important;
+  display: block;
+}
+
+.earcons-page p {
+  margin-bottom: 2.5rem;
+  line-height: 1.8;
+}
+
+/* Generally more spacing to headings */
+h2, h3 {
+  margin-top: 2.5rem;
+}
+
+p + h2, p + h3 {
+  margin-top: 3rem;
+}
+
+/* Fallback for all pages with audio elements */
+h2 + audio, h3 + audio {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+audio + p {
+  margin-top: 1.5rem;
+}
+
+/* Bilder abgerundete Ecken */
+img {
+  border-radius: 0.5rem;
+}
+
+/* Figure captions - high contrast in Dark Mode */
+figure figcaption, .figure-caption {
+  text-align: center;
+  font-style: italic;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Dark mode figure captions - bright, higher contrast color */
+@media (prefers-color-scheme: dark) {
+  figure figcaption, .figure-caption {
+    color: #d1d5db;
+  }
+}

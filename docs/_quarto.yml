@@ -33,7 +33,12 @@ format:
     theme:
          - cosmo
          - custom.scss
-    css: styles.css
+
     toc: true
     sidebar: false
     lang: en
+    code-copy: true
+    code-fold: false
+    theme-dark:
+         - cosmo
+         - custom.scss

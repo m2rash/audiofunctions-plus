@@ -11,7 +11,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
   const [generatedLink, setGeneratedLink] = useState('');
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [inputErrors, setInputErrors] = useState({});
-  
+
   // Local state for share settings (not saved until share is clicked)
   const [shareSettings, setShareSettings] = useState({
     minBoundDifference: 0.1,
@@ -45,7 +45,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
   // Validation functions
   const validateBoundDifference = (value, field) => {
     const errors = [];
-    
+
     // Check if value is empty or just a minus sign
     if (value === '' || value === '-') {
       errors.push("Value cannot be empty");
@@ -76,7 +76,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
 
   const validateBoundDifferences = (settings) => {
     const errors = {};
-    
+
     // Validate individual fields
     ['minBoundDifference', 'maxBoundDifference'].forEach(field => {
       const fieldErrors = validateBoundDifference(settings[field], field);
@@ -154,7 +154,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
       minBoundDifference: shareSettings.minBoundDifference,
       maxBoundDifference: shareSettings.maxBoundDifference
     }));
-    
+
     // Create share data object
     const shareData = {
       functions: functionDefinitions,
@@ -166,23 +166,23 @@ const ShareDialog = ({ isOpen, onClose }) => {
         restrictionMode: shareSettings.restrictionMode
       }
     };
-    
+
     // Convert to JSON string and then to base64
     const jsonString = JSON.stringify(shareData);
     const base64String = encodeToImportLink(shareData);
-    
+
     // Generate the share link
     const baseUrl = window.location.origin + window.location.pathname;
     const shareLink = `${baseUrl}#import=${base64String}`;
-    
-    console.log('Share data (JSON):', jsonString);
-    console.log('Share data (Base64):', base64String);
-    console.log('Share link:', shareLink);
-    
+
+    // console.log('Share data (JSON):', jsonString);
+    // console.log('Share data (Base64):', base64String);
+    // console.log('Share link:', shareLink);
+
     setGeneratedLink(shareLink);
     setShowLinkDialog(true);
     onClose(); // Close the main share dialog immediately
-    
+
     announceStatus('Settings saved and share link generated.');
   };
 
@@ -202,12 +202,12 @@ const ShareDialog = ({ isOpen, onClose }) => {
     // Allow empty strings, minus signs and valid numbers during typing
     if (value === '' || value === '-' || !isNaN(parseFloat(value))) {
       const newValue = value === '' || value === '-' ? value : parseFloat(value);
-      const newSettings = { 
-        ...shareSettings, 
-        [field]: newValue 
+      const newSettings = {
+        ...shareSettings,
+        [field]: newValue
       };
       setShareSettings(newSettings);
-      
+
       // Validate in real-time but only show errors after user interaction
       const errors = validateBoundDifferences(newSettings);
       setInputErrors(errors);
@@ -217,18 +217,18 @@ const ShareDialog = ({ isOpen, onClose }) => {
   const handleBlur = (field, value) => {
     // On blur, ensure a valid value is set
     let finalValue = value;
-    
+
     if (value === '' || value === '-') {
       finalValue = field === 'minBoundDifference' ? 0.1 : 100;
       const newSettings = { ...shareSettings, [field]: finalValue };
       setShareSettings(newSettings);
     }
-    
+
     // Validate after blur to show any errors
     const currentSettings = { ...shareSettings, [field]: finalValue };
     const errors = validateBoundDifferences(currentSettings);
     setInputErrors(errors);
-    
+
     if (errors[field]) {
       announceStatus(`Error in ${field}: ${errors[field].join('. ')}`);
     }
@@ -248,7 +248,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
       minBoundDifference: shareSettings.minBoundDifference,
       maxBoundDifference: shareSettings.maxBoundDifference
     }));
-    
+
     // Create export data object (same as share data)
     const exportData = {
       functions: functionDefinitions,
@@ -260,12 +260,12 @@ const ShareDialog = ({ isOpen, onClose }) => {
         restrictionMode: shareSettings.restrictionMode
       }
     };
-    
+
     try {
       const jsonString = JSON.stringify(exportData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       const a = document.createElement('a');
       a.href = url;
       a.download = 'audiofunctions-export.json';
@@ -273,7 +273,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       announceStatus('JSON file downloaded successfully.');
       onClose();
     } catch (err) {
@@ -306,7 +306,7 @@ const ShareDialog = ({ isOpen, onClose }) => {
           />
         </div>
         {hasError && (
-          <div 
+          <div
             id={`${id}-error`}
             className="error-message mt-1 text-sm"
             role="alert"
@@ -332,15 +332,15 @@ const ShareDialog = ({ isOpen, onClose }) => {
                 Share
               </DialogTitle>
               <Description id="dialog-description" className="text-descriptions">
-                Share the current state including all defined functions with their sonifications, speed and step-size values, the current view, and the active function. 
+                Share the current state including all defined functions with their sonifications, speed and step-size values, the current view, and the active function.
                 Configure additional sharing settings below.
               </Description>
             </div>
-            
+
             {/* Live region for status announcements */}
-            <div 
-              aria-live="polite" 
-              aria-atomic="true" 
+            <div
+              aria-live="polite"
+              aria-atomic="true"
               className="sr-only"
               role="status"
             >

@@ -3,8 +3,8 @@
 @theme {
   /* theme Colors */
   --color-sag-green: #32cb32;
-  --color-light-blue: #4e95d9; 
-  --color-light-blue-2: #3c84c9; 
+  --color-light-blue: #4e95d9;
+  --color-light-blue-2: #3c84c9;
   --color-dark-blue: #104862;
   --color-dark-green: #275317;
   --color-dark-green-2: #3d8124;
@@ -61,7 +61,7 @@
 
   /* Graph */
   --color-axis: var(--color-gray-md);
-  --color-grid: var(--color-gray-mdli); 
+  --color-grid: var(--color-gray-mdli);
 
   /* Graph elements */
   --color-curve-primary: var(--color-primary);
@@ -91,7 +91,7 @@
   :root {
     color-scheme: light;
   }
-  
+
   [data-theme="dark"] {
     color-scheme: dark;
 
@@ -121,7 +121,7 @@
 
     /* Graph */
     --color-axis: var(--color-gray-mdli);
-    --color-grid: var(--color-gray-md); 
+    --color-grid: var(--color-gray-md);
 
     /* Graph elements */
     --color-curve-primary: var(--color-primary);
@@ -141,7 +141,7 @@
     /* special cases */
     --color-text-input-background: var(--color-gray-mddk);
 
-    
+
     --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.7), 0 1px 3px -1px rgb(0 0 0 / 0.6);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.6);
   }
@@ -151,53 +151,53 @@
     /* High-Contrast colors */
     --color-hc-background: #000000;
     --color-hc-foreground: #ffffff;
-    --color-hc-accent: #ffff00; 
-    --color-hc-link: #00ffff; 
-    --color-hc-warning: #ff8000; 
-    --color-hc-error: #ff0000; 
-    --color-hc-success: #00ff00; 
-    --color-hc-border: #ffffff; 
-    
+    --color-hc-accent: #ffff00;
+    --color-hc-link: #00ffff;
+    --color-hc-warning: #ff8000;
+    --color-hc-error: #ff0000;
+    --color-hc-success: #00ff00;
+    --color-hc-border: #ffffff;
+
     /* General */
     --color-primary: var(--color-hc-accent);
     --color-background: var(--color-hc-background);
-    --color-overlay: rgba(255, 255, 255, 0.7); 
+    --color-overlay: rgba(255, 255, 255, 0.7);
 
     --color-danger: #d91018;
 
-    
+
     /* Text */
     --color-txt: var(--color-hc-foreground);
     --color-txt-title: var(--color-hc-foreground);
     --color-txt-subtitle: var(--color-hc-foreground);
     --color-txt-label: var(--color-hc-foreground);
-    
+
     /* Basic elements */
-    --color-elem-background: #0a0a0a; 
+    --color-elem-background: #0a0a0a;
     --color-border: var(--color-hc-border);
     --color-hover-border: var(--color-hc-accent);
     --color-hover-full: color-mix(in srgb, var(--color-hc-accent), transparent 0%);
     --color-focus-border: var(--color-hc-accent);
-    --color-contrast-border: var(--color-hc-link); 
-    
+    --color-contrast-border: var(--color-hc-link);
+
     /* Graph */
     --color-axis: var(--color-hc-foreground);
-    --color-grid: rgba(255, 255, 255, 0.5); 
-    
+    --color-grid: rgba(255, 255, 255, 0.5);
+
     /* Graph elements */
     --color-curve-primary: var(--color-hc-accent);
     --color-curve-secondary: var(--color-hc-link);
-    
+
     --color-isolated-point: var(--color-hc-link);
     --color-isolated-point-border: var(--color-hc-link);
     --color-endpoint-closed: var(--color-hc-link);
     --color-endpoint-closed-border: var(--color-hc-link);
     --color-endpoint-open: var(--color-hc-success);
     --color-endpoint-open-border: var(--color-hc-success);
-    
+
     --color-cursor-primary: var(--color-hc-error);
     --color-cursor-primary-border: var(--color-hc-error);
-    
+
     /* special cases */
     --color-text-input-background: var(--color-hc-background);
 
@@ -205,10 +205,10 @@
     --spacing-highlight-border: 5px;
 
     /* Further accessibility changes -- not used right now */
-    --font-size-base: 1.1rem; 
+    --font-size-base: 1.1rem;
     --line-height-base: 1.8;
     --shadow-standard: 0 0 0 2px var(--color-hc-border);
-    
+
     color-scheme: dark;
   }
 
@@ -228,7 +228,7 @@
     --color-dpf-gray-medium: #95a5a6;
     --color-dpf-gray-dark: #7f8c8d;
     --color-danger: var(--color-dpf-error);
-    
+
     /* General */
     --color-primary: var(--color-dpf-primary);
     --color-background: var(--color-white);
@@ -469,10 +469,6 @@ button:hover {
 
 
 [data-theme="high-contrast"] .high-contrast-highlight-border{
-  outline-width: var(--spacing-highlight-border);
-  outline-style: solid;
-  outline-offset: -5px !important;
-  outline-color: var(--color-hc-link);
   color: var(--color-hc-background) !important; /* Black text */
   font-weight: 700 !important; /* Bold text */
 }
@@ -565,7 +561,7 @@ text.JXGtext {
 
 .curve {
   stroke: var(--color-primary);
-  stroke-width: 3px;  
+  stroke-width: 3px;
   stroke-linecap: round;
   /* stroke-dasharray: 1cap; */
 }
@@ -615,7 +611,7 @@ text.JXGtext {
   stroke-width: 4px;
 }
 
-/* Landmark square styles */  
+/* Landmark square styles */
 .landmark-square {
   fill: var(--color-landmark-fill);
   stroke: var(--color-landmark-border);

@@ -24,7 +24,7 @@ function createEndPoints(func,board){
     // we are also transforming the math constants to be able to parse them
     // WARNING nthroot is not implemented in mathjs, we need nthRoot, so when using mathjs, we need to change nthroot to nthRoot
     // WARNING ln is not implemented in mathjs, we need log, so when using mathjs, we need to change ln to log
-    console.log("Creating endpoints for function: ", func);
+    // console.log("Creating endpoints for function: ", func);
     if (func.type === "function"){
       return [[],[]];
     }
@@ -33,17 +33,17 @@ function createEndPoints(func,board){
       return [];
     }
     const txtraw = functionDefPiecewiseToString(func.functionDef);
-    console.log("Raw piecewise function string:", txtraw);
+    // console.log("Raw piecewise function string:", txtraw);
     const txt2mathjs = txtraw.replaceAll("**","^").replaceAll("nthroot","nthRoot").replaceAll("ln","log");
-    console.log("Transformed piecewise function string for mathjs:", txt2mathjs);
-    const parsed = transformMathConstants(math.parse(txt2mathjs)); 
-    console.log("Parsed piecewise function:", parsed.toString());
+    // console.log("Transformed piecewise function string for mathjs:", txt2mathjs);
+    const parsed = transformMathConstants(math.parse(txt2mathjs));
+    // console.log("Parsed piecewise function:", parsed.toString());
     const types_to_be_deleted= ["isolated", "unequal"]; // we remove these types of points of interest, since they will be redefined
     const filteredPoints = func.pointOfInterests.filter(
       point => !types_to_be_deleted.includes(point.type)
     );
     func.pointOfInterests = filteredPoints;
-    console.log(func);
+    // console.log(func);
 
     if (!("items" in parsed)){ // not a piecewise function
         return [[],[]];
@@ -54,32 +54,32 @@ function createEndPoints(func,board){
     for (i=0;i< l.length;i++){
         ineq = transformAssingnments(l[i].items[1]); // the inequality or equality of ith item, we change assignments to equalities
         if ("op" in ineq){ //that is a single inequality or an equality
-            if (ineq.op == "<=" || ineq.op ==">=" || ineq.op =="=="){ //one of the arguments is the variable "x" 
+            if (ineq.op == "<=" || ineq.op ==">=" || ineq.op =="=="){ //one of the arguments is the variable "x"
                 if (("name" in ineq.args[1]) && (ineq.args[1].name == "x")){ // we have a op x, with op in {<=, >=, ==}
                     v=ineq.args[0].evaluate(); // v is the value of a in a op x
                     p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});
                     endpoints.push(p);
                     if (ineq.op == "=="){ // if we have an equality, we add the x coordinate to the list of x-coordinates of isolated points
-                        console.log("Adding isolated point at x=", v);
+                        // console.log("Adding isolated point at x=", v);
                         func.pointOfInterests.push({
                             x: v,
                             y: l[i].items[0].evaluate({x:v}),
                             type: "isolated"
                         });
-                        console.log("Function ", func);
+                        // console.log("Function ", func);
                       }
                 }else{ // we have x op a, with op in {<=, >=, ==}
                     v=ineq.args[1].evaluate(); // v is the value of a in x op a
-                    p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'isolated-point', fixed:true, highlight:false, withLabel:false, size: 4});   
+                    p=board.create("point", [v,l[i].items[0].evaluate({x:v})], {cssClass: 'isolated-point', fixed:true, highlight:false, withLabel:false, size: 4});
                     endpoints.push(p);
                     if (ineq.op == "=="){ // if we have an equality, we add the x coordinate to the list of x-coordinates of isolated points
-                        console.log("Adding isolated point at x=", v);
+                        // console.log("Adding isolated point at x=", v);
                         func.pointOfInterests.push({
                             x: v,
                             y: l[i].items[0].evaluate({x:v}),
                             type: "isolated"
                         });
-                        console.log("Function ", func);
+                        // console.log("Function ", func);
                     }
                 }
             }
@@ -87,34 +87,34 @@ function createEndPoints(func,board){
                 if (("name" in ineq.args[1]) && (ineq.args[1].name == "x")){ // we have a op x, with op in {<,>}
                     v=ineq.args[0].evaluate(); // v is the value of a in a op x
                     let fv = l[i].items[0].evaluate({x:v});
-                    if (ineq.op == "!="){ 
+                    if (ineq.op == "!="){
                       if (isNaN(fv)){// the point is not defined here, we try the mean of the values at the left and right of v
                         fv=(l[i].items[0].evaluate({x:v-0.0000001})+l[i].items[0].evaluate({x:v+0.0000001})/2);
                       }
-                      console.log("Possible value at x=", v, fv);
+                      // console.log("Possible value at x=", v, fv);
                       func.pointOfInterests.push({
                         x: v,
                         y: NaN,
                         type: "unequal"
                       });
                     }
-                    p=board.create("point", [v,fv], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                    p=board.create("point", [v,fv], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});
                     endpoints.push(p);
                 }else{ // we have x op a, with op in {<, >}
                     v=ineq.args[1].evaluate(); // v is the value of a in x op a
                     let fv = l[i].items[0].evaluate({x:v});
-                    if (ineq.op == "!="){ 
+                    if (ineq.op == "!="){
                       if (isNaN(fv)){// the point is not defined here, we try the mean of the values at the left and right of v
                         fv=(l[i].items[0].evaluate({x:v-0.0000001})+l[i].items[0].evaluate({x:v+0.0000001})/2);
                       }
-                      console.log("Possible value at x=", v, fv);
+                      // console.log("Possible value at x=", v, fv);
                       func.pointOfInterests.push({
                         x: v,
                         y: NaN,
                         type: "unequal"
                       });
                     }
-                    p=board.create("point", [v,fv], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                    p=board.create("point", [v,fv], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});
                     endpoints.push(p);
                 }
             }
@@ -122,19 +122,19 @@ function createEndPoints(func,board){
             // the values a and b are the first and last arguments of the inequality
             a=ineq.params[0].evaluate(); // the value of a in a op x op b
             b=ineq.params[2].evaluate(); // the value of b in a op x op b
-            // we should check here that conditionals are in the form smaller, smallerEq 
+            // we should check here that conditionals are in the form smaller, smallerEq
             if (ineq.conditionals[0]=="smaller"){ // this is a smaller so we fill in white, since it is an strict inequality
-                p=board.create("point", [a,l[i].items[0].evaluate({x:a})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [a,l[i].items[0].evaluate({x:a})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});
                 endpoints.push(p);
             }else{  // this is a smallerEq so we fill in blue
-                p=board.create("point", [a,l[i].items[0].evaluate({x:a})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [a,l[i].items[0].evaluate({x:a})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});
                 endpoints.push(p);
             }
             if (ineq.conditionals[1]=="smaller"){ // this is a smaller so we fill in white, since it is an strict inequality
-                p=board.create("point", [b,l[i].items[0].evaluate({x:b})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [b,l[i].items[0].evaluate({x:b})], {cssClass: 'endpoint-open', fixed:true, highlight:false, withLabel:false, size: 4});
                 endpoints.push(p);
             }else{ // this is a smallerEq so we fill in blue
-                p=board.create("point", [b,l[i].items[0].evaluate({x:b})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});   
+                p=board.create("point", [b,l[i].items[0].evaluate({x:b})], {cssClass: 'endpoint-closed', fixed:true, highlight:false, withLabel:false, size: 4});
                 endpoints.push(p);
             }
         }
@@ -209,7 +209,7 @@ const GraphView = () => {
       landmarks.forEach((landmark, landmarkIndex) => {
         const { x, y, shape, label } = landmark;
         const landmarkShape = shape || 'diamond';
-        
+
         try {
           let landmarkObject;
           const baseOptions = {
@@ -229,7 +229,7 @@ const GraphView = () => {
                 size: 8,
               });
               break;
-              
+
             case 'triangle':
               landmarkObject = board.create('point', [x, y], {
                 ...baseOptions,
@@ -237,8 +237,8 @@ const GraphView = () => {
                 size: 9,
               });
               break;
-              
-              
+
+
             case 'square':
               landmarkObject = board.create('point', [x, y], {
                 ...baseOptions,
@@ -246,7 +246,7 @@ const GraphView = () => {
                 size: 6,
               });
               break;
-              
+
             default:
               // Fallback to cross
               landmarkObject = board.create('point', [x, y], {
@@ -257,7 +257,7 @@ const GraphView = () => {
 
           if (landmarkObject) {
             landmarkObjects.push(landmarkObject);
-            
+
             // REMOVED: Label creation code
             // No longer creating text labels for landmarks
           }
@@ -286,9 +286,9 @@ const GraphView = () => {
         majorStep: stepSize
         // gridX: stepSize, // Grid-Abstand für X-Achse
         // gridY: stepSize, // Grid-Abstand für Y-Achse
-      },      
+      },
       axis: {
-        cssClass: "axis", 
+        cssClass: "axis",
         needsRegularUpdate: true,
         highlight: false,
         ticks: {
@@ -306,10 +306,10 @@ const GraphView = () => {
 
     board.removeEventHandlers(); // remove all event handlers
     board.addPointerEventHandlers(); // Re-enable pointer handlers for mouse movement
-    
+
     // Add click prevention handler
     const container = document.getElementById('jxgbox');
-    
+
     const preventClickHandler = (event) => {
       // Prevent all mouse clicks
       event.preventDefault();
@@ -321,7 +321,7 @@ const GraphView = () => {
     container.addEventListener('click', preventClickHandler, true);
     container.addEventListener('mousedown', preventClickHandler, true);
     container.addEventListener('mouseup', preventClickHandler, true);
-    
+
     // Store the handler in the ref for cleanup
     handlersRef.current = { preventClickHandler };
 
@@ -352,13 +352,13 @@ const GraphView = () => {
       let graphFormula;
       let expr;
       let hasError = false;
-      
+
       // Check math spell and syntax
       let [exprResult, errList] = checkMathSpell(func);
       expr = exprResult;
 
-      console.log("List of errors: ",errList);
-      
+      // console.log("List of errors: ",errList);
+
       // Clear all existing errors for this function first
       setInputErrors(prev => {
         const newErrors = { ...prev };
@@ -370,16 +370,16 @@ const GraphView = () => {
         });
         return newErrors;
       });
-      
+
       if (errList.length > 0) {
         // Process all errors, not just the first one
         let functionErrors = [];
         let conditionErrors = [];
         let generalError = null;
-        
+
         errList.forEach(([errMMsg, errPos]) => {
-          console.log("Error in ", func.functionName, ":", errMMsg, " in ", errPos.toString());
-          
+          // console.log("Error in ", func.functionName, ":", errMMsg, " in ", errPos.toString());
+
           if (func.type === "piecewise_function") {
             // Check if errPos is an array of positions (for overlap errors)
             if (Array.isArray(errPos) && errPos.length > 0 && Array.isArray(errPos[0])) {
@@ -416,11 +416,11 @@ const GraphView = () => {
             generalError = errMMsg;
           }
         });
-        
+
         // Build error object for this function
         if (func.type === "piecewise_function") {
-          setInputErrors(prev => ({ 
-            ...prev, 
+          setInputErrors(prev => ({
+            ...prev,
             [func.id]: {
               functionErrors: functionErrors,
               conditionErrors: conditionErrors,
@@ -428,14 +428,14 @@ const GraphView = () => {
             }
           }));
         } else {
-          setInputErrors(prev => ({ 
-            ...prev, 
+          setInputErrors(prev => ({
+            ...prev,
             [func.id]: {
               generalError: generalError
             }
           }));
         }
-        
+
         hasError = true;
         expr = "0";
         graphFormula = 0;
@@ -446,13 +446,13 @@ const GraphView = () => {
           delete newErrors[func.id];
           return newErrors;
         });
-        
+
         try {
           graphFormula = board.jc.snippet(expr, true, "x", true);
         } catch (err) {
           console.error(`Error parsing expression for function ${func.id}: `, err);
-          setInputErrors(prev => ({ 
-            ...prev, 
+          setInputErrors(prev => ({
+            ...prev,
             [func.id]: {
               generalError: "Invalid function. Please check your input."
             }
@@ -473,7 +473,7 @@ const GraphView = () => {
         highlight: false,
         strokeColor: func.color || "#0000FF", // Use function's color or default to blue
       });
-  
+
       // Create endpoints for piecewise functions
       if (expr !== "0") {
         try {
@@ -482,8 +482,8 @@ const GraphView = () => {
         } catch (endpointErr) {
           console.error(`Error creating endpoints for ${func.functionName}:`, endpointErr);
           // Update error if endpoint creation fails
-          setInputErrors(prev => ({ 
-            ...prev, 
+          setInputErrors(prev => ({
+            ...prev,
             [func.id]: {
               message: "Error creating piecewise endpoints. Please check your input.",
               isGeneral: true
@@ -491,19 +491,19 @@ const GraphView = () => {
           }));
         }
       }
-      
+
       //Create landmark symbols after all functions are created
       createLandmarkSymbols(board);
-      
+
       // Find last known position for this function's cursor
       let preservedPos = preservedCursorPositionsRef.current.get(func.id);
       let lastPos = cursorCoords && Array.isArray(cursorCoords)
         ? cursorCoords.find(c => c.functionId === func.id)
         : undefined;
-      
+
       let initialX = 0;
       let initialY = 0;
-      
+
       // Use preserved position if available, otherwise use current cursorCoords
       if (preservedPos) {
         initialX = preservedPos.x;
@@ -550,16 +550,16 @@ const GraphView = () => {
       // Retrieve points of interest for snapping
       let l = [];
       activeFunctions.forEach(func => {
-        func.pointOfInterests.forEach((point) =>{ 
-          //console.log("New x of interest:", point.x); 
+        func.pointOfInterests.forEach((point) =>{
+          //console.log("New x of interest:", point.x);
           l.push(point.x);
-        }); 
+        });
         //console.log("Points of interest: (x-coordinates)  ", l.toString());
       });
-      
+
       const sl = l.filter(e => Math.abs(e-x) < snapaccuracy);
       let snappedX = sl.length > 0 ? sl[0] : x;
-      
+
       // Clamp x position to prevent crossing chart boundaries
       const tolerance = 0.02; // Same tolerance as in GraphSonification
       if (snappedX <= graphBounds.xMin + tolerance) {
@@ -567,17 +567,17 @@ const GraphView = () => {
       } else if (snappedX >= graphBounds.xMax - tolerance) {
         snappedX = graphBounds.xMax - tolerance;
       }
-      
+
       // Store the current position immediately
       lastCursorPositionRef.current = { x: snappedX };
-      
+
       // Update all active cursors
       const cursorPositions = [];
       activeFunctions.forEach(func => {
         const cursor = cursorsRef.current.get(func.id);
         const graphObject = graphObjectsRef.current.get(func.id);
         const parsedExpr = parsedExpressionsRef.current.get(func.id);
-        
+
         if (cursor && graphObject && parsedExpr) {
           try {
             const y = board.jc.snippet(parsedExpr, true, "x", true)(snappedX);
@@ -590,7 +590,7 @@ const GraphView = () => {
               // } else if (clampedY >= graphBounds.yMax - tolerance) {
               //   clampedY = graphBounds.yMax - tolerance;
               // }
-              
+
               // Show cursor and update position
               cursor.show();
               cursor.setPositionDirectly(JXG.COORDS_BY_USER, [snappedX, y]);
@@ -623,25 +623,25 @@ const GraphView = () => {
           }
         }
       });
-      
+
       // Update audio immediately by calling setCursorCoords right away
       setCursorCoords(cursorPositions);
-      
+
       // Always ensure we have a valid last position, even if no functions are valid
       if (cursorPositions.length === 0 && lastCursorPositionRef.current && lastCursorPositionRef.current.x !== snappedX) {
         // If no functions are valid but we have a last position, update it to current x
         lastCursorPositionRef.current = { x: snappedX };
       }
-      
+
       // Clear any pending state update
       if (pendingStateUpdateRef.current) {
         clearTimeout(pendingStateUpdateRef.current);
       }
-      
+
       // The delayed state update is no longer needed since we update immediately
       // But we keep the ref for potential future use
       pendingStateUpdateRef.current = null;
-      
+
       board.update();
 
       // --- X axis tick logic (track last ticked index, no epsilon, not reset on resume) ---
@@ -664,15 +664,15 @@ const GraphView = () => {
     preservedCursorPositionsRef.current.clear();
 
     if (PlayFunction.active) {
-      console.log("Play mode activated!");
-      
+      // console.log("Play mode activated!");
+
       // Set exploration mode based on the source
       if (PlayFunction.source === "play") {
         setExplorationMode("batch");
       } else if (PlayFunction.source === "keyboard") {
         setExplorationMode("keyboard_smooth");
       }
-      
+
       let startX;
       if (PlayFunction.source === "play") {
         startX = PlayFunction.speed > 0 ? graphBounds.xMin : graphBounds.xMax;
@@ -851,7 +851,7 @@ const GraphView = () => {
           setPlayFunction(prev => ({ ...prev, active: false }));
           return;
         }
-        
+
         // Use direction to determine movement direction
         let actualSpeed;
         if (PlayFunction.source === "keyboard") {
@@ -863,7 +863,7 @@ const GraphView = () => {
           actualSpeed = PlayFunction.speed;
         }
         PlayFunction.x += ((graphBounds.xMax - graphBounds.xMin) / (1000 / PlayFunction.interval)) * (actualSpeed / 100);
-        
+
         // Clamp PlayFunction.x to prevent crossing boundaries
         const tolerance = 0.02;
         if (PlayFunction.x <= graphBounds.xMin + tolerance) {
@@ -871,9 +871,9 @@ const GraphView = () => {
         } else if (PlayFunction.x >= graphBounds.xMax - tolerance) {
           PlayFunction.x = graphBounds.xMax - tolerance;
         }
-        
+
         updateCursors(PlayFunction.x);
-        
+
         // Stop play function if we've reached the boundaries
         // For batch sonification, only stop when reaching the opposite boundary
         if (PlayFunction.source === "play") {
@@ -920,7 +920,7 @@ const GraphView = () => {
           const x = coords[0];
           const y = coords[1];
           updateCursors(x, y);
-          
+
           // Reset exploration mode to "none" after a short delay when mouse stops moving
           clearTimeout(mouseTimeoutRef.current);
           mouseTimeoutRef.current = setTimeout(() => {
@@ -951,7 +951,7 @@ const GraphView = () => {
         container.removeEventListener('mouseup', handlersRef.current.preventClickHandler, true);
       }
       board.off('move', moveHandler);
-      
+
       board.unsuspendUpdate();
       JXG.JSXGraph.freeBoard(board);
     };
@@ -970,7 +970,7 @@ const GraphView = () => {
         graphBounds.xMax,
         graphBounds.yMin,
       ]);
-      boardRef.current.update();  
+      boardRef.current.update();
     }
   }, [graphBounds]);
 
@@ -979,6 +979,49 @@ const GraphView = () => {
     if (wrapperRef.current) {
       wrapperRef.current.focus();
     }
+  }, []);
+
+  // Handle window resize using JSXGraph's resizeContainer method
+  // Skip Firefox due to known JSXGraph resize bugs
+  useEffect(() => {
+    // Detect Firefox
+    const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+    
+    if (isFirefox) {
+      // Skip resize handling for Firefox to avoid JSXGraph bugs
+      return;
+    }
+
+    let resizeTimer;
+
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (boardRef.current && graphContainerRef.current) {
+          try {
+            // Check container dimensions before resizing
+            const container = graphContainerRef.current;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Only resize if dimensions are valid
+            if (width > 0 && height > 0 && !isNaN(width) && !isNaN(height)) {
+              boardRef.current.resizeContainer();
+              boardRef.current.update();
+            }
+          } catch (error) {
+            // Silent fallback
+          }
+        }
+      }, 200);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // useEffect(() => {
@@ -994,7 +1037,7 @@ const GraphView = () => {
   //       wrapper.blur(); // Focus entfernen
   //       return;
   //     }
-      
+
   //     // TAB to allow normal tabbing through elements
   //     if (e.key === 'Tab') {
   //       return; // Not preventing default to allow normal tabbing
@@ -1007,10 +1050,10 @@ const GraphView = () => {
   //     if (!graphKeys.includes(e.key)) {
   //       return; // Other keys are passed through normally
   //     }
-      
+
   //     e.preventDefault();
   //     e.stopPropagation();
-      
+
   //     switch (e.key) {
   //       case 'ArrowLeft':
   //         setPlayFunction(prev => ({ ...prev, source: "keyboard", active: true, direction: -1 }));
@@ -1029,17 +1072,17 @@ const GraphView = () => {
   const activeFunctions = getActiveFunctions(functionDefinitions);
   const activeFunction = activeFunctions.length > 0 ? activeFunctions[0] : null;
   const activeFunctionName = activeFunction ? activeFunction.functionName : 'No function';
-  
+
   return (
-    <div 
+    <div
       ref={wrapperRef}
       id="chart"
       role="application"
       tabIndex={0}
       aria-label={`Interactive graph. Currently active: ${activeFunctionName}`}
-      style={{ 
-        outline: 'none', 
-        width: "100%", 
+      style={{
+        outline: 'none',
+        width: "100%",
         height: "100%",
         border: '2px solid transparent',
         borderRadius: '4px',
@@ -1054,11 +1097,11 @@ const GraphView = () => {
         e.target.style.boxShadow = 'none';
       }}
     >
-      <div 
+      <div
         ref={graphContainerRef}
         aria-hidden="true"
         role="presentation"
-        id="jxgbox" 
+        id="jxgbox"
         style={{ width: "100%", height: "100%", outline: 'none' }}
       />
     </div>

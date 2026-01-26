@@ -17,7 +17,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
         if (isOpen) {
             graphBoundsBackup.current = graphBounds; // backup current graphBounds
             setInputErrors({}); // Clear errors when opening dialog
-            console.log("Open: ", graphBoundsBackup.current);
+            // console.log("Open: ", graphBoundsBackup.current);
             announceStatus("Graph bounds dialog opened. Use Tab to navigate between fields.");
         }
     }, [isOpen]);
@@ -31,7 +31,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
     // Validation functions
     const validateBoundValue = (value, field) => {
         const errors = [];
-        
+
         // Check if value is empty or just a minus sign
         if (value === '' || value === '-') {
             errors.push("Value cannot be empty");
@@ -56,11 +56,11 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
 
     const validateBounds = (bounds) => {
         const errors = {};
-        
+
         // Get min and max bound differences from graph settings
         const minDiff = graphSettings?.minBoundDifference || 0.1;
         const maxDiff = graphSettings?.maxBoundDifference || 100;
-        
+
         // Validate individual fields
         ['xMin', 'xMax', 'yMin', 'yMax'].forEach(field => {
             const fieldErrors = validateBoundValue(bounds[field], field);
@@ -97,7 +97,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
             // Only check ranges if the order is correct
             if (xOrderCorrect) {
                 const xRange = xMax - xMin;
-                
+
                 if (xRange < minDiff) {
                     errors.xMin = errors.xMin || [];
                     errors.xMax = errors.xMax || [];
@@ -115,7 +115,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
 
             if (yOrderCorrect) {
                 const yRange = yMax - yMin;
-                
+
                 if (yRange < minDiff) {
                     errors.yMin = errors.yMin || [];
                     errors.yMax = errors.yMax || [];
@@ -136,7 +136,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
     };
 
     const handleCancel = () => {
-        console.log("Cancel: ", graphBoundsBackup.current);
+        // console.log("Cancel: ", graphBoundsBackup.current);
         if (graphBoundsBackup.current !== null) {
             setGraphBounds(graphBoundsBackup.current); // reuse old graph bounds
         }
@@ -152,7 +152,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
             announceStatus("Cannot save: Please fix all errors before saving.");
             return;
         }
-        
+
         onClose();
         showInfoToast("Graph bounds updated", 1500);
         setTimeout(() => focusChart(), 100);
@@ -172,12 +172,12 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
     const handleNumberChange = (field, value) => {
         // Allow empty strings, minus signs and valid numbers during typing
         if (value === '' || value === '-' || !isNaN(parseFloat(value))) {
-            const newBounds = { 
-                ...graphBounds, 
-                [field]: value === '' || value === '-' ? value : parseFloat(value) 
+            const newBounds = {
+                ...graphBounds,
+                [field]: value === '' || value === '-' ? value : parseFloat(value)
             };
             setGraphBounds(newBounds);
-            
+
             // Validate in real-time but only show errors after user interaction
             const errors = validateBounds(newBounds);
             setInputErrors(errors);
@@ -187,18 +187,18 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
     const handleBlur = (field, value) => {
         // On blur, ensure a valid value is set
         let finalValue = value;
-        
+
         if (value === '' || value === '-') {
             finalValue = 0;
             const newBounds = { ...graphBounds, [field]: 0 };
             setGraphBounds(newBounds);
         }
-        
+
         // Validate after blur to show any errors
         const currentBounds = { ...graphBounds, [field]: finalValue };
         const errors = validateBounds(currentBounds);
         setInputErrors(errors);
-        
+
         if (errors[field]) {
             announceStatus(`Error in ${field}: ${errors[field].join('. ')}`);
         }
@@ -250,7 +250,7 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
                     />
                 </div>
                 {hasError && (
-                    <div 
+                    <div
                         id={`${id}-error`}
                         className="error-message mt-1 text-sm break-words w-40 -ml-4"
                         role="alert"
@@ -266,10 +266,10 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
     };
 
     return (
-        <Dialog 
-            open={isOpen} 
-            onClose={handleClose} 
-            aria-modal="true" 
+        <Dialog
+            open={isOpen}
+            onClose={handleClose}
+            aria-modal="true"
             role="dialog"
             aria-labelledby="dialog-title"
             aria-describedby="dialog-description"
@@ -285,9 +285,9 @@ const ChangeGraphBoundDialog = ({ isOpen, onClose }) => {
                     </Description>
 
                     {/* Live region for status announcements */}
-                    <div 
-                        aria-live="polite" 
-                        aria-atomic="true" 
+                    <div
+                        aria-live="polite"
+                        aria-atomic="true"
                         className="sr-only"
                         role="status"
                     >

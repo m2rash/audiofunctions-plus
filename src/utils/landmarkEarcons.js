@@ -18,11 +18,11 @@ class LandmarkEarconManager {
    */
   async initialize() {
     if (this.isInitialized) return;
-    
+
     try {
       await Tone.start();
       this.isInitialized = true;
-      console.log("LandmarkEarconManager initialized");
+      // console.log("LandmarkEarconManager initialized");
     } catch (error) {
       console.error("Failed to initialize LandmarkEarconManager:", error);
     }
@@ -115,8 +115,8 @@ class LandmarkEarconManager {
       return;
     }
 
-    console.log("Testing all landmark earcons...");
-    
+    // console.log("Testing all landmark earcons...");
+
     // Test each shape with a slight delay
     setTimeout(() => this.playEarcon("diamond"), 0);
     setTimeout(() => this.playEarcon("triangle"), 1000);

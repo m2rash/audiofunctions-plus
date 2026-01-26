@@ -4,8 +4,8 @@ import { Delete, Music, Wind, Zap, Guitar } from "lucide-react";
 import { useGraphContext } from "../../../context/GraphContext";
 import { useInstruments } from "../../../context/InstrumentsContext";
 import {useInfoToast} from "../../../context/InfoToastContext"
-import { 
-  getFunctionCount, 
+import {
+  getFunctionCount,
   getFunctionDefN,
   getFunctionTypeN,
   getFunctionInstrumentN,
@@ -49,7 +49,7 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
 
   const addFunctionContainer = () => {
     if (isReadOnly) return;
-    
+
     const newFunction = {
       id: generateUniqueId(),
       functionName: `Function ${getFunctionCount(functionDefinitions) + 1}`,
@@ -60,18 +60,18 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
       pointOfInterests: [],
       landmarks: []
     };
-    
+
     // Deactivate all existing functions and add the new active function
     const updatedDefinitions = (functionDefinitions || []).map(func => ({ ...func, isActive: false }));
     setFunctionDefinitions(addFunction(updatedDefinitions, newFunction));
-    
+
     announceStatus(`New function added. Total functions: ${getFunctionCount(functionDefinitions) + 1}`);
     setFocusAfterAction(`function-${getFunctionCount(functionDefinitions)}`);
   };
 
   const addPiecewiseFunctionContainer = () => {
     if (isReadOnly) return;
-    
+
     const newFunction = {
       id: generateUniqueId(),
       functionName: `Function ${getFunctionCount(functionDefinitions) + 1}`,
@@ -82,39 +82,39 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
       pointOfInterests: [],
       landmarks: []
     };
-    
+
     // Deactivate all existing functions and add the new active function
     const updatedDefinitions = (functionDefinitions || []).map(func => ({ ...func, isActive: false }));
     setFunctionDefinitions(addFunction(updatedDefinitions, newFunction));
-    
+
     announceStatus(`New piecewise function added. Total functions: ${getFunctionCount(functionDefinitions) + 1}`);
     setFocusAfterAction(`piecewise-function-${getFunctionCount(functionDefinitions)}-part-0-function`);
   };
 
   const removeContainer = (index) => {
     if (isReadOnly) return; // Prevent action in read-only mode
-    
+
     const functionType = getFunctionTypeN(functionDefinitions, index) === 'piecewise_function' ? 'piecewise function' : 'function';
     const wasActive = isFunctionActiveN(functionDefinitions, index);
-    
+
     // Remove the function first
     let updatedDefinitions = removeFunctionN(functionDefinitions, index);
-    
+
     // If the removed function was active and there are still functions left, activate another one
     if (wasActive && updatedDefinitions.length > 0) {
       // Prefer the function that was before the deleted one, or the first one if we deleted index 0
       const newActiveIndex = index > 0 ? index - 1 : 0;
       // Make sure the index is valid after removal
       const targetIndex = Math.min(newActiveIndex, updatedDefinitions.length - 1);
-      
+
       updatedDefinitions = updatedDefinitions.map((func, i) => ({
         ...func,
         isActive: i === targetIndex
       }));
     }
-    
+
     setFunctionDefinitions(updatedDefinitions);
-    
+
     announceStatus(`${functionType} ${index + 1} deleted. Remaining functions: ${updatedDefinitions.length}`);
   };
 
@@ -151,7 +151,7 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       functionDefinitionsBackup.current = functionDefinitions; // backup current function definitions
-      console.log("Open: ", functionDefinitionsBackup.current);
+      // console.log("Open: ", functionDefinitionsBackup.current);
       if (isReadOnly) {
         announceStatus(`Edit functions dialog opened in read-only mode. ${getFunctionCount(functionDefinitions)} functions available for viewing.`);
       } else {
@@ -161,14 +161,14 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
   }, [isOpen, isReadOnly]);
 
   const handleCancel = () => {
-    console.log("Cancel: ", functionDefinitionsBackup.current);
+    // console.log("Cancel: ", functionDefinitionsBackup.current);
     if (functionDefinitionsBackup.current !== null) {
       setFunctionDefinitions(functionDefinitionsBackup.current); // restore old function definitions
     }
-    
+
     // Clear all input errors when canceling
     setInputErrors({});
-    
+
     onClose();
     showInfoToast("Changes discarded", 1500)
     setTimeout(() => focusChart(), 100);
@@ -180,12 +180,12 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
       announceStatus("Cannot save: Please fix all errors before saving.");
       return;
     }
-    
+
     // Check for modified functions and clear their landmarks
     if (functionDefinitionsBackup.current) {
       const updatedDefinitions = functionDefinitions.map((currentFunc, index) => {
         const backupFunc = functionDefinitionsBackup.current.find(f => f.id === currentFunc.id);
-        
+
         if (backupFunc) {
           // Helper function to normalize function definition by removing all whitespace
           const normalizeDefinition = (def) => {
@@ -200,28 +200,28 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
             }
             return def;
           };
-          
+
           // Compare normalized function definitions
           const currentFuncNormalized = JSON.stringify(normalizeDefinition(currentFunc.functionDef));
           const backupFuncNormalized = JSON.stringify(normalizeDefinition(backupFunc.functionDef));
-          
+
           // If function definition changed (ignoring whitespace), clear landmarks
           if (currentFuncNormalized !== backupFuncNormalized) {
-            console.log(`Function ${currentFunc.functionName} (ID: ${currentFunc.id}) was modified - clearing landmarks`);
+            // console.log(`Function ${currentFunc.functionName} (ID: ${currentFunc.id}) was modified - clearing landmarks`);
             return {
               ...currentFunc,
               landmarks: []
             };
           }
         }
-        
+
         return currentFunc;
       });
-      
+
       // Update function definitions with cleared landmarks where necessary
       setFunctionDefinitions(updatedDefinitions);
     }
-    
+
     onClose();
     setTimeout(() => focusChart(), 100);
   };
@@ -250,11 +250,11 @@ const EditFunctionDialog = ({ isOpen, onClose }) => {
               {isReadOnly ? "View active and inactive functions in read-only mode." : "Edit active and inactive functions. Press Enter to save and close."}
             </Description>
           </div>
-          
+
           {/* Live region for status announcements */}
-          <div 
-            aria-live="polite" 
-            aria-atomic="true" 
+          <div
+            aria-live="polite"
+            aria-atomic="true"
             className="sr-only"
             role="status"
           >
@@ -357,7 +357,7 @@ const getInstrumentIcon = (instrumentName) => {
 const getPartErrors = (inputErrors, functionId) => {
   const errorInfo = inputErrors[functionId];
   if (!errorInfo) return { functionErrors: [], conditionErrors: [] };
-  
+
   return {
     functionErrors: errorInfo.functionErrors || [],
     conditionErrors: errorInfo.conditionErrors || []
@@ -373,12 +373,12 @@ const getGeneralError = (inputErrors, functionId) => {
 const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAccept, isReadOnly }) => {
   const { functionDefinitions, setFunctionDefinitions, inputErrors } = useGraphContext();
   const { availableInstruments } = useInstruments();
-  
+
   const functionId = functionDefinitions[index]?.id;
-  
+
   // Get error information for this function (only general errors for regular functions)
   const generalError = getGeneralError(inputErrors, functionId);
-  
+
   const hasError = functionId && generalError;
   const errorMessage = generalError; // generalError is already the string, not an object
 
@@ -403,11 +403,11 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
     setFunctionDefinitions(updatedDefinitions);
   };
 
-  const handleInstrumentChange = (e) => {    
+  const handleInstrumentChange = (e) => {
     e.stopPropagation(); // Prevent triggering other events
-    
+
     const currentInstrument = instrument || "clarinet"; // Default to clarinet
-    
+
     // Only allow switching between clarinet and guitar
     // If current instrument is not clarinet or guitar, default to guitar
     let nextInstrument;
@@ -418,15 +418,15 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
       nextInstrument = "clarinet";
     }
 
-    console.log(`Changing instrument for function ${index + 1} from ${currentInstrument} to ${nextInstrument}`);
-    
+    // console.log(`Changing instrument for function ${index + 1} from ${currentInstrument} to ${nextInstrument}`);
+
     const updatedDefinitions = setFunctionInstrumentN(functionDefinitions, index, nextInstrument);
     setFunctionDefinitions(updatedDefinitions);
   };
 
   const handleInstrumentKeyDown = (e) => {
     if (isReadOnly) return; // Prevent action in read-only mode
-    
+
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       e.stopPropagation();
@@ -435,9 +435,9 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
   };
 
   return (
-    <div 
-      className={`mb-4 ${isReadOnly ? 'opacity-60' : ''}`} 
-      role="group" 
+    <div
+      className={`mb-4 ${isReadOnly ? 'opacity-60' : ''}`}
+      role="group"
       aria-labelledby={`function-${index}-label`}
     >
       <label
@@ -447,11 +447,11 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
       >
         Function {index + 1}
       </label>
-      
+
       <div className="mt-2">
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
-            <div 
+            <div
               className={`text-input-outer ${hasError ? 'error-border error-input' : ''}`}
               aria-errormessage={hasError ? `function-${index}-error` : undefined}
             >
@@ -472,10 +472,10 @@ const FunctionContainer = ({ index, value, instrument, onChange, onDelete, onAcc
                 aria-errormessage={hasError ? `function-${index}-error` : undefined}
               />
             </div>
-            
+
             {/* Error display for regular functions - moved inside the input container */}
             {hasError && (
-              <div 
+              <div
                 id={`function-${index}-error`}
                 className="error-message mt-1"
                 role="alert"
@@ -522,26 +522,26 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
   const { functionDefinitions, setFunctionDefinitions, inputErrors } = useGraphContext();
   const { availableInstruments } = useInstruments();
   const needsUpdateRef = useRef(false);
-  
+
   // Get error information for this function
   const functionId = functionDefinitions[index]?.id;
   const { functionErrors, conditionErrors } = getPartErrors(inputErrors, functionId);
   const generalError = getGeneralError(inputErrors, functionId);
-  
-  console.log("=== Piecewise Function Error Debug ===");
-  console.log("Function ID:", functionId);
-  console.log("Function errors:", functionErrors);
-  console.log("Condition errors:", conditionErrors);
-  console.log("General error:", generalError);
-  console.log("=======================================");
+
+  // console.log("=== Piecewise Function Error Debug ===");
+  // console.log("Function ID:", functionId);
+  // console.log("Function errors:", functionErrors);
+  // console.log("Condition errors:", conditionErrors);
+  // console.log("General error:", generalError);
+  // console.log("=======================================");
 
   // Parse the piecewise function string or initialize with one empty part
   const [parts, setParts] = useState(() => {
     // Jetzt ist value ein Array statt String
     if (value && Array.isArray(value)) {
-      return value.map(([func, condition]) => ({ 
-        function: func || '', 
-        condition: condition || '' 
+      return value.map(([func, condition]) => ({
+        function: func || '',
+        condition: condition || ''
       }));
     }
     return [{ function: '', condition: '' }];
@@ -550,9 +550,9 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
   // Sync parts with parent value changes
   useEffect(() => {
     if (value && Array.isArray(value)) {
-      const newParts = value.map(([func, condition]) => ({ 
-        function: func || '', 
-        condition: condition || '' 
+      const newParts = value.map(([func, condition]) => ({
+        function: func || '',
+        condition: condition || ''
       }));
       setParts(newParts);
     }
@@ -591,9 +591,9 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
   const handleInstrumentChange = (e) => {
     if (isReadOnly) return;
     e.stopPropagation();
-    
+
     const currentInstrument = instrument || "clarinet";
-    
+
     let nextInstrument;
     if (currentInstrument === "clarinet") {
       nextInstrument = "guitar";
@@ -601,15 +601,15 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
       nextInstrument = "clarinet";
     }
 
-    console.log(`Changing instrument for piecewise function ${index + 1} from ${currentInstrument} to ${nextInstrument}`);
-    
+    // console.log(`Changing instrument for piecewise function ${index + 1} from ${currentInstrument} to ${nextInstrument}`);
+
     const updatedDefinitions = setFunctionInstrumentN(functionDefinitions, index, nextInstrument);
     setFunctionDefinitions(updatedDefinitions);
   };
 
   const handleInstrumentKeyDown = (e) => {
     if (isReadOnly) return;
-    
+
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       e.stopPropagation();
@@ -620,7 +620,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
   // Part management functions
   const updatePart = (partIndex, field, newValue) => {
     if (isReadOnly) return;
-    
+
     setParts(prevParts => {
       const newParts = [...prevParts];
       newParts[partIndex] = { ...newParts[partIndex], [field]: newValue };
@@ -631,7 +631,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
 
   const addPart = () => {
     if (isReadOnly) return;
-    
+
     setParts(prevParts => {
       const newParts = [...prevParts, { function: '', condition: '' }];
       needsUpdateRef.current = true;
@@ -641,7 +641,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
 
   const removePart = (partIndex) => {
     if (isReadOnly || parts.length <= 1) return;
-    
+
     setParts(prevParts => {
       const newParts = prevParts.filter((_, index) => index !== partIndex);
       needsUpdateRef.current = true;
@@ -655,15 +655,15 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
     const conditionHasError = conditionErrors[partIndex] && conditionErrors[partIndex].length > 0;
 
     return (
-      <div 
-        key={partIndex} 
+      <div
+        key={partIndex}
         className="mb-4 last:mb-0"
         role="group"
         aria-label={`Part ${partIndex + 1} of ${parts.length}`}
       >
         <div className="flex flex-wrap items-center gap-3">
           {/* Function input with error highlighting */}
-          <div 
+          <div
             className={`text-input-outer flex-1 min-w-0 ${functionHasError ? 'error-border error-input' : ''}`}
             aria-errormessage={functionHasError ? `piecewise-${index}-part-${partIndex}-function-error` : undefined}
           >
@@ -689,7 +689,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
           </div>
 
           {/* Condition input with error highlighting */}
-          <div 
+          <div
             className={`text-input-outer flex-1 min-w-0 ${conditionHasError ? 'error-border error-input' : ''}`}
             aria-errormessage={conditionHasError ? `piecewise-${index}-part-${partIndex}-condition-error` : undefined}
           >
@@ -726,10 +726,10 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
             </button>
           )}
         </div>
-        
+
         {/* Part-specific error messages */}
         {functionHasError && (
-          <div 
+          <div
             id={`piecewise-${index}-part-${partIndex}-function-error`}
             className="error-message mt-1"
             role="alert"
@@ -740,9 +740,9 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
             <strong>Function:</strong> {functionErrors[partIndex].join('. ')}
           </div>
         )}
-        
+
         {conditionHasError && (
-          <div 
+          <div
             id={`piecewise-${index}-part-${partIndex}-condition-error`}
             className="error-message mt-1"
             role="alert"
@@ -758,9 +758,9 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
   };
 
   return (
-    <div 
-      className={`mb-4 ${isReadOnly ? 'opacity-60' : ''}`} 
-      role="group" 
+    <div
+      className={`mb-4 ${isReadOnly ? 'opacity-60' : ''}`}
+      role="group"
       aria-labelledby={`piecewise-function-${index}-label`}
       aria-description="Piecewise function with multiple parts."
     >
@@ -771,20 +771,20 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
       >
         Function {index + 1} (piecewise)
       </label>
-      
+
       {/* Bordered container for piecewise function parts */}
-      <div 
+      <div
         className={`mt-2 border rounded-lg p-4 bg-background ${generalError || functionErrors.some(e => e && e.length > 0) || conditionErrors.some(e => e && e.length > 0) ? 'border-red-500' : 'border-gray-mddk'}`}
         role="group"
         aria-label={`Piecewise function ${index + 1} parts`}
       >
         {parts.map((part, partIndex) => renderPart(part, partIndex))}
-        
+
         {/* Add part button and control buttons - only show in edit mode */}
         {!isReadOnly && (
-          <div 
+          <div
             className="flex gap-2 mt-2 pt-3 items-center"
-            role="group" 
+            role="group"
             aria-label={`Piecewise function ${index + 1} controls`}
           >
             <button
@@ -795,7 +795,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
             >
               Add part
             </button>
-            
+
             {/* <button
               type="button"
               className="btn-neutral"
@@ -807,7 +807,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
               {getInstrumentIcon(instrument)}
               <span className="sr-only">{instrument}</span>
             </button> */}
-            
+
             <button
               type="button"
               className="btn-neutral"
@@ -822,7 +822,7 @@ const PiecewiseFunctionContainer = ({ index, value, instrument, onChange, onDele
 
       {/* General piecewise function error display */}
       {generalError && (
-        <div 
+        <div
           className="error-message mt-2"
           role="alert"
           aria-live="assertive"

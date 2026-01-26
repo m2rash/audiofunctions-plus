@@ -7,9 +7,14 @@
  */
 export function initializeTheme() {
   // Get saved theme from localStorage
-  const savedTheme = localStorage.getItem('theme');
-  console.log("Saved theme:", savedTheme);
-  
+  let savedTheme = null;
+  try {
+    savedTheme = localStorage.getItem('theme');
+    // console.log("Saved theme:", savedTheme);
+  } catch (error) {
+    console.warn('localStorage not available for theme, using system preference:', error);
+  }
+
   // Apply the saved theme or use system preference as fallback
   if (savedTheme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -46,7 +51,14 @@ function applySystemTheme() {
  */
 function handleSystemThemeChange(e) {
   // Only update if user is using system theme (no theme in localStorage)
-  if (!localStorage.getItem('theme')) {
+  let hasThemeInStorage = false;
+  try {
+    hasThemeInStorage = !!localStorage.getItem('theme');
+  } catch (error) {
+    console.warn('localStorage not available for theme check:', error);
+  }
+
+  if (!hasThemeInStorage) {
     if (e.matches) {
       // System switched to dark mode
       document.documentElement.setAttribute('data-theme', 'dark');
@@ -62,29 +74,49 @@ function handleSystemThemeChange(e) {
  * @param {string} theme - Theme name ('light', 'dark', 'high-contrast', 'colorblind-friendly', or 'system')
  */
 export function setTheme(theme) {
-  console.log("Setting theme to:", theme);
+  // console.log("Setting theme to:", theme);
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-  } 
+    try {
+      localStorage.setItem('theme', 'dark');
+    } catch (error) {
+      console.warn('Unable to save theme to localStorage:', error);
+    }
+  }
   else if (theme === 'high-contrast') {
     document.documentElement.setAttribute('data-theme', 'high-contrast');
-    localStorage.setItem('theme', 'high-contrast');
-  } 
+    try {
+      localStorage.setItem('theme', 'high-contrast');
+    } catch (error) {
+      console.warn('Unable to save theme to localStorage:', error);
+    }
+  }
   else if (theme === 'deuteranopia-protanopia-friendly') {
     document.documentElement.setAttribute('data-theme', 'deuteranopia-protanopia-friendly');
-    localStorage.setItem('theme', 'deuteranopia-protanopia-friendly');
+    try {
+      localStorage.setItem('theme', 'deuteranopia-protanopia-friendly');
+    } catch (error) {
+      console.warn('Unable to save theme to localStorage:', error);
+    }
   }
   else if (theme === 'light') {
     document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('theme', 'light');
-  } 
+    try {
+      localStorage.setItem('theme', 'light');
+    } catch (error) {
+      console.warn('Unable to save theme to localStorage:', error);
+    }
+  }
   else if (theme === 'system') {
     // Remove the localStorage item first so handleSystemThemeChange will work
-    localStorage.removeItem('theme');
+    try {
+      localStorage.removeItem('theme');
+    } catch (error) {
+      console.warn('Unable to remove theme from localStorage:', error);
+    }
     // Apply current system theme
     applySystemTheme();
-  } 
+  }
   else {
     console.warn('Unknown theme:', theme);
   }

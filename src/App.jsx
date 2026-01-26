@@ -41,7 +41,14 @@ const AppContent = () => {
     if (hasCheckedWelcome.current) return;
     hasCheckedWelcome.current = true;
 
-    const hasSeenWelcome = localStorage.getItem('audiofunctions-welcome-seen');
+    let hasSeenWelcome = false;
+    try {
+      hasSeenWelcome = localStorage.getItem('audiofunctions-welcome-seen');
+    } catch (error) {
+      console.warn('localStorage not available:', error);
+      // If localStorage is disabled, assume first visit
+      hasSeenWelcome = false;
+    }
     if (!hasSeenWelcome) {
       // Small delay to ensure everything is loaded
       setTimeout(() => {

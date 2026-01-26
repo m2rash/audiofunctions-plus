@@ -6,17 +6,17 @@ const MovementAdjustmentsDialog = ({ isOpen, onClose }) => {
   const { PlayFunction, setPlayFunction, stepSize, setStepSize, focusChart } = useGraphContext();
   const speedBackup = useRef(null);
   const stepSizeBackup = useRef(null);
-  
+
   useEffect(() => {
     if (isOpen) {
       speedBackup.current = PlayFunction.speed;
       stepSizeBackup.current = stepSize;
-      console.log("Open: speed =", speedBackup.current, "stepSize =", stepSizeBackup.current);
+      // console.log("Open: speed =", speedBackup.current, "stepSize =", stepSizeBackup.current);
     }
   }, [isOpen]);
 
   const handleCancel = () => {
-    console.log("Cancel: restoring speed =", speedBackup.current, "stepSize =", stepSizeBackup.current);
+    // console.log("Cancel: restoring speed =", speedBackup.current, "stepSize =", stepSizeBackup.current);
     if (speedBackup.current !== null) {
       setPlayFunction(prev => ({ ...prev, speed: speedBackup.current }));
     }

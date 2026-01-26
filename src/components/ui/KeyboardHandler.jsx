@@ -9,8 +9,8 @@ import { useDialog } from "../../context/DialogContext";
 
 // Export the ZoomBoard function so it can be used in other components
 export const useZoomBoard = () => {
-  const { setGraphBounds, graphSettings, isAudioEnabled } = useGraphContext();
-  
+  const { setGraphBounds } = useGraphContext();
+
   return (out, xOnly = false, yOnly = false) => {
     const scaleFactor = {x: 0.9, y: 0.9};
     if (out) { scaleFactor.x = 1.1; scaleFactor.y = 1.1; }
@@ -22,7 +22,7 @@ export const useZoomBoard = () => {
       const centerY = (prevBounds.yMin + prevBounds.yMax) / 2;
       const halfWidthX = (prevBounds.xMax - prevBounds.xMin) / 2 * scaleFactor.x;
       const halfWidthY = (prevBounds.yMax - prevBounds.yMin) / 2 * scaleFactor.y;
-      
+
       return {
         xMin: centerX - halfWidthX,
         xMax: centerX + halfWidthX,
@@ -33,15 +33,66 @@ export const useZoomBoard = () => {
   };
 };
 
+// Export the CenterAtCursor function so it can be used in other components
+export const useCenterAtCursor = () => {
+  const { setGraphBounds, cursorCoords, graphBounds } = useGraphContext();
+  const { announce } = useAnnouncement();
+  const { showInfoToast } = useInfoToast();
+
+  return () => {
+    if (!cursorCoords || cursorCoords.length === 0) {
+      announce("No cursor position available");
+      return;
+    }
+
+    // Use the first cursor coordinate (primary cursor position)
+    const currentCursor = cursorCoords[0];
+    const cursorX = Number(currentCursor.x);
+    const cursorY = Number(currentCursor.y);
+
+    // Get current view dimensions
+    const { xMin, xMax, yMin, yMax } = graphBounds;
+    const viewWidth = xMax - xMin;
+    const viewHeight = yMax - yMin;
+
+    // Calculate the current center of the view
+    const currentCenterX = (xMin + xMax) / 2;
+    const currentCenterY = (yMin + yMax) / 2;
+
+    // Calculate the offset needed to center the cursor
+    const offsetX = cursorX - currentCenterX;
+    const offsetY = cursorY - currentCenterY;
+
+    // Calculate new bounds by shifting the current bounds
+    const newXMin = xMin + offsetX;
+    const newXMax = xMax + offsetX;
+    const newYMin = yMin + offsetY;
+    const newYMax = yMax + offsetY;
+
+    // Set the new bounds
+    setGraphBounds({
+      xMin: newXMin,
+      xMax: newXMax,
+      yMin: newYMin,
+      yMax: newYMax
+    });
+
+    const roundedX = Number(cursorX).toFixed(2);
+    const roundedY = Number(cursorY).toFixed(2);
+    announce(`View centered at cursor position: x = ${roundedX}, y = ${roundedY}`);
+    showInfoToast(`Centered at (${roundedX}, ${roundedY})`, 1500);
+  };
+};
+
 export default function KeyboardHandler() {
-    const { 
-        setPlayFunction, 
-        setIsAudioEnabled, 
+    const {
+        setPlayFunction,
+        setIsAudioEnabled,
         setGraphBounds,
         inputRefs,
         graphSettings,
         setGraphSettings,
-        cursorCoords, 
+        cursorCoords,
         updateCursor,
         stepSize,
         functionDefinitions,
@@ -62,12 +113,15 @@ export default function KeyboardHandler() {
     const lastKeyDownTime = useRef(null);
     const HOLD_THRESHOLD = 1000;
     const KEYPRESS_THRESHOLD = 15;
-    
+
     // Track if normal navigation has happened to reset boundary wrapping
     const normalNavigationHappenedRef = useRef(false);
 
     // Use the exported zoom function
     const ZoomBoard = useZoomBoard();
+
+    // Use the exported center at cursor function
+    const centerAtCursor = useCenterAtCursor();
 
     // Function to get sorted navigation points (current bounds + landmarks within view)
     const getSortedNavigationPoints = () => {
@@ -82,7 +136,7 @@ export default function KeyboardHandler() {
         const { xMin, xMax } = graphBounds;
 
         // Filter landmarks to only include those within the current view
-        const visibleLandmarks = allLandmarks.filter(landmark => 
+        const visibleLandmarks = allLandmarks.filter(landmark =>
             landmark.x >= xMin && landmark.x <= xMax
         );
 
@@ -149,25 +203,25 @@ export default function KeyboardHandler() {
 
         if (targetPoint) {
             updateCursor(targetPoint.x);
-            
+
             // Announce and show toast based on type
             if (targetPoint.type === 'landmark') {
                 const screenPosition = getScreenPosition(targetPoint.x, targetPoint.landmark.y, graphBounds);
-                showLandmarkToast(
-                    `${targetPoint.label}: x = ${targetPoint.x.toFixed(2)}, y = ${targetPoint.landmark.y.toFixed(2)}`,
-                    screenPosition,
-                    2000
-                );
-                announce(`Jumped to ${targetPoint.label} at x = ${targetPoint.x.toFixed(2)}`);
+                // showLandmarkToast(
+                //     `${targetPoint.label}: x = ${targetPoint.x.toFixed(2)}, y = ${targetPoint.landmark.y.toFixed(2)}`,
+                //     screenPosition,
+                //     2000
+                // );
+                // announce(`Jumped to ${targetPoint.label} at x = ${targetPoint.x.toFixed(2)}`);
             } else {
                 // For boundary points, calculate screen position and show cursor-positioned toast
                 // Get Y coordinate from active function at boundary position
                 const activeFunctions = getActiveFunctions(functionDefinitions);
                 let boundaryY = 0; // Default Y value
-                
+
                 if (activeFunctions.length > 0 && cursorCoords.length > 0) {
                     // Try to get Y value from current cursor position of active function
-                    const activeFunctionCoord = cursorCoords.find(coord => 
+                    const activeFunctionCoord = cursorCoords.find(coord =>
                         coord.functionId === activeFunctions[0].id
                     );
                     if (activeFunctionCoord) {
@@ -177,14 +231,14 @@ export default function KeyboardHandler() {
                         }
                     }
                 }
-                
+
                 const screenPosition = getScreenPosition(targetPoint.x, boundaryY, graphBounds);
-                showLandmarkToast(
-                    `${targetPoint.label}: x = ${targetPoint.x.toFixed(2)}`,
-                    screenPosition,
-                    2000
-                );
-                announce(`Jumped to ${targetPoint.label} at x = ${targetPoint.x.toFixed(2)}`);
+                // showLandmarkToast(
+                //     `${targetPoint.label}: x = ${targetPoint.x.toFixed(2)}`,
+                //     screenPosition,
+                //     2000
+                // );
+                // announce(`Jumped to ${targetPoint.label} at x = ${targetPoint.x.toFixed(2)}`);
             }
         }
     };
@@ -192,35 +246,37 @@ export default function KeyboardHandler() {
     // Function to switch to specific function by index
     const switchToFunction = (targetIndex) => {
         if (!functionDefinitions || targetIndex < 0 || targetIndex >= functionDefinitions.length) return;
-        
+
         const updatedDefinitions = functionDefinitions.map((func, index) => ({
             ...func,
             isActive: index === targetIndex
         }));
-        
+
         setFunctionDefinitions(updatedDefinitions);
-        
+
         // Announce the switch
         const functionName = getFunctionNameN(functionDefinitions, targetIndex) || `Function ${targetIndex + 1}`;
         announce(`Switched to ${functionName}`);
         showInfoToast(`${functionName}`, 1500);
-        
-        console.log(`Switched to function ${targetIndex + 1}`);
+
+        // console.log(`Switched to function ${targetIndex + 1}`);
     };
 
     // Function to jump to landmark by shortcut
     const jumpToLandmarkByShortcut = (shortcut) => {
         const activeFunctions = getActiveFunctions(functionDefinitions);
         if (activeFunctions.length === 0) return;
-        
+
         const activeFunction = activeFunctions[0];
         const activeFunctionIndex = functionDefinitions.findIndex(f => f.id === activeFunction.id);
-        
+
         const landmark = findLandmarkByShortcut(functionDefinitions, activeFunctionIndex, shortcut);
         if (landmark) {
             jumpToLandmarkWithToast(landmark, updateCursor, graphBounds, announce, showLandmarkToast);
         }
     };
+
+
 
     useEffect(() => {
         // Function to handle key down events
@@ -231,41 +287,49 @@ export default function KeyboardHandler() {
             if (!active || active.getAttribute('role') !== 'application') {
                 return;
             }
-        
+
             pressedKeys.current.add(event.key.toLowerCase());
-            
+
             // Track Shift key state
             if (event.key === "Shift") {
                 setIsShiftPressed(true);
             }
-            
+
             const activeFunctions = getActiveFunctions(functionDefinitions);
             const step = event.shiftKey ? 5 : 1;
 
             // Handle shortcut for new landmark using utility function
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey && !event.altKey) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                addLandmarkAtCursorPosition(
-                    functionDefinitions,
-                    cursorCoords,
-                    setFunctionDefinitions,
-                    announce,
-                    showInfoToast,
-                    openDialog
-                );
-                return;
-            }
+            // if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey && !event.altKey) {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+
+            //     addLandmarkAtCursorPosition(
+            //         functionDefinitions,
+            //         cursorCoords,
+            //         setFunctionDefinitions,
+            //         announce,
+            //         showInfoToast,
+            //         openDialog
+            //     );
+            //     return;
+            // }
+
+            // Handle Ctrl+Z for centering view at cursor
+            // if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey && !event.altKey) {
+            //     event.preventDefault();
+            //     event.stopPropagation();
+            //     centerAtCursor();
+            //     return;
+            // }
 
             // Handle landmark shortcuts - support both regular numbers and Czech keyboard
             if (event.ctrlKey && !event.altKey && !event.shiftKey) {
                 const landmarkShortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
-                
+
                 // Czech keyboard alternatives for Ctrl shortcuts
                 const czechLandmarkKeyMap = {
                     '+': '1',  // Czech 1
-                    'ě': '2',  // Czech 2  
+                    'ě': '2',  // Czech 2
                     'š': '3',  // Czech 3
                     'č': '4',  // Czech 4
                     'ř': '5',  // Czech 5
@@ -318,16 +382,16 @@ export default function KeyboardHandler() {
                 '8': 7,
                 '9': 8
             };
-            
+
             let targetIndex;
-            
+
             if (event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
                 targetIndex = czechFunctionKeyMapShift[event.key];
             }
             else if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
                 targetIndex = czechFunctionKeyMap[event.key];
             }
-            
+
             if (targetIndex !== undefined) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -358,7 +422,7 @@ export default function KeyboardHandler() {
                     if (PlayFunction.active && PlayFunction.source === "play") {
                         setPlayFunction(prev => ({ ...prev, active: false }));
                         setExplorationMode("none");
-                        console.log("Batch sonification stopped by arrow key");
+                        // console.log("Batch sonification stopped by arrow key");
                         break;
                     }
 
@@ -366,7 +430,7 @@ export default function KeyboardHandler() {
                     if (event.ctrlKey || event.metaKey) {
                         event.preventDefault();
                         event.stopPropagation();
-                        
+
                         if (event.key === "ArrowLeft" || event.key === "j" || event.key === "J") {
                             // Navigate to previous landmark/boundary
                             jumpToNavigationPoint(-1);
@@ -409,14 +473,14 @@ export default function KeyboardHandler() {
                         }
                         let l = [];
                         activeFunctions.forEach(func => {
-                            func.pointOfInterests.forEach((point) =>{ 
+                            func.pointOfInterests.forEach((point) =>{
                                 l.push(point.x);
-                            }); 
+                            });
                         });
                         let sl;
-                        
+
                         const currentTime = Date.now();
-                        
+
                         // If this is the first keydown or enough time has passed since last movement
                         if (!lastKeyDownTime.current || (currentTime - lastKeyDownTime.current) >= HOLD_THRESHOLD) {
                             // Check for points of interest
@@ -432,7 +496,7 @@ export default function KeyboardHandler() {
                                     console.warn("Failed to play notification sound:", error);
                                 }
                             }
-                            
+
                             // Move cursor and update last keydown time
                             updateCursor(NewX);
                             lastKeyDownTime.current = currentTime;
@@ -447,7 +511,7 @@ export default function KeyboardHandler() {
                     event.preventDefault();
                     event.stopPropagation();
                     updateCursor(graphBounds.xMin);
-                    announce(`Jumped to left edge at x = ${graphBounds.xMin.toFixed(2)}`);
+                    // announce(`Jumped to left edge at x = ${graphBounds.xMin.toFixed(2)}`);
                     break;
 
                 case "End":
@@ -455,7 +519,7 @@ export default function KeyboardHandler() {
                     event.preventDefault();
                     event.stopPropagation();
                     updateCursor(graphBounds.xMax);
-                    announce(`Jumped to right edge at x = ${graphBounds.xMax.toFixed(2)}`);
+                    // announce(`Jumped to right edge at x = ${graphBounds.xMax.toFixed(2)}`);
                     break;
 
                 case " ": // Spacebar plays batch sonification
@@ -468,22 +532,22 @@ export default function KeyboardHandler() {
                     break;
             }
         };
-    
+
       const handleKeyUp = (e) => {
         const active = document.activeElement;
-  
+
         // Only handle events when the chart (role="application") is focused
         if (!active || active.getAttribute('role') !== 'application') {
           return;
         }
 
         pressedKeys.current.delete(e.key.toLowerCase());
-        
+
         // Track Shift key state
         if (e.key === "Shift") {
           setIsShiftPressed(false);
         }
-        
+
         // If the arrow keys or J/L keys are released, stop move but maintain the last cursor position
         if (["ArrowLeft", "ArrowRight", "j", "J", "l", "L"].includes(e.key)) {
           setPlayFunction(prev => {
@@ -495,16 +559,16 @@ export default function KeyboardHandler() {
           });
           // Reset exploration mode when keyboard exploration stops
           setExplorationMode("none");
-          
+
           const currentTime = Date.now();
           const timeSinceLastKeyDown = currentTime - (lastKeyDownTime.current || 0);
-          
+
           if (timeSinceLastKeyDown > KEYPRESS_THRESHOLD) {
             lastKeyDownTime.current = null;
           }
         }
       };
-  
+
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
 
@@ -513,6 +577,6 @@ export default function KeyboardHandler() {
         document.removeEventListener("keyup", handleKeyUp);
       };
     }, [setPlayFunction, setIsAudioEnabled, setGraphBounds, setGraphSettings, inputRefs, cursorCoords, updateCursor, stepSize, functionDefinitions, setFunctionDefinitions, setExplorationMode, PlayFunction, mouseTimeoutRef, isAudioEnabled, setIsShiftPressed, ZoomBoard, openDialog, graphBounds, graphSettings]);
-  
+
     return null;
 }

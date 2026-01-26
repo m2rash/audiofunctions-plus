@@ -15,7 +15,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     setStatusMessage(message);
     timeoutRef.current = setTimeout(() => {
       setStatusMessage('');
@@ -29,11 +29,11 @@ const AboutDialog = ({ isOpen, onClose }) => {
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onClose={onClose}
-      className="relative" 
-      aria-modal="true" 
+      className="relative"
+      aria-modal="true"
       role="dialog"
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
@@ -49,12 +49,12 @@ const AboutDialog = ({ isOpen, onClose }) => {
               Information about the project, developers, and licensing
             </Description>
           </div>
-          
+
           {/* Status announcements */}
           {statusMessage && (
-            <div 
-              aria-live="polite" 
-              aria-atomic="true" 
+            <div
+              aria-live="polite"
+              aria-atomic="true"
               className="sr-only"
               role="status"
             >
@@ -63,14 +63,14 @@ const AboutDialog = ({ isOpen, onClose }) => {
           )}
 
           {/* Content area */}
-          <div 
+          <div
             ref={contentRef}
-            className="flex-1 overflow-y-auto px-6 space-y-6" 
-            role="main" 
+            className="flex-1 overflow-y-auto px-6 space-y-6"
+            role="main"
             aria-label="About information"
           >
             {/* EU Funding Info */}
-            <div 
+            <div
               className="border rounded-lg p-4"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--color-primary), transparent 95%)',
@@ -80,9 +80,9 @@ const AboutDialog = ({ isOpen, onClose }) => {
               <div className="flex items-start gap-3">
                 {/* Project Logo */}
                 <div className="w-12 h-12 flex-shrink-0 mt-0.5">
-                  <img 
-                    src="/logo.svg" 
-                    alt="SONAIRGRAPH Project Logo" 
+                  <img
+                    src="/logo.svg"
+                    alt="SONAIRGRAPH Project Logo"
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       // Fallback to Globe icon if logo fails to load
@@ -90,10 +90,10 @@ const AboutDialog = ({ isOpen, onClose }) => {
                       e.target.nextElementSibling.style.display = 'block';
                     }}
                   />
-                  <Globe 
-                    className="w-12 h-12 hidden" 
+                  <Globe
+                    className="w-12 h-12 hidden"
                     style={{ color: 'var(--color-primary)' }}
-                    aria-hidden="true" 
+                    aria-hidden="true"
                   />
                 </div>
                 <div className="flex-1">
@@ -112,7 +112,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                       <ExternalLink className="w-3 h-3" aria-hidden="true" />
                       Project Information
                     </button>
-                    
+
                     {/* GitHub Button */}
                     <button
                       onClick={() => handleExternalLink('https://github.com/m2rash/audiofunctions-plus', 'GitHub repository')}
@@ -146,7 +146,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
               </div>
 
               <br />
-              
+
               {/* Development Team */}
               <h3 className="font-semibold text-titles mb-3">Developers</h3>
               <div className="space-y-2 text-descriptions text-sm">
@@ -200,7 +200,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
 
               {/* License Summary */}
               <div className="mt-2 text-descriptions text-sm">
-                
+
               </div>
 
               {/* Collapsible License Details */}
@@ -210,51 +210,55 @@ const AboutDialog = ({ isOpen, onClose }) => {
                   className="mt-4 animate-in slide-in-from-top-2 duration-300"
                 >
                   <div className="space-y-2 text-descriptions text-sm">
-                    
+
                     <p>
-                      <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong>
+                      <strong>AGPL-3.0 license</strong>
                     </p>
-                    
+
                     <div className="bg-elem-background border border-border rounded p-3 mt-3">
                       <p className="text-xs text-descriptions mb-2">
-                        <strong>You are free to:</strong>
+                        <strong>Key provisions:</strong>
                       </p>
                       <ul className="text-xs text-descriptions list-disc list-inside space-y-1 mb-3">
-                        <li><strong>Share</strong> — copy and redistribute the material in any medium or format</li>
-                        <li><strong>Adapt</strong> — remix, transform, and build upon the material</li>
+                        <li><strong>Freedom to use</strong> — You can run the program for any purpose</li>
+                        <li><strong>Freedom to study and modify</strong> — You can study how the program works and change it</li>
+                        <li><strong>Freedom to redistribute</strong> — You can redistribute copies of the original program</li>
+                        <li><strong>Freedom to distribute modifications</strong> — You can distribute copies of your modified versions</li>
+                        <li><strong>Network copyleft</strong> — If you run a modified version on a server, you must provide source code to users</li>
                       </ul>
                       <p className="text-xs text-descriptions mb-2">
-                        <strong>Under the following terms:</strong>
+                        <strong>Requirements when redistributing or modifying:</strong>
                       </p>
                       <ul className="text-xs text-descriptions list-disc list-inside space-y-1 mb-3">
-                        <li><strong>Attribution</strong> — You must give appropriate credit to the original authors</li>
-                        <li><strong>NonCommercial</strong> — You may not use the material for commercial purposes</li>
-                        <li><strong>ShareAlike</strong> — If you remix, transform, or build upon the material, you must distribute your contributions under the same license</li>
+                        <li>Preserve copyright notices and license information</li>
+                        <li>Provide source code (including any modifications)</li>
+                        <li>Use the same AGPL v3 license for derivative works</li>
+                        <li>Provide source code to users of network services based on this software</li>
                       </ul>
-                      
-                      {/* Attribution Requirements */}
+
+                      {/* License Requirements */}
                       <div className="mt-4 p-3 bg-background border border-border rounded">
-                        <p className="text-xs text-descriptions font-semibold mb-2">Required Attribution:</p>
+                        <p className="text-xs text-descriptions font-semibold mb-2">License Compliance:</p>
                         <p className="text-xs text-descriptions mb-2">
-                          When using, modifying, or redistributing this software, you must include:
+                          When using, modifying, or redistributing this software, you must:
                         </p>
                         <ul className="text-xs text-descriptions list-disc list-inside space-y-1 mb-3">
-                          <li>Credit to AudioFunctions+ as part of the SONAIRGRAPH project</li>
-                          <li>A link to the original project (if reasonably possible)</li>
-                          <li>Indication of any changes made to the original</li>
-                          <li>The license information (CC BY-NC-SA 4.0)</li>
+                          <li>Include the original copyright notice and license text</li>
+                          <li>Make source code available under AGPL v3</li>
+                          <li>Indicate any changes made to the original</li>
+                          <li>Provide source code to network service users</li>
                         </ul>
                         <div className="bg-elem-background border border-border rounded p-2 font-mono text-xs text-descriptions">
-                          "Based on AudioFunctions+ from the SONAIRGRAPH project (https://sonairgraph.tactilelibrary.eu/). Licensed under CC BY-NC-SA 4.0."
+                          "AudioFunctions+ - Copyright © 2025 AudioFunctions+ Development Team. Licensed under AGPL-3.0."
                         </div>
                         <p className="text-xs text-descriptions mt-2">
-                          <strong>Important:</strong> This applies to the entire software, including any derivative works or adaptations.
+                          <strong>Important:</strong> The AGPL v3 ensures that all derivative works and network services remain free and open source.
                         </p>
                       </div>
 
                       <div className="mt-3 pt-2 border-t border-border">
                         <button
-                          onClick={() => handleExternalLink('https://creativecommons.org/licenses/by-nc-sa/4.0/', 'Creative Commons license details')}
+                          onClick={() => handleExternalLink('https://www.gnu.org/licenses/agpl-3.0.html', 'AGPL-3.0 license details')}
                           className="inline-flex items-center gap-1 text-xs text-primary hover:opacity-80 underline transition-opacity"
                           aria-label="View full license terms"
                         >
@@ -308,7 +312,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                   <div className="space-y-3">
                     <div className="text-sm text-descriptions">
                       <p className="mb-2">AudioFunctions+ is built with the following open-source libraries:</p>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">React</strong><br />
@@ -320,7 +324,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             reactjs.org
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">Tone.js</strong><br />
                           <span className="text-xs text-descriptions">Web Audio Synthesis</span><br />
@@ -331,7 +335,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             tonejs.github.io
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">JSXGraph</strong><br />
                           <span className="text-xs text-descriptions">Interactive Geometry & Graphing</span><br />
@@ -342,7 +346,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             jsxgraph.uni-bayreuth.de
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">Math.js</strong><br />
                           <span className="text-xs text-descriptions">Mathematical Expression Parser</span><br />
@@ -353,7 +357,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             mathjs.org
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">kbar</strong><br />
                           <span className="text-xs text-descriptions">Command Palette</span><br />
@@ -364,7 +368,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             kbar.vercel.app
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">Headless UI</strong><br />
                           <span className="text-xs text-descriptions">Accessible UI Components</span><br />
@@ -375,7 +379,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             headlessui.com
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">Lucide React</strong><br />
                           <span className="text-xs text-descriptions">Icon Library</span><br />
@@ -386,7 +390,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             lucide.dev
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">Tailwind CSS</strong><br />
                           <span className="text-xs text-descriptions">Utility-First CSS Framework</span><br />
@@ -397,7 +401,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                             tailwindcss.com
                           </button>
                         </div>
-                        
+
                         <div className="bg-elem-background border border-border rounded p-3">
                           <strong className="text-titles">Vite</strong><br />
                           <span className="text-xs text-descriptions">Build Tool & Dev Server</span><br />

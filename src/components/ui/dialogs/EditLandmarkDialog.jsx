@@ -13,14 +13,14 @@ const math = create(all, config);
 const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   const { functionDefinitions, setFunctionDefinitions } = useGraphContext();
   const { announce } = useAnnouncement();
-  
+
   const [statusMessage, setStatusMessage] = useState('');
   const [inputErrors, setInputErrors] = useState({});
   const landmarkDataBackup = useRef(null);
   const functionDefinitionsBackup = useRef(null); // Add backup for function definitions
   const appearanceChangedRef = useRef(false); // Track if selection changed to prevent double-playing earcon
   const appearanceSelectOpenedRef = useRef(false); // Track if select dropdown was actually opened
-  
+
   // Local state for landmark data
   const [localLandmark, setLocalLandmark] = useState({
     label: '',
@@ -28,19 +28,19 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     y: 0,
     appearance: 'triangle'
   });
-  
+
   // Check if there are any errors that prevent saving
   const hasErrors = Object.keys(inputErrors).some(key => inputErrors[key] && inputErrors[key].length > 0);
 
   // Function to calculate Y value from X value and function
   const calculateYFromX = (xValue) => {
     if (!landmarkData || !functionDefinitions) return 0;
-    
+
     const { functionIndex } = landmarkData;
     const func = functionDefinitions[functionIndex];
-    
+
     if (!func) return 0;
-    
+
     try {
       if (func.type === 'function') {
         // Handle regular functions
@@ -51,7 +51,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       } else if (func.type === 'piecewise_function') {
         // Handle piecewise functions
         const pieces = func.functionDef;
-        
+
         for (const [expression, condition] of pieces) {
           try {
             // Parse and evaluate condition
@@ -59,7 +59,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
             const parsedCondition = transformMathConstants(math.parse(conditionExpr));
             const compiledCondition = math.compile(parsedCondition.toString());
             const conditionResult = compiledCondition.evaluate({ x: xValue });
-            
+
             if (conditionResult) {
               // Parse and evaluate function expression
               const functionExpr = expression.replace(/\*\*/g, '^');
@@ -72,7 +72,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
             continue;
           }
         }
-        
+
         throw new Error('No matching condition in piecewise function');
       } else {
         throw new Error('Unknown function type');
@@ -101,24 +101,24 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   useEffect(() => {
     if (isOpen && landmarkData) {
       const { functionIndex, landmarkIndex, landmark } = landmarkData;
-      
+
       // Create backup of the landmark data
       landmarkDataBackup.current = {
         functionIndex,
         landmarkIndex,
         landmark: { ...landmark }
       };
-      
+
       // Create backup of the entire function definitions
       functionDefinitionsBackup.current = JSON.parse(JSON.stringify(functionDefinitions));
-      
+
       setLocalLandmark({
         label: landmark.label || '',
         x: landmark.x,
         y: landmark.y,
-        appearance: landmark.shape || 'triangle' 
+        appearance: landmark.shape || 'triangle'
       });
-      
+
       setInputErrors({});
       announceStatus(`Edit landmark dialog opened. Current position: x=${landmark.x.toFixed(2)}, y=${landmark.y.toFixed(2)}.`);
     }
@@ -133,33 +133,33 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   // Validation functions
   const validateXCoordinate = (value) => {
     const errors = [];
-    
+
     // Allow empty string and minus sign during typing
     if (value === '' || value === '-') {
       return errors; // No errors for temporary input states
     }
-    
+
     const numValue = parseFloat(value);
     if (isNaN(numValue)) {
       errors.push("X coordinate must be a valid number");
       return errors;
     }
-    
+
     const validation = validateLandmarkCoordinates(numValue, 0);
     if (!validation.valid) {
       errors.push(validation.message);
     }
-    
+
     return errors;
   };
 
   const validateLabel = (value) => {
     const errors = [];
-    
+
     if (value && value.length > 100) {
       errors.push("Label cannot be longer than 100 characters");
     }
-    
+
     return errors;
   };
 
@@ -169,20 +169,20 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     setLocalLandmark(prev => {
       let newX = value;
       let newY = prev.y; // Keep previous Y value during typing
-      
+
       // Only calculate new Y if we have a valid number
       if (value !== '' && value !== '-' && !isNaN(parseFloat(value))) {
         newX = parseFloat(value);
         newY = calculateYFromX(newX);
       }
-      
+
       return {
         ...prev,
         x: newX,
         y: newY
       };
     });
-    
+
     // Validate X coordinate
     const xErrors = validateXCoordinate(value);
     setInputErrors(prev => ({
@@ -193,21 +193,21 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
 
   const handleXBlur = (value) => {
     let finalValue = value;
-    
+
     // Convert empty or invalid values to 0
     if (value === '' || value === '-' || isNaN(parseFloat(value))) {
       finalValue = '0';
     }
-    
+
     const numValue = parseFloat(finalValue);
     const newY = calculateYFromX(numValue);
-    
+
     setLocalLandmark(prev => ({
       ...prev,
       x: numValue,
       y: newY
     }));
-    
+
     // Validate the final value
     const xErrors = validateXCoordinate(finalValue);
     setInputErrors(prev => ({
@@ -221,7 +221,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       ...prev,
       label: value
     }));
-    
+
     const labelErrors = validateLabel(value);
     setInputErrors(prev => ({
       ...prev,
@@ -234,14 +234,14 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       ...prev,
       appearance: value
     }));
-    
+
     // Automatically set earcon based on shape
     const earcon = `landmark_${value}`;
-    console.log(`Landmark shape changed to ${value}, earcon set to ${earcon}`);
-    
+    // console.log(`Landmark shape changed to ${value}, earcon set to ${earcon}`);
+
     // Mark that selection changed so blur handler knows not to play again
     appearanceChangedRef.current = true;
-    
+
     // Play earcon preview when shape is selected
     try {
       landmarkEarconManager.playEarcon(value);
@@ -284,7 +284,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
         console.warn("Failed to play landmark earcon preview on blur:", error);
       }
     }
-    
+
     // Reset the flags for next interaction
     appearanceChangedRef.current = false;
     appearanceSelectOpenedRef.current = false;
@@ -294,9 +294,9 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   // Dialog actions
   const handleAccept = () => {
     if (hasErrors || !landmarkData) return;
-    
+
     const { functionIndex, landmarkIndex } = landmarkData;
-    
+
     const updates = {
       label: localLandmark.label,
       x: localLandmark.x,
@@ -304,56 +304,56 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       shape: localLandmark.appearance,
       earcon: `landmark_${localLandmark.appearance}`
     };
-    
+
     const result = updateLandmarkWithValidation(functionDefinitions, functionIndex, landmarkIndex, updates);
-    
+
     if (!result.success) {
       announceStatus(`Error: ${result.message}`);
       setInputErrors({ general: [result.message] });
       return;
     }
-    
+
     // Update function definitions with the validated changes
     setFunctionDefinitions(result.definitions);
     announceStatus(`Landmark updated successfully.`);
-    
+
     // Clear backups since changes are accepted
     landmarkDataBackup.current = null;
     functionDefinitionsBackup.current = null;
-    
+
     onClose();
   };
 
   const handleDelete = () => {
     if (!landmarkData) return;
-    
+
     const { functionIndex, landmarkIndex, landmark } = landmarkData;
-    
+
     // Show confirmation
     const landmarkName = landmark.label || `Landmark at x=${landmark.x.toFixed(2)}`;
     const confirmed = window.confirm(`Are you sure you want to delete "${landmarkName}"? This action cannot be undone.`);
-    
+
     if (!confirmed) {
       announceStatus('Delete cancelled.');
       return;
     }
-    
+
     const result = removeLandmarkWithValidation(functionDefinitions, functionIndex, landmarkIndex);
-    
+
     if (!result.success) {
       announceStatus(`Error: ${result.message}`);
       setInputErrors({ general: [result.message] });
       return;
     }
-    
+
     // Update function definitions with the landmark removed
     setFunctionDefinitions(result.definitions);
     announceStatus(`Landmark "${landmarkName}" deleted successfully.`);
-    
+
     // Clear backups since changes are accepted
     landmarkDataBackup.current = null;
     functionDefinitionsBackup.current = null;
-    
+
     onClose();
   };
 
@@ -365,12 +365,12 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
     } else {
       announceStatus('Changes cancelled.');
     }
-    
+
     // Clear backups and errors
     landmarkDataBackup.current = null;
     functionDefinitionsBackup.current = null;
     setInputErrors({});
-    
+
     onClose();
   };
 
@@ -381,7 +381,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
       announceStatus("Cannot close: Please fix all errors or cancel to discard changes.");
       return;
     }
-    
+
     // For overlay clicks, treat as cancel
     handleCancel();
   };
@@ -407,7 +407,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
           handleDelete();
           return;
         }
-        
+
         // Check if Cancel button is focused
         if (activeElement && activeElement.textContent === 'Cancel') {
           e.preventDefault();
@@ -415,7 +415,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
           handleCancel();
           return;
         }
-        
+
         // Check if Accept button is focused
         if (activeElement && activeElement.textContent === 'Accept') {
           e.preventDefault();
@@ -423,7 +423,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
           handleAccept();
           return;
         }
-        
+
         // For input fields, accept the changes
         e.preventDefault();
         e.stopPropagation();
@@ -442,13 +442,13 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
   }
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onClose={handleClose}
-      className="relative" 
-      aria-modal="true" 
-      role="dialog" 
-      aria-labelledby="dialog-title" 
+      className="relative"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
     >
       <div className="fixed inset-0 bg-overlay" aria-hidden="true" />
@@ -462,11 +462,11 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
               Edit landmark properties. The Y coordinate is automatically calculated based on the X coordinate and function.
             </Description>
           </div>
-          
+
           {/* Live region for status announcements */}
-          <div 
-            aria-live="polite" 
-            aria-atomic="true" 
+          <div
+            aria-live="polite"
+            aria-atomic="true"
             className="sr-only"
             role="status"
           >
@@ -474,10 +474,10 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 space-y-4 min-h-0" role="main" aria-label="Landmark properties">
-            
+
             {/* General error display */}
             {inputErrors.general && (
-              <div 
+              <div
                 className="error-message"
                 role="alert"
                 aria-live="assertive"
@@ -490,7 +490,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
 
             {/* Label Input */}
             <div className="pt-2">
-              <div 
+              <div
                 className={`text-input-outer ${inputErrors.label ? 'error-border error-input' : ''}`}
                 aria-errormessage={inputErrors.label ? "label-error" : undefined}
               >
@@ -511,7 +511,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                 />
               </div>
               {inputErrors.label && (
-                <div 
+                <div
                   id="label-error"
                   className="error-message mt-1"
                   role="alert"
@@ -528,7 +528,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
             <div className="grid grid-cols-2 gap-4">
               {/* X Coordinate Input */}
               <div>
-                <div 
+                <div
                   className={`text-input-outer ${inputErrors.x ? 'error-border error-input' : ''}`}
                   aria-errormessage={inputErrors.x ? "x-coordinate-error" : undefined}
                 >
@@ -550,7 +550,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                   />
                 </div>
                 {inputErrors.x && (
-                  <div 
+                  <div
                     id="x-coordinate-error"
                     className="error-message mt-1"
                     role="alert"
@@ -631,7 +631,7 @@ const EditLandmarkDialog = ({ isOpen, onClose, landmarkData = null }) => {
                   Delete
                 </button>
               </div>
-              
+
               {/* Cancel and Accept buttons on the right */}
               <div className="flex items-center gap-2">
                 <button

@@ -53,7 +53,7 @@ You can also manually trigger samples using helper functions:
 
 ```javascript
 // Use the built-in helper function
-playAudioSample("chart_border", { volume: -15 });
+playAudioSample("chart_border", { volume: -20 });
 
 // Or use the event trigger function
 triggerSampleEvent("chart_border");

@@ -4,7 +4,7 @@
   "version": "0.9.5",
   "description": "Sonification of mathematical functions",
   "author": "Lukas Schölch, Mattia Ducci, Pedro A García Sánchez, Ondřej Nečas",
-  "license": "CC BY-NC-SA 4.0",
+  "license": "AGPL-3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

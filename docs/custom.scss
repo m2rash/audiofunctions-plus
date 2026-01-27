@@ -1,6 +1,6 @@
 /*-- scss:defaults --*/
 // Include theme-specific fonts
-@import url("https://fonts.googleapis.com/css?family=Atkinson Hyperlegible");
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 // Farben von der WebApp
 $sag-green: #32cb32;
@@ -14,8 +14,10 @@ $headings-font-family: "Atkinson Hyperlegible", $font-family-sans-serif;
 
 /*-- scss:rules --*/
 
+
 // CSS Custom Properties für Theme-Switching
 :root {
+  --bs-root-font-size: 20px;
   --sag-green: #{$sag-green};
   --sag-light-blue: #{$light-blue};
   --sag-dark-green: #{$dark-green-3};
@@ -64,7 +66,7 @@ body {
 .navbar .navbar-brand img,
 .brand img,
 .quarto-navbar .navbar-brand img {
-  height: 2.5rem !important;
+  height: 3.5rem !important;
   width: auto;
   max-height: none !important;
 }

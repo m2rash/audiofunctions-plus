@@ -27,16 +27,18 @@ The application supports two sonification modes:
 Here's how a sine function sounds with both sonification modes:
 
 **Continuous sonification**: 
+
 <audio controls style="display: block; margin: auto;"> 
-  <source src="earcons/bell.mp3" type="audio/wav"/>
+  <source src="earcons/af_continuous.mp3" type="audio/mp3"/>
 </audio>
 
 **Discrete sonification**: 
+
 <audio controls style="display: block; margin: auto;"> 
-  <source src="earcons/bell.mp3" type="audio/wav"/>
+  <source src="earcons/af_discrete.mp3" type="audio/mp3"/>
 </audio>
 
-Notice how the discrete version plays notes at different speeds - faster during steep sections of the curve and slower where the function is nearly flat, while the continuous version maintains steady movement throughout.
+Notice how the discrete version plays notes at different speeds - faster during steep sections of the curve and slower where the function is nearly flat, while the continuous version maintains steady movement throughout. Additionally, background noise indicates when the y-value is negative (< 0).
 
 
 

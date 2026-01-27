@@ -5,7 +5,9 @@ project:
 
 website:
   title: "Audiofunctions+"
+  favicon: logo.svg
   navbar:
+    logo: logo.svg
     left:
       - text: "Shortcuts"
         href: shortcuts.md

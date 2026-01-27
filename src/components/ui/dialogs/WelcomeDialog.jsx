@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { ChevronLeft, ChevronRight, Check, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, BookOpen } from "lucide-react";
 
 const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -26,6 +26,24 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
               <strong>Tip:</strong> You can always access this tutorial again through the Help section in the command palette (<kbd className="kbd">Ctrl+K</kbd> or <kbd className="kbd">Cmd+K</kbd>) or by pressing <kbd className="kbd">F1</kbd>
             </p>
           </div>
+
+          {/* User Guide link section */}
+          <div className="shortcut-reference-box">
+            <h2 className="text-titles font-semibold mb-3">Complete Documentation</h2>
+            <p className="text-descriptions text-sm mb-4">
+              This tutorial provides a quick overview of the main features. For comprehensive documentation including all shortcuts, and advanced features, visit our detailed user guide.
+            </p>
+            <button
+              onClick={() => {
+                window.open('https://m2rash.github.io/audiofunctions-plus/', '_blank');
+              }}
+              className="btn-primary flex items-center gap-2 justify-center"
+              aria-label="Open complete user guide in new tab"
+            >
+              <BookOpen className="w-4 h-4" />
+              View Complete Guide
+            </button>
+          </div>
         </div>
       )
     },
@@ -50,8 +68,20 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
             <div>
               <h2 className="text-titles font-semibold">Audio Features:</h2>
               <p className="text-descriptions">
-                Each function has its own instrument sound. As you navigate, you'll hear the function values as musical tones, making it easier to understand the mathematical relationships.
+                As you navigate, you'll hear the function values as musical tones, making it easier to understand the mathematical relationships. You can switch between 2 different sonification modes by pressing <kbd className="kbd">I</kbd>. Additionally, there are various earcons (audio cues) that provide helpful feedback.
               </p>
+              <div className="mt-3">
+                <button
+                  onClick={() => {
+                    window.open('https://m2rash.github.io/audiofunctions-plus/earcons.html', '_blank');
+                  }}
+                  className="btn-secondary flex items-center gap-2"
+                  aria-label="Learn more about earcons and audio cues in new tab"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Learn About Earcons
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -64,7 +94,7 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
           <p className="text-descriptions">
             Beyond navigating functions, AudioFunctions+ offers many additional features through the <strong>Command Palette</strong>.
           </p>
-          
+
           <div className="space-y-3">
             <div>
               <h2 className="text-titles font-semibold">Opening the Command Palette:</h2>
@@ -81,27 +111,37 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
             </div>
           </div>
 
-          {/* Shortcuts reference section */}
+          {/* Additional Resources section */}
           <div className="shortcut-reference-box">
-            <h2 className="text-titles font-semibold mb-2">Complete Shortcuts Reference</h2>
-            <p className="text-descriptions text-sm mb-3">
-              Download a comprehensive list of all keyboard shortcuts and hotkeys for quick reference.
+            <h2 className="text-titles font-semibold mb-3">Additional Resources</h2>
+
+            <p className="text-descriptions text-sm mb-4">
+              For comprehensive documentation, visit our detailed program guide which includes a complete list of all keyboard shortcuts and advanced features.
             </p>
-            <button
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = '/Audiofunctions+ Hotkeys.odt';
-                link.download = 'Audiofunctions+ Hotkeys.odt';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
-              className="btn-primary flex items-center gap-2"
-              aria-label="Download keyboard shortcuts reference document"
-            >
-              <Download className="w-4 h-4" />
-              Download Reference
-            </button>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => {
+                  window.open('https://m2rash.github.io/audiofunctions-plus/', '_blank');
+                }}
+                className="btn-primary flex items-center gap-2 justify-center"
+                aria-label="Open detailed program guide in new tab"
+              >
+                <BookOpen className="w-4 h-4" />
+                Program Guide
+              </button>
+
+              <button
+                onClick={() => {
+                  window.open('https://m2rash.github.io/audiofunctions-plus/shortcuts.html', '_blank');
+                }}
+                className="btn-secondary flex items-center gap-2 justify-center"
+                aria-label="Open keyboard shortcuts reference in new tab"
+              >
+                <BookOpen className="w-4 h-4" />
+                Shortcuts Reference
+              </button>
+            </div>
           </div>
         </div>
       )
@@ -139,7 +179,7 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     setStatusMessage(message);
     timeoutRef.current = setTimeout(() => {
       setStatusMessage('');
@@ -171,7 +211,7 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
     }
   }, [currentPage, isOpen, pages.length]);
 
-  // Focus management for page changes  
+  // Focus management for page changes
   useEffect(() => {
     if (isOpen && contentRef.current) {
       // Small delay to ensure content is rendered
@@ -226,11 +266,11 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
   const currentPageData = pages[currentPage];
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onClose={isAutoOpened ? () => {} : handleClose} // Disable click-outside close if auto-opened
-      className="relative" 
-      aria-modal="true" 
+      className="relative"
+      aria-modal="true"
       role="dialog"
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
@@ -246,12 +286,12 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
               Page {currentPage + 1} of {pages.length}
             </Description>
           </div>
-          
+
           {/* Status announcements only when needed */}
           {statusMessage && (
-            <div 
-              aria-live="polite" 
-              aria-atomic="true" 
+            <div
+              aria-live="polite"
+              aria-atomic="true"
               className="sr-only"
               role="status"
             >
@@ -260,10 +300,10 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
           )}
 
           {/* Content area */}
-          <div 
+          <div
             ref={contentRef}
-            className="pb-4 flex-1 overflow-y-auto px-6 focus:outline-none" 
-            role="main" 
+            className="pb-4 flex-1 overflow-y-auto px-6 focus:outline-none"
+            role="main"
             aria-label={`Tutorial content: ${currentPageData.title}`}
             tabIndex={-1}
           >
@@ -278,8 +318,8 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
                 <div
                   key={index}
                   className={`w-2 h-2 rounded-full mx-1 transition-colors duration-200 page-indicator ${
-                    index === currentPage 
-                      ? "page-indicator-active" 
+                    index === currentPage
+                      ? "page-indicator-active"
                       : "page-indicator-inactive"
                   }`}
                   role="tab"

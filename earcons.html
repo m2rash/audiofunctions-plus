@@ -30,6 +30,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./logo.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -42,9 +43,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-57164877eda0bdd667a714c8b7d9f807.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-57164877eda0bdd667a714c8b7d9f807.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-57164877eda0bdd667a714c8b7d9f807.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-109ce75b8e87a2c68c0071857ce8d0dc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-109ce75b8e87a2c68c0071857ce8d0dc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-109ce75b8e87a2c68c0071857ce8d0dc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -74,7 +75,6 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed fullcontent quarto-light">
@@ -85,8 +85,8 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./logo.png" alt="" class="navbar-logo light-content">
-    <img src="./logo.png" alt="" class="navbar-logo dark-content">
+    <img src="./logo.svg" alt="" class="navbar-logo light-content">
+    <img src="./logo.svg" alt="" class="navbar-logo dark-content">
     </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Audiofunctions+</span>
@@ -105,6 +105,10 @@ ul.task-list li input[type="checkbox"] {
   <li class="nav-item">
     <a class="nav-link active" href="./earcons.html" aria-current="page"> 
 <span class="menu-text">Earcons</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./sharing.html"> 
+<span class="menu-text">Sharing</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./json.html"> 
@@ -145,20 +149,32 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>Audiofunctions uses several earcons (audio icons) to provide auditory feedback to the user. Below are the earcons used in the application:</p>
-<ul>
-<li>Ding</li>
-</ul>
-<audio controls="" style="display: block; margin: auto;">
-<source src="earcons/ding.mp3" type="audio/wav">
-</audio>
-<ul>
-<li>Bell</li>
-</ul>
-<audio controls="" style="display: block; margin: auto;">
-<source src="earcons/bell.mp3" type="audio/wav">
-</audio>
+<section id="navigation-and-movement-sounds" class="level2">
+<h2 class="anchored" data-anchor-id="navigation-and-movement-sounds">Navigation and Movement Sounds</h2>
+<p><strong>Chart Border Start</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/chart_border_start.mp3" type="audio/wav"> </audio> Plays specifically when batch sonification begins and the cursor moves away from the left boundary of the chart. This indicates the start of a batch playback session.</p>
+<p><strong>Chart Border</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/chart_border.mp3" type="audio/wav"> </audio> Plays when the cursor reaches the edge of the visible chart area during navigation. This helps users understand when they’ve reached the boundaries of the current view.</p>
+</section>
+<section id="function-analysis-sounds" class="level2">
+<h2 class="anchored" data-anchor-id="function-analysis-sounds">Function Analysis Sounds</h2>
+<p><strong>Y-Axis Intersection</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/y-axis-intersection.wav" type="audio/wav"> </audio> Plays when a function crosses the y-axis (where x = 0). This helps users orient themselves within the graph by identifying when functions intersect the vertical axis.</p>
+<p><strong>Negative Values</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/negative_values.mp3" type="audio/wav"> </audio> Plays in background when the function value is negative (y &lt; 0). This audio cue helps users identify when they are in the negative region of the graph below the x-axis.</p>
+<p><strong>No Y Value</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/no_y.mp3" type="audio/wav"> </audio> Plays when no functions are visible at the current cursor position, when functions go out of bounds, or when encountering discontinuities in functions (such as division by zero or undefined values).</p>
+</section>
+<section id="landmark-sounds" class="level2">
+<h2 class="anchored" data-anchor-id="landmark-sounds">Landmark Sounds</h2>
+<p><strong>Triangle Landmark</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/landmark_triangle.mp3" type="audio/wav"> </audio> Plays when the cursor encounters a triangle-shaped landmark that has been placed on the graph.</p>
+<p><strong>Square Landmark</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/landmark_square.mp3" type="audio/wav"> </audio> Plays when the cursor encounters a square-shaped landmark that has been placed on the graph.</p>
+<p><strong>Diamond Landmark</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/landmark_diamond.mp3" type="audio/wav"> </audio> Plays when the cursor encounters a diamond-shaped landmark that has been placed on the graph.</p>
+</section>
+<section id="interaction-feedback-sounds" class="level2">
+<h2 class="anchored" data-anchor-id="interaction-feedback-sounds">Interaction Feedback Sounds</h2>
+<p><strong>Notification</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/notification.mp3" type="audio/wav"> </audio> Plays when the cursor passes over points of interest while navigating in discrete mode with arrow keys. This alerts users to important locations on functions that would otherwise be missed due to the step size in discrete navigation.</p>
+<p><strong>Deny</strong> <audio controls="" style="display: block; margin: auto;"> <source src="earcons/deny.wav" type="audio/wav"> </audio> Plays when the user attempts to zoom or pan beyond the allowable limits of the chart view. This indicates that further navigation in that direction is not possible.</p>
+<hr>
+<p>These earcons work together with the continuous tone sonification to provide a comprehensive audio experience that helps users navigate and understand mathematical functions through sound.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

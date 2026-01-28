@@ -40,6 +40,8 @@ Here's how a sine function sounds with both sonification modes:
 
 Notice how the discrete version plays notes at different speeds - faster during steep sections of the curve and slower where the function is nearly flat, while the continuous version maintains steady movement throughout. Additionally, background noise indicates when the y-value is negative (< 0).
 
+You can interactively explore the functions from these examples at the following link: [Sinus example](https://audiofunctions-plus.netlify.app/#import=eyJmdW5jdGlvbnMiOlt7ImlkIjoiZjEiLCJmdW5jdGlvbk5hbWUiOiJGdW5jdGlvbiAxIiwidHlwZSI6ImZ1bmN0aW9uIiwiZnVuY3Rpb25EZWYiOiJzaW4oeCkiLCJpc0FjdGl2ZSI6dHJ1ZSwiaW5zdHJ1bWVudCI6ImNsYXJpbmV0IiwicG9pbnRPZkludGVyZXN0cyI6W10sImxhbmRtYXJrcyI6W119XSwiZ3JhcGhTZXR0aW5ncyI6eyJkZWZhdWx0VmlldyI6Wy0xMCwxMCwzLC0zXSwibWluQm91bmREaWZmZXJlbmNlIjowLjEsIm1heEJvdW5kRGlmZmVyZW5jZSI6MTAwLCJzaG93R3JpZCI6dHJ1ZSwic2hvd0F4ZXMiOnRydWUsImdyaWRDb2xvciI6IiNDQ0NDQ0MiLCJyZXN0cmljdGlvbk1vZGUiOiJub25lIn19)
+
 
 
 ## Getting Started

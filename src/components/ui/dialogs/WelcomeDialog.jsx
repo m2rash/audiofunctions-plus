@@ -68,7 +68,7 @@ const WelcomeDialog = ({ isOpen, onClose, isAutoOpened = false }) => {
             <div>
               <h2 className="text-titles font-semibold">Audio Features:</h2>
               <p className="text-descriptions">
-                As you navigate, you'll hear the function values as musical tones, making it easier to understand the mathematical relationships. You can switch between 2 different sonification modes by pressing <kbd className="kbd">I</kbd>. Additionally, there are various earcons (audio cues) that provide helpful feedback.
+                As you navigate, you'll hear the function values as musical tones, making it easier to understand the mathematical relationships. You can switch between two different sonification modes by pressing <kbd className="kbd">I</kbd>. Additionally, there are various earcons (audio cues) that provide helpful feedback.
               </p>
               <div className="mt-3">
                 <button

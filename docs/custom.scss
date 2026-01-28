@@ -2,7 +2,7 @@
 // Include theme-specific fonts
 @import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
-// Farben von der WebApp
+// Colors of Af+
 $sag-green: #32cb32;
 $light-blue: #4e95d9;
 $dark-blue: #104862;
@@ -36,12 +36,12 @@ $headings-font-family: "Atkinson Hyperlegible", $font-family-sans-serif;
   font-size: 0.875rem;
 }
 
-/* Seitenhintergrund heller machen */
+/* Page background */
 body {
   background-color: #fafbfc;
 }
 
-/* Header like in WebApp - NOT green */
+/* Header like in WebApp */
 .navbar {
   background-color: white;
   border-bottom: 1px solid #e9ecef;

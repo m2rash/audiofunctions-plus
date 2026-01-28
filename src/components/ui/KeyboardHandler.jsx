@@ -298,6 +298,7 @@ export default function KeyboardHandler() {
             const activeFunctions = getActiveFunctions(functionDefinitions);
             const step = event.shiftKey ? 5 : 1;
 
+            // TODO renable landmarkShortcuts
             // Handle shortcut for new landmark using utility function
             // if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey && !event.altKey) {
             //     event.preventDefault();
@@ -314,6 +315,7 @@ export default function KeyboardHandler() {
             //     return;
             // }
 
+            // TODO renable centerAtCursor shortcut
             // Handle Ctrl+Z for centering view at cursor
             // if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey && !event.altKey) {
             //     event.preventDefault();

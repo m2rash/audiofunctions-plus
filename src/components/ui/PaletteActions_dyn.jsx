@@ -245,6 +245,7 @@ export const useDynamicKBarActions = () => {
     icon: <Ruler className="size-5 shrink-0 opacity-70" />,
   },
 
+  // TODO Re-enable center at cursor action
   // {
   //   id: "center-at-cursor",
   //   name: "Center View at Cursor",
@@ -329,6 +330,7 @@ export const useDynamicKBarActions = () => {
     icon: <RotateCcw className="size-5 shrink-0 opacity-70" />,
   },
 
+  // TODO Re-enable Landmarks
   // //landmarks
   // {
   //   id: "landmarks",

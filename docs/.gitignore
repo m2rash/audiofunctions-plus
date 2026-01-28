@@ -1,2 +1,77 @@
+# Quarto specific
 /.quarto/
 **/*.quarto_ipynb
+/_site/
+/_book/
+/_manuscript/
+
+# R specific
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+.Rapp.history
+.httr-oauth
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.egg-info/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node.js (if using Observable JS or other JS tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Backup files
+*.bak
+*.backup

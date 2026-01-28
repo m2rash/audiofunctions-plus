@@ -44,14 +44,8 @@ The JSON file used for importing and exporting configurations contains a list of
       "functionName": "Function 2",
       "type": "piecewise_function",
       "functionDef": [
-        [
-          "x^2",
-          "x <= 0"
-        ],
-        [
-          "x + 1",
-          " 0 < x"
-        ]
+        ["x^2", "x <= 0"],
+        ["x + 1", " 0 < x"]
       ],
       "isActive": false,
       "instrument": "clarinet",
@@ -60,12 +54,7 @@ The JSON file used for importing and exporting configurations contains a list of
     }
   ],
   "graphSettings": {
-    "defaultView": [
-      -10,
-      10,
-      10,
-      -10
-    ],
+    "defaultView": [-10, 10, 10, -10],
     "minBoundDifference": 0.1,
     "maxBoundDifference": 100,
     "showGrid": true,
@@ -81,17 +70,15 @@ In this example, the JSON file contains two functions: a sine function and a pie
 ## Tweaking JSON Files
 
 You can manually edit the JSON file to modify function definitions or graph settings before importing it back into Audiofunctions+.
-For instance, you can visualize the following "non-graph" function 
+For instance, you can visualize the following "non-graph" function
 
-![Plotting two functions simultaneously](imgs/non-fn.png)
+![Screenshot of Audiofunctions+ displaying two simultaneously active functions plotted on the same graph](imgs/non-fn.png)
 
-example in the following way. 
-
-
+example in the following way.
 
 Insert the following date in the edit functions menu:
 
-![Editing a non-graph function](imgs/def-non-fn.png){width="50%"}
+![Screenshot of the Edit Functions dialog of Audiofunctions+ showing two functions being defined](imgs/def-non-fn.png){width="50%"}
 
 Export it to a JSON file as explained above, and then open the JSON file in a text editor. You will see something like this:
 
@@ -103,14 +90,8 @@ Export it to a JSON file as explained above, and then open the JSON file in a te
       "functionName": "Function 1",
       "type": "piecewise_function",
       "functionDef": [
-        [
-          "0",
-          "x<0"
-        ],
-        [
-          "1/10 x^2",
-          "x>=0"
-        ]
+        ["0", "x<0"],
+        ["1/10 x^2", "x>=0"]
       ],
       "isActive": false,
       "instrument": "clarinet",
@@ -121,12 +102,7 @@ Export it to a JSON file as explained above, and then open the JSON file in a te
       "id": "f2",
       "functionName": "Function 2",
       "type": "piecewise_function",
-      "functionDef": [
-        [
-          "-1/20 x^2",
-          "x>=0"
-        ]
-      ],
+      "functionDef": [["-1/20 x^2", "x>=0"]],
       "isActive": true,
       "instrument": "clarinet",
       "pointOfInterests": [],
@@ -134,12 +110,7 @@ Export it to a JSON file as explained above, and then open the JSON file in a te
     }
   ],
   "graphSettings": {
-    "defaultView": [
-      -10,
-      10,
-      10,
-      -10
-    ],
+    "defaultView": [-10, 10, 10, -10],
     "minBoundDifference": 0.1,
     "maxBoundDifference": 100,
     "showGrid": true,
@@ -150,6 +121,6 @@ Export it to a JSON file as explained above, and then open the JSON file in a te
 }
 ```
 
-Change the field `isActive` of the first function from `false` to `true`, save the file and import it back into Audiofunctions+ as explained above.
+Set the field `isActive` of all functions from `true`, save the file and import it back into Audiofunctions+ as explained above.
 
 When you activate the sonification, you will hear both functions sonified simultaneously.

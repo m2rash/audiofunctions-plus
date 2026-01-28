@@ -1,40 +1,46 @@
 project:
   type: website
-  resources: 
+  resources:
     - earcons/*.mp3
 
 website:
   title: "Audiofunctions+"
+  favicon: logo.svg
   navbar:
+    logo: logo.svg
     left:
       - text: "Shortcuts"
         href: shortcuts.md
       - text: "Earcons"
         href: earcons.md
+      - text: "Sharing"
+        href: sharing.md
       - text: "Exporting/Importing files"
         href: json.md
     # right:
     #   - about.qmd
-  
-  sidebar: 
+
+  sidebar:
     contents:
       - text: "Shortcuts"
         href: shortcuts.qmd
- 
-  page-footer: 
+
+  page-footer:
     left: Produced with [Quarto](https://quarto.org/)<br> Maintained by the SONAIRGRAPH dev team
     right: |
-       ![](eu-funding.png){width=50%} 
+       ![](eu-funding.png){width=50%}
 
 format:
   html:
-    theme: 
+    theme:
          - cosmo
          - custom.scss
-    css: styles.css
+
     toc: true
     sidebar: false
     lang: en
-
-
-
+    code-copy: true
+    code-fold: false
+    theme-dark:
+         - cosmo
+         - custom.scss

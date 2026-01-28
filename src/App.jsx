@@ -36,26 +36,27 @@ const AppContent = () => {
   const hasCheckedWelcome = useRef(false);
 
   // Check if this is the first visit and show welcome dialog
-  useEffect(() => {
-    // Prevent double execution
-    if (hasCheckedWelcome.current) return;
-    hasCheckedWelcome.current = true;
+  // TODO re-enable automatic welcome dialog
+  // useEffect(() => {
+  //   // Prevent double execution
+  //   if (hasCheckedWelcome.current) return;
+  //   hasCheckedWelcome.current = true;
 
-    let hasSeenWelcome = false;
-    try {
-      hasSeenWelcome = localStorage.getItem('audiofunctions-welcome-seen');
-    } catch (error) {
-      console.warn('localStorage not available:', error);
-      // If localStorage is disabled, assume first visit
-      hasSeenWelcome = false;
-    }
-    if (!hasSeenWelcome) {
-      // Small delay to ensure everything is loaded
-      setTimeout(() => {
-        openDialog('welcome', { isAutoOpened: true });
-      }, 1000);
-    }
-  }, [openDialog]);
+  //   let hasSeenWelcome = false;
+  //   try {
+  //     hasSeenWelcome = localStorage.getItem('audiofunctions-welcome-seen');
+  //   } catch (error) {
+  //     console.warn('localStorage not available:', error);
+  //     // If localStorage is disabled, assume first visit
+  //     hasSeenWelcome = false;
+  //   }
+  //   if (!hasSeenWelcome) {
+  //     // Small delay to ensure everything is loaded
+  //     setTimeout(() => {
+  //       openDialog('welcome', { isAutoOpened: true });
+  //     }, 1000);
+  //   }
+  // }, [openDialog]);
 
   return <KBarWrapper />;
 };
@@ -111,7 +112,7 @@ const KBarWrapper = () => {
       >
         Skip to chart. Enable audio chart keyboard interaction.
       </a>
-      
+
       <PaletteActions />
       <CommandBar />
       <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw" }}>

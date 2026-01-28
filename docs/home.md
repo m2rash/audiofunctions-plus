@@ -4,8 +4,6 @@ lang: en
 toc: false
 ---
 
-# Welcome to Audiofunctions+
-
 Audiofunctions+ is a web application designed to facilitate visually impaired users' learning of mathematical functions. By converting function graphs into audio, Audiofunctions+ allows users to interpret the shape of a function's graph by listening to its sonification and explore mathematical relationships through hearing.
 
 ## What You Can Do

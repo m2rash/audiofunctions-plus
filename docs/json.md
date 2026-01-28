@@ -72,13 +72,13 @@ In this example, the JSON file contains two functions: a sine function and a pie
 You can manually edit the JSON file to modify function definitions or graph settings before importing it back into Audiofunctions+.
 For instance, you can visualize the following "non-graph" function
 
-![Plotting two functions simultaneously](imgs/non-fn.png)
+![Screenshot of Audiofunctions+ displaying two simultaneously active functions plotted on the same graph](imgs/non-fn.png)
 
 example in the following way.
 
 Insert the following date in the edit functions menu:
 
-![Editing a non-graph function](imgs/def-non-fn.png){width="50%"}
+![Screenshot of the Edit Functions dialog of Audiofunctions+ showing two functions being defined](imgs/def-non-fn.png){width="50%"}
 
 Export it to a JSON file as explained above, and then open the JSON file in a text editor. You will see something like this:
 

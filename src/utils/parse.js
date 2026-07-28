@@ -953,6 +953,19 @@ export function checkMathSpell(func){
         errorMessage = null; // reset error message
         errorPosition = 0; // reset error position
         if(isAssignment(txt)){
+           const txt_parsed = math.parse(txt);
+           if (txt_parsed.type === "AssignmentNode" && txt_parsed.object.name!="y" ){
+                errorMessage = "Invalid assignment, only y=... of f(x)= is allowed";
+                return ["0", [[errorMessage, 0]]];
+           }
+           if (txt_parsed.type === "FunctionAssignmentNode" && txt_parsed.params.length!=1){
+                errorMessage = "Invalid assignment, only functions of one variable are allowed";
+                return ["0", [[errorMessage, 0]]];
+           }
+           if (txt_parsed.type === "FunctionAssignmentNode" && txt_parsed.params[0]!="x"){
+                errorMessage = "Invalid assignment, only functions in variable x are allowed";
+                return ["0", [[errorMessage, 0]]];
+           }
            if(isOneVariableFunction(getAssignmentExpression(txt))){
                 // jessiecode does does not understand E, e, pi, we translate them to mathjs constants
                 console.log("Single function is valid, parsing: ", transformMathConstants(math.parse(getAssignmentExpression(txt))).toString({implicit: 'show'}));
@@ -982,6 +995,25 @@ export function checkMathSpell(func){
             errorPosition = [i, 0];
             const fn = parts[i][0];
             const cn = parts[i][1];
+            if(isAssignment(fn)){
+            const txt_parsed = math.parse(fn);
+                if (txt_parsed.type === "AssignmentNode" && txt_parsed.object.name!="y" ){
+                        errorMessage = "Invalid assignment, only y=... of f(x)= is allowed";
+                        errorPosition = [i, 0];
+                        errorList.push([errorMessage, errorPosition]);
+                }
+                if (txt_parsed.type === "FunctionAssignmentNode" && txt_parsed.params.length!=1){
+                        errorMessage = "Invalid assignment, only functions of one variable are allowed";
+                        errorPosition = [i, 0];
+                        errorList.push([errorMessage, errorPosition]);
+                }
+                if (txt_parsed.type === "FunctionAssignmentNode" && txt_parsed.params[0]!="x"){
+                        errorMessage = "Invalid assignment, only functions in variable x are allowed";
+                        errorPosition = [i, 0];
+                        errorList.push([errorMessage, errorPosition]);
+                }
+            }
+
             if (!(isOneVariableFunction(getAssignmentExpression(fn)))){
                 //errorMessage = "Invalid function format";
                 errorPosition = [i, 0];
